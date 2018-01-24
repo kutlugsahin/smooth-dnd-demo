@@ -1,5 +1,9 @@
 .App {
   text-align: center;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: #eee
 }
 
 .App-logo {
@@ -20,6 +24,25 @@
 
 .App-intro {
   font-size: large;
+}
+
+.container {
+ height: 90vh;
+ width: 600px;
+ overflow-y: auto;
+ border: 1px solid #aaa;
+ background-color: white;
+ margin-top: 50%;
+ transform: translate(-50%, -50%);
+ margin-left: 50%;
+}
+
+.item {
+  height: 150px;
+  margin: 5px;
+  background-color: #eee;
+  text-align: center;
+  vertical-align: middle;
 }
 
 @keyframes App-logo-spin {
