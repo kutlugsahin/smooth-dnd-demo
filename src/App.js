@@ -20,7 +20,7 @@ class App extends Component {
     });
 
     this.items.forEach(p => {
-      p.style.transition = "transform .3 ease";
+      p.style.transition = "transform .3s ease";
     })
 
     this.containerRect = this.container.getBoundingClientRect();
@@ -30,20 +30,25 @@ class App extends Component {
 
       if ((e.clientY > this.containerRect.top) || e.clientY < (this.containerRect.top + this.containerRect.height)) {
         let res = -1;
-        this.items.reduce((totalHeight, element, index) => {
+        let totalHeight = 0;
+        for (let index = 0; index < this.items.length; index++){
+          const element = this.items[index];
           if (y >= totalHeight && y <= totalHeight + element.clientHeight) {
             const diff = y - totalHeight;
-            if (diff < element.clientHeight / 2) {
+            if (diff < element.clientHeight / 2 || this.lastSlidedIndex === index) {
               res = index;
             } else {
               res = index + 1;
             }
+            break;
           } else {
-            return totalHeight + element.clientHeight;
+            totalHeight += element.clientHeight;
           }
-        }, 0);
+        }
 
-        this.slideFromIndex(this.items, res, 200);
+        if (res !== this.lastSlidedIndex) {
+          this.slideFromIndex(this.items, res, 50);
+        }
       }
     }).bind(this);
     window.addEventListener('mousemove', f)
@@ -56,9 +61,11 @@ class App extends Component {
         <div className="container" ref={e => this.container = e}>
           {
             this.elements.map(p => (
-              <div ref={(elem) => {
+              <div style={{overflow: 'hidden'}} ref={(elem) => {
                 this.items[p.id] = elem;
-              }} className={'item'} key={p.id}>{p.text}</div>
+              }} key={p.id}>
+                <div className={'item'}>{p.text}</div>  
+              </div>
             ))
           }  
         </div>

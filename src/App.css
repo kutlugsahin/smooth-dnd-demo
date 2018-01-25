@@ -27,19 +27,20 @@
 }
 
 .container {
- height: 90vh;
+  position: absolute;
+ height: 1000px;
  width: 600px;
  overflow-y: auto;
  border: 1px solid #aaa;
  background-color: white;
- margin-top: 50%;
+ top: 50%;
  transform: translate(-50%, -50%);
- margin-left: 50%;
+ left: 50%;
 }
 
 .item {
-  height: 150px;
-  margin: 5px;
+  height: 50px;
+  margin: 1px;
   background-color: #eee;
   text-align: center;
   vertical-align: middle;
