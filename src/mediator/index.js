@@ -1,18 +1,30 @@
-class Store {
+const hasClass = (element, classname) => {
+  return element.classList.contains(classname);
+}
+
+const parent = (element, classname) => {
+  let current = element;
+  while (current) {
+    if (hasClass(current, classname)) return current;
+    current = current.parentElement; 
+  }
+  return null;
+}
+
+
+class Mediator {
   constructor() {
     this.containers = {};
-    this.draggable = {
-      
-    }
-
     this.registerListeners = this.registerListeners.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
-    this.onMouseMouse = this.onMouseUp.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
   }
 
   registerListeners() {
     window.document.body.addEventListener('mousedown', this.onMouseDown);
+    window.document.body.addEventListener('mouseup', this.mouseup);
+    window.document.body.addEventListener('mousemove', this.mousemove);
   }
 
 
@@ -25,15 +37,17 @@ class Store {
     }
   }
 
-  startDragging(draggable, fromcontainer, groupname) {
+  onMouseDown(e) {
     
   }
 
-  cancelDragging() {
+  onMouseUp(e) {
     
   }
 
-  completeDragging() {
+  onMouseMove(e) {
     
   }
 }
+
+export default new Mediator();

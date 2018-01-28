@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Draggable from '../draggable';
+import Mediator from '../mediator';
 import './style.css'
 
 class Container extends Component {
@@ -20,7 +21,7 @@ class Container extends Component {
 
   componentDidMount() {
     window.container = this;
-
+    Mediator.register(this);
   }
 
 
