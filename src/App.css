@@ -40,10 +40,11 @@
 
 .item {
   height: 50px;
-  margin: 1px;
+  margin: 2px;
   background-color: #eee;
   text-align: center;
   vertical-align: middle;
+  border: 1px solid #ccc;
 }
 
 @keyframes App-logo-spin {
