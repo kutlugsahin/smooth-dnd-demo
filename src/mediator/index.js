@@ -78,14 +78,15 @@ class Mediator {
         floater.style.height = height;
         floater.style.position = 'fixed';
         floater.style.pointerEvents = 'none';
-        floater.disables = true; 
         floater.appendChild(ctx.element.cloneNode(true));
-        document.body.appendChild(floater);
         this.draggingContext.draggedElement = floater;
         this.draggingContext.draggingDelta = {
           x: elementRect.left - ctx.position.x,
           y: elementRect.top - ctx.position.y
         }
+        this.draggingContext.draggedElement.style.left = ctx.position.x + ctx.draggingDelta.x + 'px';
+        this.draggingContext.draggedElement.style.top = ctx.position.y + ctx.draggingDelta.y + 'px';
+        document.body.appendChild(floater);
 
         const groupName = ctx.fromContainer.props.group || 'defaultGroup';
         this.containers[groupName].forEach(p => { p.watchClientRect(); })
