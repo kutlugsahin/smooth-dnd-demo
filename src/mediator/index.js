@@ -78,17 +78,20 @@ class Mediator {
         floater.style.height = height;
         floater.style.position = 'fixed';
         floater.style.pointerEvents = 'none';
+        floater.disables = true; 
         floater.appendChild(ctx.element.cloneNode(true));
         document.body.appendChild(floater);
         this.draggingContext.draggedElement = floater;
         this.draggingContext.draggingDelta = {
-          x: elementRect.x - ctx.position.x,
-          y: elementRect.y - ctx.position.y
+          x: elementRect.left - ctx.position.x,
+          y: elementRect.top - ctx.position.y
         }
 
         const groupName = ctx.fromContainer.props.group || 'defaultGroup';
         this.containers[groupName].forEach(p => { p.watchClientRect(); })
       }
+
+      console.log(ctx.position.x + ctx.draggingDelta.x, ctx.position.y + ctx.draggingDelta.y);
 
       this.getAnimationFrame(() => {
         this.draggingContext.draggedElement.style.left = ctx.position.x + ctx.draggingDelta.x + 'px';
@@ -220,7 +223,7 @@ class Mediator {
     });
   }
 
-  handleMove(e) {
+  handleMove(e) {    
     if (this.draggingContext.isGrabbed && !this.draggingContext.isDragging) {
       e.preventDefault();
       const { container, payload } = this.getDraggableInfo(this.draggingContext.element);

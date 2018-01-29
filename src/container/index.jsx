@@ -66,9 +66,9 @@ class Container extends Component {
   }
 
   onScroll() {
-    const { x, y, width, height } = this.container.getBoundingClientRect();
-    this.containerRect = { x, y, width, height };
-    this.containerVisibleRect = { x, y, width, height };
+    const { left, top, width, height } = this.container.getBoundingClientRect();
+    this.containerRect = { x: left, y: top, width, height };
+    this.containerVisibleRect = { x:left, y:top, width, height };
   }
 
   handleInbound(draggingContext, x, y) {
