@@ -56,7 +56,7 @@ class Mediator {
         id = null;
         clb();
       });
-    }
+    }    
   }
 
   setDraggingContext(props) {
@@ -77,6 +77,7 @@ class Mediator {
         floater.style.width = width;
         floater.style.height = height;
         floater.style.position = 'fixed';
+        floater.style.pointerEvents = 'none';
         floater.appendChild(ctx.element.cloneNode(true));
         document.body.appendChild(floater);
         this.draggingContext.draggedElement = floater;
@@ -96,20 +97,57 @@ class Mediator {
 
       this.handleDragMove();
 
-    } else if (prevCtx.draggedElement) {
+    } else if (prevCtx.isDragging) {
       document.body.removeChild(prevCtx.draggedElement);
       this.getAnimationFrame(null);
-
-
-      const groupName = ctx.fromContainer.props.group || 'defaultGroup';
+      const groupName = prevCtx.fromContainer.props.group || 'defaultGroup';
       this.containers[groupName].forEach(p => { p.stopWatchingClientRect(); })
+      if (prevCtx.fromContainer) {
+        prevCtx.fromContainer.saveState(prevCtx);
+      }
+
+      if (this.lastTargetContainer) {
+        this.lastTargetContainer.saveState(prevCtx);        
+      }
     }
   }
 
   handleDragMove() {
-    const { fromContainer, position } = this.draggingContext;
+    const { fromContainer, position, draggingDelta, element } = this.draggingContext;
     const groupName = fromContainer.props.group || 'defaultGroup';
+
+    const targetContainers = this.containers[groupName];
+    const x = position.x + draggingDelta.x + (element.clientWidth / 2);
+    const y = position.y + draggingDelta.y + (element.clientHeight / 2);
+
+    let targetContainer = null;
+
+    for (let i = 0; i < targetContainers.length; i++){
+      const containerVisibleRect = targetContainers[i].containerVisibleRect;
+      if (
+        x >= containerVisibleRect.x &&
+        x <= containerVisibleRect.x + containerVisibleRect.width &&
+        y >= containerVisibleRect.y &&
+        y <= containerVisibleRect.y + containerVisibleRect.height) {
+        targetContainer = targetContainers[i];
+      }
+    }
+
+    fromContainer.handleOutbound(this.draggingContext);
+
+    if (this.lastTargetContainer &&
+      this.lastTargetContainer !== targetContainer &&
+      this.lastTargetContainer !== fromContainer) {
+      this.lastTargetContainer.setState({ dispatch: -1, attach: -1 });
+      this.lastTargetContainer = null;
+    }
+
+    if (targetContainer) {
+      targetContainer.handleInbound(this.draggingContext, x,y);
+    }
   }
+
+  
 
   registerListeners() {
     window.document.body.addEventListener('mousedown', this.handleGrab);
@@ -132,7 +170,7 @@ class Mediator {
     let container = null;
     for (let containergroup in this.containers) {
       const containers = this.containers[containergroup];
-      for (let i = 0; i < containers.length; i++){
+      for (let i = 0; i < containers.length; i++) {
         const ctn = containers[i];
         if (ctn.container === containerWrapper) {
           container = ctn;
@@ -156,9 +194,9 @@ class Mediator {
   }
 
   handleGrab(e) {
-    e.preventDefault();
     const draggableWrapper = parent(e.target, 'react-smooth-dnd-draggable-wrapper');
     if (draggableWrapper) {
+      e.preventDefault();
       this.setDraggingContext({ isGrabbed: true, element: draggableWrapper });
     }
   }
@@ -183,8 +221,8 @@ class Mediator {
   }
 
   handleMove(e) {
-    e.preventDefault();
     if (this.draggingContext.isGrabbed && !this.draggingContext.isDragging) {
+      e.preventDefault();
       const { container, payload } = this.getDraggableInfo(this.draggingContext.element);
       this.setDraggingContext({
         fromContainer: container,
@@ -196,6 +234,7 @@ class Mediator {
         }
       });
     } else if (this.draggingContext.isDragging) {
+      e.preventDefault();      
       this.setDraggingContext({
         position: {
           x: e.clientX,

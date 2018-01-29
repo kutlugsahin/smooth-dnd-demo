@@ -7,19 +7,28 @@ import Draggable from './draggable';
 class App extends Component {
   constructor(props) {
     super(props);
-
-    this.items = Array(50).fill(undefined).map((p, i) => i);
+    this.state = {
+      items: Array(50).fill(undefined).map((p, i) => i)
+    };
   }
 
   render() {
     this.container = (
       <Container
+        onDragEnd={(from, to) => {
+          const result = [...this.state.items];
+          const removed = result.splice(from, 1);
+          result.splice(to, 0, removed);
+          this.setState({
+            items: result
+          })
+        }} 
         style={{ width: '700px', height: '1000px' }}>
-        {this.items.map((p, index) => {
+        {this.state.items.map((p, index) => {
           return (
             <Draggable key={index} payload={p}>
               <div className="item">
-                <span>Draggeble {index}</span>
+                <span>Draggeble {p}</span>
               </div>
             </Draggable>
           )
