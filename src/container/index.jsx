@@ -10,6 +10,7 @@ class Container extends Component {
     this.calculateVisibleReact = this.calculateVisibleReact.bind(this);
     this.attachScrollEvents = this.attachScrollEvents.bind(this);
     this.getTranslateStyleForElement = this.getTranslateStyleForElement.bind(this);
+    this.handleDragStart = this.handleDragStart.bind(this);
     this.wrappers = [];
     this.draggables = [];
     this.state = {
@@ -84,7 +85,7 @@ Container.propTypes = {
   orientation: PropTypes.string,
   style: PropTypes.shape(),
   className: PropTypes.string,
-  itemRenderer: PropTypes.func
+  group: PropTypes.string
 }
 
 Container.defaultProps = {

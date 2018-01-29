@@ -8,6 +8,10 @@ export default class extends Component {
     payload: PropTypes.any,
   }
 
+  alert() {
+    alert('sdfsdfd');
+  }
+
   constructor(props) {
     super(props);
     this.state = {
