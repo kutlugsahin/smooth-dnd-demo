@@ -84,6 +84,9 @@ class Mediator {
           x: elementRect.x - ctx.position.x,
           y: elementRect.y - ctx.position.y
         }
+
+        const groupName = ctx.fromContainer.props.group || 'defaultGroup';
+        this.containers[groupName].forEach(p => { p.watchClientRect(); })
       }
 
       this.getAnimationFrame(() => {
@@ -96,6 +99,10 @@ class Mediator {
     } else if (prevCtx.draggedElement) {
       document.body.removeChild(prevCtx.draggedElement);
       this.getAnimationFrame(null);
+
+
+      const groupName = ctx.fromContainer.props.group || 'defaultGroup';
+      this.containers[groupName].forEach(p => { p.stopWatchingClientRect(); })
     }
   }
 

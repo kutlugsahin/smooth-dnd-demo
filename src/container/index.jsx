@@ -4,13 +4,27 @@ import Draggable from '../draggable';
 import Mediator from '../mediator';
 import './style.css'
 
+const debounce = (fn, delay) => {
+  let timer = null;
+  return (...params) => {
+    const self = this;
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      fn.apply(self, params);
+    }, delay);
+  }
+}
+
 class Container extends Component {
   constructor(props) {
     super(props);
-    this.calculateVisibleReact = this.calculateVisibleReact.bind(this);
-    this.attachScrollEvents = this.attachScrollEvents.bind(this);
+    this.onScroll = debounce(this.onScroll, 100).bind(this);
     this.getTranslateStyleForElement = this.getTranslateStyleForElement.bind(this);
     this.handleDragStart = this.handleDragStart.bind(this);
+    this.watchClientRect = this.watchClientRect.bind(this);
+    this.stopWatchingClientRect = this.stopWatchingClientRect.bind(this);
     this.wrappers = [];
     this.draggables = [];
     this.state = {
@@ -26,12 +40,19 @@ class Container extends Component {
   }
 
 
-  calculateVisibleReact() {
-    this.containerRect = this.container.getBoundingClientRect();
+  watchClientRect() {
+    const { x, y, width, height } = this.container.getBoundingClientRect();
+    this.containerRect = { x, y, width, height };
+    window.document.addEventListener('scroll', this.onScroll);
   }
 
-  attachScrollEvents() {
+  stopWatchingClientRect() {
+    window.document.removeEventListener('scroll', this.onScroll);
+  }
 
+  onScroll(e) {
+    const { x, y, width, height } = this.container.getBoundingClientRect();
+    this.containerRect = { x, y, width, height };
   }
 
   render() {
