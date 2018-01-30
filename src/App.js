@@ -8,22 +8,23 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: Array(50).fill(undefined).map((p, i) => i)
+      items: Array(50).fill(undefined).map((p, i) => i),
+      items2: Array(50).fill(undefined).map((p, i) => i),
     };
   }
 
   render() {
     this.container = (
       <Container
-        onDragEnd={(from, to) => {
+        onDragEnd={(from, to, payload) => {
           const result = [...this.state.items];
-          const removed = result.splice(from, 1);
-          result.splice(to, 0, removed);
+          const removed = from > -1 ? result.splice(from, 1) : null;;
+          result.splice(to, 0, from ? removed: payload);
           this.setState({
             items: result
           })
         }} 
-        style={{ width: '700px', height: '1000px' }}>
+        style={{ width: '200px', height: '1000px' }}>
         {this.state.items.map((p, index) => {
           return (
             <Draggable key={index} payload={p}>
@@ -48,7 +49,31 @@ class App extends Component {
             dispatch: e.target.value
           });
         }} />
-        {this.container}
+        <div style={{ float: "left" }}>
+          {this.container}
+        </div>  
+        <div style={{float: "left", marginLeft: '40px'}}>
+          <Container
+            onDragEnd={(from, to, payload) => {
+              const result = [...this.state.items2];
+              const removed = from > -1 ? result.splice(from, 1) : null;;
+              result.splice(to, 0, from ? removed : payload);
+              this.setState({
+                items2: result
+              })
+            }}
+            style={{ width: '200px', height: '1000px' }}>
+            {this.state.items2.map((p, index) => {
+              return (
+                <Draggable key={index} payload={p}>
+                  <div className="item">
+                    <span>Draggeble2 {p}</span>
+                  </div>
+                </Draggable>
+              )
+            })}
+          </Container>
+        </div>
       </div>
     );
   }

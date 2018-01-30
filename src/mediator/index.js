@@ -92,7 +92,7 @@ class Mediator {
         this.containers[groupName].forEach(p => { p.watchClientRect(); })
       }
 
-      console.log(ctx.position.x + ctx.draggingDelta.x, ctx.position.y + ctx.draggingDelta.y);
+      //console.log(ctx.position.x + ctx.draggingDelta.x, ctx.position.y + ctx.draggingDelta.y);
 
       this.getAnimationFrame(() => {
         this.draggingContext.draggedElement.style.left = ctx.position.x + ctx.draggingDelta.x + 'px';
@@ -139,15 +139,17 @@ class Mediator {
 
     fromContainer.handleOutbound(this.draggingContext);
 
-    if (this.lastTargetContainer &&
-      this.lastTargetContainer !== targetContainer &&
-      this.lastTargetContainer !== fromContainer) {
-      this.lastTargetContainer.setState({ dispatch: -1, attach: -1 });
-      this.lastTargetContainer = null;
+    if (targetContainer !== fromContainer) {
+      fromContainer.setState({ attach: -1 });
     }
 
     if (targetContainer) {
+      this.lastTargetContainer = targetContainer;
       targetContainer.handleInbound(this.draggingContext, x,y);
+    } else {
+      if (this.lastTargetContainer !== fromContainer) {
+        this.lastTargetContainer.setState({ dispatch: -1, attach: -1 });
+      }
     }
   }
 

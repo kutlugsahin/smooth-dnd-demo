@@ -40,13 +40,17 @@ class Container extends Component {
     this.handleInbound = this.handleInbound.bind(this);
     this.handleOutbound = this.handleOutbound.bind(this);
     this.getElementSize = this.getElementSize.bind(this);
+    this.setContainerState = this.setContainerState.bind(this);
+    this.setWrapperSizes = this.setWrapperSizes.bind(this);
+    this.getWrapperSizes = this.getWrapperSizes.bind(this);
     this.saveState = this.saveState.bind(this);
     this.wrappers = [];
     this.draggables = [];
     this.state = {
       dispatch: -1,
       attach: -1,
-      animate: true
+      animate: true,
+      size: 56
     }
   }
 
@@ -68,41 +72,34 @@ class Container extends Component {
   onScroll() {
     const { left, top, width, height } = this.container.getBoundingClientRect();
     this.containerRect = { x: left, y: top, width, height };
-    this.containerVisibleRect = { x:left, y:top, width, height };
+    this.containerVisibleRect = { x: left, y: top, width, height };
   }
 
   handleInbound(draggingContext, x, y) {
     const diff = getDragDistanceToContainerBeginning(x, y, this);
     const attachedSize = this.getElementSize(draggingContext.element);
+    const wrapperSizes = this.getWrapperSizes();
     let totalSize = 0;
-    let index = -1;
-    for (let i = 0; i < this.wrappers.length; i++){
-      const wrapper = this.wrappers[i];
-      const wrapperSize = this.getElementSize(wrapper)
-      if (diff > totalSize && diff <= totalSize + wrapperSize) {
-        if (diff < totalSize + (wrapperSize / 2)) {
-          index = i;
-        } else {
-          index = i + 1;
-        }
+    let index = 0;
+    for (let i = 0; i < wrapperSizes.length; i++) {
+      const [start, end] = wrapperSizes[i];
+      if (diff <= start) {
         break;
       } else {
-        totalSize += wrapperSize;
+        index++;
       }
     }
 
-    if (this.state.attach !== index || this.state.size !== attachedSize) {
-      this.setState({
-        attach: index,
-        size: attachedSize
-      });
-    }
+    this.setContainerState({
+      attach: index,
+      size: attachedSize
+    });
   }
 
   handleOutbound(draggingContext) {
     const { element } = draggingContext;
     const dispatchIndex = this.wrappers.indexOf(element);
-    this.setState({
+    this.setContainerState({
       dispatch: dispatchIndex,
       size: this.getElementSize(element)
     });
@@ -112,9 +109,55 @@ class Container extends Component {
     return this.props.orientation === 'horizontal' ? element.clientWidth : element.clientHeight;
   }
 
+  setContainerState(state) {
+    if ((state.attach !== undefined && this.state.attach !== state.attach) ||
+      (state.dispatch !== undefined && this.state.dispatch !== state.dispatch)) {
+      this.setWrapperSizes(Object.assign({}, this.state, state));
+      console.log(state);
+    }
+    this.setState(state);
+  }
+
+  setWrapperSizes({ attach, dispatch, size }) {
+    const wrapperSizes = [...this.wrappers.map(this.getElementSize)];
+    if (dispatch > -1) {
+      wrapperSizes.splice(dispatch, 1);
+    }
+
+    let total = 0;
+    const result = [];
+    for (let i = 0; i < wrapperSizes.length; i++) {
+      const currentSize = wrapperSizes[i];
+      if (attach > -1 && i === attach) {
+        total += size;
+      } else {
+        result.push([total, total + currentSize]);
+        total += currentSize;
+      }
+    }
+
+    console.log(attach, dispatch);
+    console.log(result.slice(0, 4));
+
+    this.wrapperSizes = result;
+  }
+
+  getWrapperSizes() {
+    return this.wrapperSizes || this.wrappers.reduce((acc, wrapper, i) => {
+      if (i === 0) {
+        acc.push([0, this.getElementSize(wrapper)]);
+      } else {
+        acc.push([acc[i - 1][1], acc[i - 1][1] + this.getElementSize(wrapper)])
+      }
+      return acc;
+    }, []);
+  }
+
   saveState(draggingContext) {
     if (this.props.onDragEnd) {
-      this.props.onDragEnd(this.state.dispatch, this.state.attach > this.state.dispatch ? this.state.attach -1: this.state.at);      
+      this.props.onDragEnd(this.state.dispatch,
+        this.state.attach > this.state.dispatch ? this.state.attach - 1 : this.state.attach,
+        draggingContext.payload);
     }
 
     this.setState({
@@ -171,7 +214,7 @@ class Container extends Component {
 
     return {
       transition: animate ? 'transform 0.2s ease' : 'transform 0s ease',
-      transform: `translateY(${translate}px)`,
+      transform: `translate3d(0, ${translate}px, 0)`,
       visibility: +dispatch > -1 && +dispatch === index ? 'hidden' : 'visible'
     };
   }
