@@ -39,7 +39,6 @@ class App extends Component {
     return (
       <div className="App">
         <input type="text" onChange={e => {
-          console.log(this.container);
           window.container.setState({
             attach: e.target.value
           });

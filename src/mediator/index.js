@@ -110,7 +110,7 @@ class Mediator {
         prevCtx.fromContainer.saveState(prevCtx);
       }
 
-      if (this.lastTargetContainer) {
+      if (this.lastTargetContainer && prevCtx.fromContainer !== this.lastTargetContainer) {
         this.lastTargetContainer.saveState(prevCtx);        
       }
     }

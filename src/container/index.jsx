@@ -76,16 +76,48 @@ class Container extends Component {
   }
 
   handleInbound(draggingContext, x, y) {
+    let index = 0;
     const diff = getDragDistanceToContainerBeginning(x, y, this);
     const attachedSize = this.getElementSize(draggingContext.element);
     const wrapperSizes = this.getWrapperSizes();
-    let totalSize = 0;
-    let index = 0;
-    for (let i = 0; i < wrapperSizes.length; i++) {
-      const [start, end] = wrapperSizes[i];
-      if (diff <= start) {
-        break;
-      } else {
+    if (this.state.attach > -1) {
+      let totalSize = 0;
+      for (let i = 0; i < wrapperSizes.length; i++) {
+        const [start, end] = wrapperSizes[i];
+        if (this.state.attach < i) {
+          if (diff >= start) {
+            index = i;
+            break;
+          }
+        } else if (this.state.attach === i) {
+          if (diff < start) {
+            index = i;
+          } else {
+            index = i + 1;
+          }
+            break;
+        } else {
+          if (diff < end) {
+            index = i;
+            break;
+          }
+        }
+
+        index++;
+      }
+    } else if(this.state.dispatch > -1) {
+      index = this.state.dispatch;
+    } else {
+      for (let i = 0; i < wrapperSizes.length; i++) {
+        const [start, end] = wrapperSizes[i];
+        if (diff >= start && diff <= end) {
+          if (diff < (end - start) / 2) {
+            index = i;
+          } else {
+            index = i + 1;
+          }
+          break;
+        }
         index++;
       }
     }
@@ -113,7 +145,6 @@ class Container extends Component {
     if ((state.attach !== undefined && this.state.attach !== state.attach) ||
       (state.dispatch !== undefined && this.state.dispatch !== state.dispatch)) {
       this.setWrapperSizes(Object.assign({}, this.state, state));
-      console.log(state);
     }
     this.setState(state);
   }
@@ -129,15 +160,13 @@ class Container extends Component {
     for (let i = 0; i < wrapperSizes.length; i++) {
       const currentSize = wrapperSizes[i];
       if (attach > -1 && i === attach) {
+        // result.push([total, total + currentSize + size]);
         total += size;
       } else {
         result.push([total, total + currentSize]);
         total += currentSize;
       }
     }
-
-    console.log(attach, dispatch);
-    console.log(result.slice(0, 4));
 
     this.wrapperSizes = result;
   }
@@ -156,7 +185,7 @@ class Container extends Component {
   saveState(draggingContext) {
     if (this.props.onDragEnd) {
       this.props.onDragEnd(this.state.dispatch,
-        this.state.attach > this.state.dispatch ? this.state.attach - 1 : this.state.attach,
+        this.state.attach, // > this.state.dispatch ? this.state.attach - 1 : this.state.attach,
         draggingContext.payload);
     }
 
@@ -204,7 +233,9 @@ class Container extends Component {
   getTranslateStyleForElement(index, size, animate = true) {
     const { attach, dispatch } = this.state;
     let translate = 0;
-    if (attach > -1 && attach <= index) {
+    const visibleAttachIndex = attach > -1 ? (dispatch > -1 && dispatch < attach ? attach + 1 : attach) : -1;
+
+    if (visibleAttachIndex > -1 && visibleAttachIndex <= index) {
       translate = size;
     }
 
