@@ -8,8 +8,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: Array(50).fill(undefined).map((p, i) => i),
-      items2: Array(50).fill(undefined).map((p, i) => i),
+      items: 'Array(50).fill(undefined)'.split('').map((p, i) => i),
+      items2: 'Array(50).fill(undefined)'.split('').map((p, i) => i),
     };
   }
 

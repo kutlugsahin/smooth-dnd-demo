@@ -140,7 +140,7 @@ class Mediator {
     fromContainer.handleOutbound(this.draggingContext);
 
     if (targetContainer !== fromContainer) {
-      fromContainer.setState({ attach: -1 });
+      fromContainer.previewAddItem(null);
     }
 
     if (targetContainer) {
@@ -148,12 +148,10 @@ class Mediator {
       targetContainer.handleInbound(this.draggingContext, x,y);
     } else {
       if (this.lastTargetContainer !== fromContainer) {
-        this.lastTargetContainer.setState({ dispatch: -1, attach: -1 });
+        this.lastTargetContainer.resetPreview();
       }
     }
-  }
-
-  
+  }  
 
   registerListeners() {
     window.document.body.addEventListener('mousedown', this.handleGrab);

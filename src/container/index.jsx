@@ -44,14 +44,32 @@ class Container extends Component {
     this.setWrapperSizes = this.setWrapperSizes.bind(this);
     this.getWrapperSizes = this.getWrapperSizes.bind(this);
     this.saveState = this.saveState.bind(this);
+    this.previewRemoveItem = this.previewRemoveItem.bind(this);
+    this.previewAddItem = this.previewAddItem.bind(this);
+    this.resetPreview = this.resetPreview.bind(this);
     this.wrappers = [];
     this.draggables = [];
     this.state = {
-      dispatch: -1,
-      attach: -1,
-      animate: true,
-      size: 56
+      previewRemoveItemIndex: null,
+      previewAddItemIndex: null,
+      animate: true
     }
+  }
+
+  previewAddItem(index, size) {
+    if (this.state.previewAddItemIndex !== index || this.state.size !== size) {
+      this.setContainerState({ previewAddItemIndex: index, size });
+    }
+  }
+
+  previewRemoveItem(index) {
+    if (this.state.previewRemoveItemIndex !== index) {
+      this.setContainerState({ previewRemoveItemIndex: index });
+    }
+  }
+
+  resetPreview() {
+    this.setContainerState({ previewAddItemIndex: null, previewRemoveItemIndex: null });
   }
 
   componentDidMount() {
@@ -75,38 +93,66 @@ class Container extends Component {
     this.containerVisibleRect = { x: left, y: top, width, height };
   }
 
+  // handleInbound(draggingContext, x, y) {
+  //   let index = 0;
+  //   const diff = getDragDistanceToContainerBeginning(x, y, this);
+  //   const draggingElementSize = this.getElementSize(draggingContext.element);
+  //   const wrapperSizes = this.getWrapperSizes();
+  //   if (this.state.previewAddItemIndex !== null) {
+  //     let totalSize = 0;
+  //     for (let i = 0; i < wrapperSizes.length; i++) {
+  //       const [start, end] = wrapperSizes[i];
+  //       if (this.state.previewAddItemIndex < i) {
+  //         if (diff >= start && diff < end) {
+  //           index = i;
+  //           break;
+  //         }
+  //       } else if (this.state.previewAddItemIndex === i) {
+  //         if (diff < start) {
+  //           index = i;
+  //         } else {
+  //           index = i + 1;
+  //         }
+  //         break;
+  //       } else {
+  //         if (diff < end) {
+  //           index = i;
+  //           break;
+  //         }
+  //       }
+
+  //       index++;
+  //     }
+  //   } else if (this.state.previewRemoveItemIndex !== null) {
+  //     index = this.state.previewRemoveItemIndex;
+  //   } else {
+  //     for (let i = 0; i < wrapperSizes.length; i++) {
+  //       const [start, end] = wrapperSizes[i];
+  //       if (diff >= start && diff <= end) {
+  //         if (diff < (end - start) / 2) {
+  //           index = i;
+  //         } else {
+  //           index = i + 1;
+  //         }
+  //         break;
+  //       }
+  //       index++;
+  //     }
+  //   }
+
+  //   this.previewAddItem(index, draggingElementSize);
+  // }
+
   handleInbound(draggingContext, x, y) {
     let index = 0;
     const diff = getDragDistanceToContainerBeginning(x, y, this);
-    const attachedSize = this.getElementSize(draggingContext.element);
+    const draggingElementSize = this.getElementSize(draggingContext.element);
     const wrapperSizes = this.getWrapperSizes();
-    if (this.state.attach > -1) {
-      let totalSize = 0;
-      for (let i = 0; i < wrapperSizes.length; i++) {
-        const [start, end] = wrapperSizes[i];
-        if (this.state.attach < i) {
-          if (diff >= start) {
-            index = i;
-            break;
-          }
-        } else if (this.state.attach === i) {
-          if (diff < start) {
-            index = i;
-          } else {
-            index = i + 1;
-          }
-            break;
-        } else {
-          if (diff < end) {
-            index = i;
-            break;
-          }
-        }
-
-        index++;
-      }
-    } else if(this.state.dispatch > -1) {
-      index = this.state.dispatch;
+    
+    if (this.state.previewAddItemIndex !== null) {
+      
+    } else if (this.state.previewRemoveItemIndex !== null) {
+      index = this.state.previewRemoveItemIndex;
     } else {
       for (let i = 0; i < wrapperSizes.length; i++) {
         const [start, end] = wrapperSizes[i];
@@ -122,19 +168,13 @@ class Container extends Component {
       }
     }
 
-    this.setContainerState({
-      attach: index,
-      size: attachedSize
-    });
+    this.previewAddItem(index, draggingElementSize);
   }
 
   handleOutbound(draggingContext) {
     const { element } = draggingContext;
-    const dispatchIndex = this.wrappers.indexOf(element);
-    this.setContainerState({
-      dispatch: dispatchIndex,
-      size: this.getElementSize(element)
-    });
+    const previewRemoveItemIndex = this.wrappers.indexOf(element);
+    this.previewRemoveItem(previewRemoveItemIndex);
   }
 
   getElementSize(element) {
@@ -142,24 +182,24 @@ class Container extends Component {
   }
 
   setContainerState(state) {
-    if ((state.attach !== undefined && this.state.attach !== state.attach) ||
-      (state.dispatch !== undefined && this.state.dispatch !== state.dispatch)) {
+    if ((state.previewAddItemIndex !== undefined && this.state.previewAddItemIndex !== state.previewAddItemIndex) ||
+      (state.previewRemoveItemIndex !== undefined && this.state.previewRemoveItemIndex !== state.previewRemoveItemIndex)) {
       this.setWrapperSizes(Object.assign({}, this.state, state));
     }
     this.setState(state);
   }
 
-  setWrapperSizes({ attach, dispatch, size }) {
+  setWrapperSizes({ previewAddItemIndex, previewRemoveItemIndex, size }) {
     const wrapperSizes = [...this.wrappers.map(this.getElementSize)];
-    if (dispatch > -1) {
-      wrapperSizes.splice(dispatch, 1);
+    if (previewRemoveItemIndex !== null) {
+      wrapperSizes.splice(previewRemoveItemIndex, 1);
     }
 
     let total = 0;
     const result = [];
     for (let i = 0; i < wrapperSizes.length; i++) {
       const currentSize = wrapperSizes[i];
-      if (attach > -1 && i === attach) {
+      if (previewAddItemIndex > -1 && i === previewAddItemIndex) {
         // result.push([total, total + currentSize + size]);
         total += size;
       } else {
@@ -184,14 +224,14 @@ class Container extends Component {
 
   saveState(draggingContext) {
     if (this.props.onDragEnd) {
-      this.props.onDragEnd(this.state.dispatch,
-        this.state.attach, // > this.state.dispatch ? this.state.attach - 1 : this.state.attach,
+      this.props.onDragEnd(this.state.previewRemoveItemIndex,
+        this.state.previewAddItemIndex, // > this.state.previewRemoveItemIndex ? this.state.previewAddItemIndex - 1 : this.state.previewAddItemIndex,
         draggingContext.payload);
     }
 
     this.setState({
-      attach: -1,
-      dispatch: -1,
+      previewAddItemIndex: null,
+      previewRemoveItemIndex: null,
       animate: false
     });
 
@@ -231,22 +271,24 @@ class Container extends Component {
   }
 
   getTranslateStyleForElement(index, size, animate = true) {
-    const { attach, dispatch } = this.state;
+    const { previewAddItemIndex, previewRemoveItemIndex } = this.state;
     let translate = 0;
-    const visibleAttachIndex = attach > -1 ? (dispatch > -1 && dispatch < attach ? attach + 1 : attach) : -1;
+    const previewAddItemVisibleIndex = previewAddItemIndex !== null ?
+      (previewRemoveItemIndex !== null && previewRemoveItemIndex < previewAddItemIndex ?
+        previewAddItemIndex + 1 : previewAddItemIndex) : null;
 
-    if (visibleAttachIndex > -1 && visibleAttachIndex <= index) {
+    if (previewAddItemVisibleIndex !== null && previewAddItemVisibleIndex <= index) {
       translate = size;
     }
 
-    if (dispatch > -1 && dispatch < index) {
-      translate -= size;
+    if (previewRemoveItemIndex !== null && previewRemoveItemIndex < index) {
+      translate -= this.getElementSize(this.wrappers[index]);
     }
 
     return {
       transition: animate ? 'transform 0.2s ease' : 'transform 0s ease',
       transform: `translate3d(0, ${translate}px, 0)`,
-      visibility: +dispatch > -1 && +dispatch === index ? 'hidden' : 'visible'
+      visibility: previewRemoveItemIndex !== null && previewRemoveItemIndex === index ? 'hidden' : 'visible'
     };
   }
 }
