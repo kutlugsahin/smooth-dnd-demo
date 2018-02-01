@@ -41,3 +41,26 @@ export const listenScrollParent = (element, clb) => {
     dispose
   }
 }
+
+export const hasParent = (element, parent) => {
+  let current = element;
+  while (current) {
+    if (current === parent) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export const getParent = (element, selector) => {
+  let current = element;
+  while (current) {
+    if (current.matches(selector)) { return current;}
+  }
+
+  return null;
+}
+
+export const hasClass = (element, cls) => {
+  return element.className.split(' ').map(p => p).indexOf(cls) > -1;
+}
