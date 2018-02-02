@@ -12,7 +12,8 @@ export const getVisibleRect = (element) => {
   let rect = element.getBoundingClientRect();
   currentElement = element.parentElement;
   while (currentElement) {
-    rect = getIntersection(rect, currentElement.getBoundindClientRect())
+    rect = getIntersection(rect, currentElement.getBoundingClientRect());
+    currentElement = currentElement.parentElement;
   }
   return rect;
 }
@@ -48,6 +49,7 @@ export const hasParent = (element, parent) => {
     if (current === parent) {
       return true;
     }
+    current = current.parentElement;
   }
   return false;
 }
@@ -55,7 +57,10 @@ export const hasParent = (element, parent) => {
 export const getParent = (element, selector) => {
   let current = element;
   while (current) {
-    if (current.matches(selector)) { return current;}
+    if (current.matches(selector)) {
+      return current;
+    }
+    current = current.parentElement;    
   }
 
   return null;
@@ -63,4 +68,21 @@ export const getParent = (element, selector) => {
 
 export const hasClass = (element, cls) => {
   return element.className.split(' ').map(p => p).indexOf(cls) > -1;
+}
+
+export const debounce = (fn, delay, immediate) => {
+  let timer = null;
+  return (...params) => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    if (immediate && !timer) {
+      fn.call(this, ...params);
+    } else {
+      timer = setTimeout(() => {
+        timer = null;
+        fn.call(this, ...params);
+      }, delay);  
+    }
+  }
 }

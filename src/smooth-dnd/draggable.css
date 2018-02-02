@@ -1,3 +1,4 @@
-.draggable {
-  overflow: hidden;
+.smooth-dnd-draggable-wrapper {
+  overflow: auto;
+  transition: transform 0.2s ease;
 }
