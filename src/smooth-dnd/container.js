@@ -20,8 +20,10 @@ const draggableInfo = {
 class OrientationDependentProps {
   static horizontalMap = {
     size: 'clientWidth',
-    begin: 'clientTop',
+    distanceToParent: 'clientLeft',
     translate: 'transform',
+    begin: 'left',
+    dragPosition: 'y',
     setters: {
       'translate': (val) => `translate3d(${val}px, 0, 0)`
     }
@@ -29,9 +31,10 @@ class OrientationDependentProps {
 
   static verticalMap = {
     size: 'clientHeight',
-    begin: 'clientLeft',
+    distanceToParent: 'clientTop',
     translate: 'transform',
-
+    begin: 'top',
+    dragPosition: 'x',
     setters: {
       'translate' : (val) => `translate3d(0,${val}px, 0)`
     }
@@ -42,12 +45,12 @@ class OrientationDependentProps {
     OrientationDependentProps.verticalMap;
   }
   
-  get(element, prop) {
-    return element[this.map[prop]]
+  get(obj, prop) {
+    return obj[this.map[prop]];
   }
 
-  set(element, prop, value) {
-    element[this.map[prop]] = this.map.setters[prop](value);
+  set(obj, prop, value) {
+    obj[this.map[prop]] = this.map.setters[prop](value);
   }
 }
 
@@ -64,6 +67,7 @@ class Container {
     this.getElementSize = this.getElementSize.bind(this);
     this.setDraggableVisibility = this.setDraggableVisibility.bind(this);
     this.calculateDragPosition = this.calculateDragPosition.bind(this);
+    this.findDraggableInPosition = this.findDraggableInPosition.bind(this);
     this.containerElement && this.init(element, props);
     this.draggables = [];
 
@@ -198,7 +202,20 @@ class Container {
 
   calculateDragPosition() {
     const dragCenter = this.state.draggableInfo.position;
+    const dragPos = this.orientationDependentProps.get(this.state.draggableInfo.position, 'dragPosition');
     
+  }
+
+  findDraggableInPosition(position, start, end) {
+    // binary serach draggable
+    if (end - start < 3) {
+      for (var i = 0; i < this.draggables.length; i++) {
+        const draggable = this.draggables[i];
+
+      }
+    } else {
+      
+    }
   }
 
   getElementSize(element) {
