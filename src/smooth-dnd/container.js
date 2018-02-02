@@ -20,7 +20,7 @@ const draggableInfo = {
 class OrientationDependentProps {
   static horizontalMap = {
     size: 'clientWidth',
-    distanceToParent: 'clientLeft',
+    distanceToParent: 'offsetLeft',
     translate: 'transform',
     begin: 'left',
     dragPosition: 'y',
@@ -31,7 +31,7 @@ class OrientationDependentProps {
 
   static verticalMap = {
     size: 'clientHeight',
-    distanceToParent: 'clientTop',
+    distanceToParent: 'offsetTop',
     translate: 'transform',
     begin: 'top',
     dragPosition: 'x',
@@ -171,8 +171,8 @@ class Container {
     let { removedIndex: prevRemovedIndex, addedIndex: prevAddedIndex } = this.state;
     if (prevRemovedIndex === null) prevRemovedIndex = Number.MAX_SAFE_INTEGER;
     if (prevAddedIndex === null) prevAddedIndex = Number.MAX_SAFE_INTEGER;
-    const currentAddedIndex = addedIndex || Number.MAX_SAFE_INTEGER;
-    const currentRemovedIndex = removedIndex || Number.MAX_SAFE_INTEGER;
+    const currentAddedIndex = addedIndex != null ? addedIndex : Number.MAX_SAFE_INTEGER;
+    const currentRemovedIndex = removedIndex !== null ? removedIndex : Number.MAX_SAFE_INTEGER;
 
     if (prevRemovedIndex !== currentRemovedIndex) {
       if (prevRemovedIndex < Number.MAX_SAFE_INTEGER) {
@@ -191,7 +191,7 @@ class Container {
       if (prevDirection !== currentDirection) {
         const translation = currentDirection === 1 ? this.getElementSize(draggable) : 
           currentDirection === 0 ? 0 : 0 - this.getElementSize(draggable);
-        this.orientationDependentProps.set(draggable, 'translate', translation);
+        this.orientationDependentProps.set(draggable.style, 'translate', translation);
         draggable[draggableBegin] = translation;
       }
     }
@@ -208,12 +208,7 @@ class Container {
 
   findDraggableInPosition(position, start, end) {
     // binary serach draggable
-    if (end - start < 3) {
-      for (var i = 0; i < this.draggables.length; i++) {
-        const draggable = this.draggables[i];
-
-      }
-    } else {
+    if (end === start) {
       
     }
   }
