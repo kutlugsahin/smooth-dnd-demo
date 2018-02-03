@@ -14,7 +14,9 @@ export default class extends Component {
       textAlign: 'center',
       border: '1px solid #ccc',
       vertialAlign: 'middle',
-      lineHeight: '50px'
+      lineHeight: '50px',
+      backgroundColor: "white",
+      margin: '5px'
     }
   }
 
@@ -25,8 +27,8 @@ export default class extends Component {
 
   render() {
     return (
-      <div style={{ width: '510px', height: '800px', overflowY:'auto' }}>
-        <div ref={e => { this.container = e; }} style={{ width: '500px', margin: '50px' }}>
+      <div style={{ width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(.5,.5,1)' }}>
+        <div ref={e => { this.container = e; }} style={{ width: '500px'}}>
           {this.state.items.map(p => (
             <div style={this.dragStyle} key={p}>Draggable {p}</div>
           ))}

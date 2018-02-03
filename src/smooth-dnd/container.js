@@ -4,7 +4,7 @@
 
 import mediator from './mediator';
 import * as Utils from './utils';
-import './draggable.css';
+import './container.css';
 
 const translationValue = '__smooth_dnd_draggable_translation_value';
 const draggableBegin = '__smooth_dnd_draggable_draggable_begining';
@@ -23,7 +23,8 @@ class OrientationDependentProps {
     distanceToParent: 'offsetLeft',
     translate: 'transform',
     begin: 'left',
-    dragPosition: 'y',
+    dragPosition: 'x',
+    scale: 'scaleX',
     setters: {
       'translate': (val) => `translate3d(${val}px, 0, 0)`
     }
@@ -34,17 +35,18 @@ class OrientationDependentProps {
     distanceToParent: 'offsetTop',
     translate: 'transform',
     begin: 'top',
-    dragPosition: 'x',
+    dragPosition: 'y',
+    scale: 'scaleY',
     setters: {
-      'translate' : (val) => `translate3d(0,${val}px, 0)`
+      'translate': (val) => `translate3d(0,${val}px, 0)`
     }
   }
   constructor(orientation) {
     this.map = orientation === 'horizontal' ?
-    OrientationDependentProps.horizontalMap :
-    OrientationDependentProps.verticalMap;
+      OrientationDependentProps.horizontalMap :
+      OrientationDependentProps.verticalMap;
   }
-  
+
   get(obj, prop) {
     return obj[this.map[prop]];
   }
@@ -68,8 +70,10 @@ class Container {
     this.setDraggableVisibility = this.setDraggableVisibility.bind(this);
     this.calculateDragPosition = this.calculateDragPosition.bind(this);
     this.findDraggableInPosition = this.findDraggableInPosition.bind(this);
+    this.getElementBeginEnd = this.getElementBeginEnd.bind(this);
     this.containerElement && this.init(element, props);
     this.draggables = [];
+    this.scrollables = [];
 
     this.state = {
       draggableInfo: null,
@@ -86,7 +90,6 @@ class Container {
     this.containerElement = element;
     this.setProps(props || Container.defaultProps);
     this.wrapChildren();
-    this.onScrollPositionChanged();
   }
 
   setProps(props) {
@@ -114,15 +117,24 @@ class Container {
   }
 
   deregisterEvents() {
-    if (this.scrollEventListener) {
-      this.scrollEventListener.dispose();
-      this.scrollEventListener = null;
-    }
+    this.scrollables.forEach(p => {
+      p.removeEventListener('scroll', this.onScrollPositionChanged);
+    });
+    this.scrollables = [];
   }
 
   registerEvents() {
-    if (!this.scrollEventListener) {
-      this.scrollEventListener = Utils.listenScrollParent(this.containerElement, this.onScrollPositionChanged);
+    // if (!this.scrollEventListener) {
+    //   this.scrollEventListener = Utils.listenScrollParent(this.containerElement, this.onScrollPositionChanged);
+    // }
+    this.onScrollPositionChanged();
+    let current = this.containerElement;
+    while (current) {
+      if (current.scrollHeight > current.offsetHeight) {
+        current.addEventListener('scroll', this.onScrollPositionChanged);
+        this.scrollables.push(current);
+      }
+      current = current.parentElement;
     }
   }
 
@@ -145,10 +157,22 @@ class Container {
     if (this.isDragInside(draggableInfo.position)) {
       draggableInfo.targetContainer = this;
       // handle drop in and reorder
+      let addIndex = this.calculateDragPosition();
+      let removeIndex = null;
+      if (draggableInfo.container === this && this.props.behaviour === 'move') {
+        removeIndex = draggableInfo.elementIndex;
+        if (removeIndex < addIndex) addIndex++;
+      }
+      this.setItemStates(removeIndex, addIndex, this.orientationDependentProps.get(draggableInfo, 'size'));
+
     } else {
       // remove target container if it is this
       if (draggableInfo.targetContainer === this) {
         draggableInfo.targetContainer = null;
+      }
+
+      if (draggableInfo.container === this && this.props.behaviour === 'move') {
+        this.setItemStates(draggableInfo.elementIndex, null, this.orientationDependentProps.get(draggableInfo, 'size'));        
       }
     }
   }
@@ -157,14 +181,18 @@ class Container {
   // drop can be in or out of the container
   handleDrop() {
     const isDroppedIn = this.state.draggableInfo.targetContainer === this;
+    this.setItemStates(null, null);
   }
 
   onScrollPositionChanged() {
     this.rect = this.containerElement.getBoundingClientRect();
     this.visibleRect = Utils.getVisibleRect(this.containerElement);
-    if(this.draggableInfo){
-      this.handleDrag(draggableInfo);
+    if (this.state.draggableInfo) {
+      this.handleDrag(this.state.draggableInfo);
     }
+
+    this.scaleX = (this.rect.right - this.rect.left) / this.containerElement.offsetWidth;
+    this.scaleY = (this.rect.bottom - this.rect.top) / this.containerElement.offsetHeight;
   }
 
   setItemStates(removedIndex, addedIndex, size) {
@@ -176,7 +204,7 @@ class Container {
 
     if (prevRemovedIndex !== currentRemovedIndex) {
       if (prevRemovedIndex < Number.MAX_SAFE_INTEGER) {
-        this.setDraggableVisibility(this.draggables[prevRemovedIndex], false);
+        this.setDraggableVisibility(this.draggables[prevRemovedIndex], true);
       }
       if (currentRemovedIndex < Number.MAX_SAFE_INTEGER) {
         this.setDraggableVisibility(this.draggables[currentRemovedIndex], false);
@@ -189,7 +217,7 @@ class Container {
       let currentDirection = (currentRemovedIndex < i ? -1 : 0) + (currentAddedIndex <= i ? 1 : 0)
 
       if (prevDirection !== currentDirection) {
-        const translation = currentDirection === 1 ? this.getElementSize(draggable) : 
+        const translation = currentDirection === 1 ? this.getElementSize(draggable) :
           currentDirection === 0 ? 0 : 0 - this.getElementSize(draggable);
         this.orientationDependentProps.set(draggable.style, 'translate', translation);
         draggable[draggableBegin] = translation;
@@ -203,14 +231,43 @@ class Container {
   calculateDragPosition() {
     const dragCenter = this.state.draggableInfo.position;
     const dragPos = this.orientationDependentProps.get(this.state.draggableInfo.position, 'dragPosition');
-    
+    return this.findDraggableInPosition(dragPos, 0, this.draggables.length - 1);
   }
 
-  findDraggableInPosition(position, start, end) {
+  findDraggableInPosition(position, startIndex, endIndex) {
+    if (endIndex < startIndex) return null;
     // binary serach draggable
-    if (end === start) {
-      
+    if (startIndex === endIndex) {
+      let { begin, end } = this.getElementBeginEnd(this.draggables[startIndex])
+      if (position >= begin && position <= end) {
+        return startIndex;
+      } else {
+        return null;
+      }
+    } else {
+      const middleIndex = Math.floor((endIndex + startIndex) / 2);   
+      let { begin, end } = this.getElementBeginEnd(this.draggables[middleIndex])      
+      if (position < begin) {
+        return this.findDraggableInPosition(position, startIndex, middleIndex - 1);
+      } else if (position > end) {
+        return this.findDraggableInPosition(position, middleIndex + 1, endIndex);
+      } else {
+        return middleIndex;
+      }
     }
+  }
+
+  getElementBeginEnd(element) {
+    const scale = this.orientationDependentProps.get(this, 'scale') || 1;
+    const begin =
+      (this.orientationDependentProps.get(element, 'distanceToParent') +
+        (element.translate || 0) +
+      this.orientationDependentProps.get(this.rect, 'begin')) * scale;
+    
+    const end = begin + (this.orientationDependentProps.get(element, 'size') * scale);
+    return {
+      begin, end
+    };
   }
 
   getElementSize(element) {

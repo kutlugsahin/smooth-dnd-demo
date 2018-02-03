@@ -66,9 +66,9 @@ class Mediator {
   }
 
   getGhostElement(element, { x, y }) {
-    const { left, top, right, bottom } = element.getBoundingClientRect();
-    const midX = right - left / 2;
-    const midY = bottom - top / 2;
+    const { left, top, right, bottom } = element.firstChild.getBoundingClientRect();
+    const midX = left + ((right - left) / 2);
+    const midY = top + ((bottom - top) / 2);
     const div = document.createElement('div');
     div.style.position = 'fixed';
     div.style.pointerEvents = 'none';
@@ -76,22 +76,28 @@ class Mediator {
     div.style.top = top + 'px';
     div.style.width = right - left + 'px';
     div.style.height = bottom - top + 'px';
-    div.appendChild(element.cloneNode(true));
+    div.style.overflow = 'hidden';
+    div.className = "react-smooth-dnd-ghost";
+    const clone = element.firstChild.cloneNode(true);
+    clone.style.margin = '0px';
+    div.appendChild(clone);
 
     return {
       ghost: div,
       centerDelta: { x: midX - x, y: midY - y },
-      positionDelta: { left: left - x, top: top - y }
+      positionDelta: { left: left - x, top: top - y },
+      clientWidth: right - left,
+      clientHeight: bottom - top
     };
   }
 
   getDraggableInfo(draggableElement) {
     const container = this.containers.filter(p => Utils.hasParent(draggableElement, p.containerElement))[0];
     const draggableIndex = container.draggables.indexOf(draggableElement);
-    container.state.removedIndex = draggableIndex;
     return {
       container,
       element: draggableElement,
+      elementIndex: draggableIndex,
       payload: container.props.getChildPayload(draggableIndex),
       targetContainer: null,
       position: {x: 0, y: 0}
@@ -153,6 +159,8 @@ class Mediator {
       this.ghostInfo.ghost.style.top = `${e.clientY + this.ghostInfo.positionDelta.top}px`; 
       this.draggableInfo.position.x = e.clientX + this.ghostInfo.centerDelta.x;
       this.draggableInfo.position.y = e.clientY + this.ghostInfo.centerDelta.y;
+      this.draggableInfo.clientWidth = this.ghostInfo.clientWidth;
+      this.draggableInfo.clientHeight = this.ghostInfo.clientHeight;
     }
 
     this.dragListeningContainers.forEach(p => p.handleDrag(this.draggableInfo));
