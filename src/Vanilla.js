@@ -5,7 +5,7 @@ export default class extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: 'Array(50).fill(undefined)'.split('').map((p, i) => i),
+      items: Array(500).fill().map((p, i) => i),
       items2: 'Array(50).fill(undefined)'.split('').map((p, i) => i),
     };
 

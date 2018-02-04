@@ -124,9 +124,6 @@ class Container {
   }
 
   registerEvents() {
-    // if (!this.scrollEventListener) {
-    //   this.scrollEventListener = Utils.listenScrollParent(this.containerElement, this.onScrollPositionChanged);
-    // }
     this.onScrollPositionChanged();
     let current = this.containerElement;
     while (current) {
@@ -185,7 +182,7 @@ class Container {
   }
 
   onScrollPositionChanged() {
-    this.getContainerRectangles(this.getContainerRectangles().rect);
+    this.getContainerScale(this.getContainerRectangles().rect);
     if (this.state.draggableInfo) {
       this.handleDrag(this.state.draggableInfo);
     }
@@ -254,7 +251,7 @@ class Container {
       }
     } else {
       const middleIndex = Math.floor((endIndex + startIndex) / 2);   
-      let { begin, end } = this.getElementBeginEnd(this.draggables[middleIndex])      
+      const { begin, end } = this.getElementBeginEnd(this.draggables[middleIndex])      
       if (position < begin) {
         return this.findDraggableInPosition(position, startIndex, middleIndex - 1);
       } else if (position > end) {
