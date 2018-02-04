@@ -268,11 +268,11 @@ class Container {
   getElementBeginEnd(element) {
     const scale = this.orientationDependentProps.get(this, 'scale') || 1;
     const begin =
-      (this.orientationDependentProps.get(element, 'distanceToParent') +
-        (element.translate || 0) +
-      this.orientationDependentProps.get(this.rect, 'begin')) * scale;
+      ((this.orientationDependentProps.get(element, 'distanceToParent') +
+        (element.translate || 0)) * scale) +
+      this.orientationDependentProps.get(this.rect, 'begin');
     
-    const end = begin + (this.orientationDependentProps.get(element, 'size') * scale);
+    const end = begin + (this.getElementSize(element) * scale);
     return {
       begin, end
     };
