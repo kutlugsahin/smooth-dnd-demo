@@ -5,7 +5,7 @@ export default class extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: Array(500).fill().map((p, i) => i),
+      items: Array(50).fill().map((p, i) => i),
       items2: 'Array(50).fill(undefined)'.split('').map((p, i) => i),
     };
 
@@ -16,22 +16,31 @@ export default class extends Component {
       vertialAlign: 'middle',
       lineHeight: '50px',
       backgroundColor: "white",
-      margin: '5px'
+      marginTop: '-1px'
     }
   }
 
   componentDidMount() {
     window.container = new container(this.container);
   }
-  
+
 
   render() {
+    // return (
+    //   <div style={{ width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin:'100px' }}>
+    //     <div ref={e => { this.container = e; }}>
+    //       {this.state.items.map(p => (
+    //         <div style={Object.assign({},this.dragStyle, {height: `${50 + (Math.random() * 200)}px`})} key={p}>Draggable {p}</div>
+    //       ))}
+    //     </div>
+    //   </div>
+    // )
     return (
-      <div style={{ width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(.5,.5,1)' }}>
-        <div ref={e => { this.container = e; }} style={{ width: '500px'}}>
-          {this.state.items.map(p => (
-            <div style={this.dragStyle} key={p}>Draggable {p}</div>
-          ))}
+      <div style={{ width: '510px', height: '800px', overflowY: 'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '100px' }}>
+        <div ref={e => this.container = e}>
+          <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '30px' }}>D1</div>
+          <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '100px' }}>D2</div>
+          <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '30px' }}>D3</div>
         </div>
       </div>
     )

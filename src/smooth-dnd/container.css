@@ -1,8 +1,8 @@
 .smooth-dnd-draggable-wrapper {
-  overflow: auto;
-  transition: transform 0.2s ease;
+  
+  transition: transform 0.25s ease;
 }
 
 .react-smooth-dnd-ghost{
-  box-shadow: 0px 0px 2px 0px #ddd;
+  box-shadow: 1px 1px 2px 0px #ddd;
 }

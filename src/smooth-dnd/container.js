@@ -178,6 +178,7 @@ class Container {
   // drop can be in or out of the container
   handleDrop() {
     const isDroppedIn = this.state.draggableInfo.targetContainer === this;
+
     this.setItemStates(null, null);
   }
 
@@ -222,8 +223,8 @@ class Container {
       let currentDirection = (currentRemovedIndex < i ? -1 : 0) + (currentAddedIndex <= i ? 1 : 0)
 
       if (prevDirection !== currentDirection) {
-        const translation = currentDirection === 1 ? this.getElementSize(draggable) :
-          currentDirection === 0 ? 0 : 0 - this.getElementSize(draggable);
+        const translation = currentDirection === 1 ? size :
+          currentDirection === 0 ? 0 : 0 - size;
         this.orientationDependentProps.set(draggable.style, 'translate', translation);
         draggable[draggableBegin] = translation;
       }
@@ -259,6 +260,14 @@ class Container {
       } else {
         return middleIndex;
       }
+    }
+  }
+
+  findSortIndex(position) {
+    let shadowPosition = this.orientationDependentProps.get(this.state.draggableInfo.element, 'size') / 2;
+    let visibleIndexBeforeShadow = this.state.removedIndex === this.state.addedIndex - 1 ? this.state.removedIndex - 1 : this.state.addedIndex - 1;
+    if (visibleIndexBeforeShadow > -1)
+      shadowPosition += getElementBeginEnd(this.draggables[visibleIndexBeforeShadow]).end;
     }
   }
 
