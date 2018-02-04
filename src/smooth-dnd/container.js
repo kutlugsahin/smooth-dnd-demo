@@ -185,14 +185,22 @@ class Container {
   }
 
   onScrollPositionChanged() {
-    this.rect = this.containerElement.getBoundingClientRect();
-    this.visibleRect = Utils.getVisibleRect(this.containerElement);
+    this.getContainerRectangles(this.getContainerRectangles().rect);
     if (this.state.draggableInfo) {
       this.handleDrag(this.state.draggableInfo);
     }
+  }
 
-    this.scaleX = (this.rect.right - this.rect.left) / this.containerElement.offsetWidth;
-    this.scaleY = (this.rect.bottom - this.rect.top) / this.containerElement.offsetHeight;
+  getContainerScale(boundingRect) {
+    this.scaleX = (boundingRect.right - boundingRect.left) / this.containerElement.offsetWidth;
+    this.scaleY = (boundingRect.bottom - boundingRect.top) / this.containerElement.offsetHeight;
+    return { scaleX: this.scaleX, scaleY: this.scaleY };
+  }
+
+  getContainerRectangles() {
+    this.rect = this.containerElement.getBoundingClientRect();
+    this.visibleRect = Utils.getVisibleRect(this.containerElement);
+    return { rect: this.rect, visibleRect: this.visibleRect };
   }
 
   setItemStates(removedIndex, addedIndex, size) {

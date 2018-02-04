@@ -65,7 +65,7 @@ class Mediator {
     });
   }
 
-  getGhostElement(element, { x, y }) {
+  getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1  }) {
     const { left, top, right, bottom } = element.firstChild.getBoundingClientRect();
     const midX = left + ((right - left) / 2);
     const midY = top + ((bottom - top) / 2);
@@ -79,6 +79,10 @@ class Mediator {
     div.style.overflow = 'hidden';
     div.className = "react-smooth-dnd-ghost";
     const clone = element.firstChild.cloneNode(true);
+    clone.style.width = ((right - left) / scaleX) + 'px';
+    clone.style.height = ((bottom - top) / scaleY) + 'px';
+    clone.style.transform = `scale3d(${scaleX || 1}, ${scaleY || 1}, 1)`;
+    clone.style.transformOrigin = '0 0 0';  
     clone.style.margin = '0px';
     div.appendChild(clone);
 
@@ -143,14 +147,16 @@ class Mediator {
     e.preventDefault();
     if (!this.draggableInfo) {
       // first move after grabbing  draggable
-      this.ghostInfo = this.getGhostElement(this.grabbedElement, {x: e.clientX, y: e.clientY});
-      document.body.appendChild(this.ghostInfo.ghost);
-
       this.draggableInfo = this.getDraggableInfo(this.grabbedElement);
+      this.ghostInfo = this.getGhostElement(this.grabbedElement, { x: e.clientX, y: e.clientY },
+        this.draggableInfo.container.getContainerScale(this.draggableInfo.container.getContainerRectangles().rect));
       this.draggableInfo.position = {
         x: e.clientX + this.ghostInfo.centerDelta.x,
         y: e.clientY + this.ghostInfo.centerDelta.y
       };
+
+      document.body.appendChild(this.ghostInfo.ghost);
+
       this.dragListeningContainers = this.containers.filter(p => p.isDragRelevant(this.draggableInfo));
       this.dragListeningContainers.forEach(p => p.registerEvents());
     } else {
