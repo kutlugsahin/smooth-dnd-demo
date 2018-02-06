@@ -195,6 +195,7 @@ class Container {
 
     if (this.state.addedIndex !== addIndex || this.state.removedIndex !== removeIndex) {
       this.setItemStates(removeIndex, addIndex, this.getProp(draggableInfo, 'size'));
+      console.log(addIndex, removeIndex);
       this.shadowBeginEnd = this.getShadowBounds();
       //this.drawShadowRect(this.shadowBeginEnd);
     }
