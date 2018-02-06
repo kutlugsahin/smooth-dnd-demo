@@ -26,23 +26,23 @@ export default class extends Component {
 
 
   render() {
-    // return (
-    //   <div style={{ width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin:'100px' }}>
-    //     <div ref={e => { this.container = e; }}>
-    //       {this.state.items.map(p => (
-    //         <div style={Object.assign({},this.dragStyle, {height: `${50 + (Math.random() * 200)}px`})} key={p}>Draggable {p}</div>
-    //       ))}
-    //     </div>
-    //   </div>
-    // )
     return (
-      <div style={{ width: '510px', height: '800px', overflowY: 'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '100px' }}>
-        <div ref={e => this.container = e}>
-          <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '30px' }}>D1</div>
-          <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '100px' }}>D2</div>
-          <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '30px' }}>D3</div>
+      <div style={{ width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin:'100px' }}>
+        <div ref={e => { this.container = e; }}>
+          {this.state.items.map(p => (
+            <div style={Object.assign({},this.dragStyle, {height: `${50 + (Math.random() * 200)}px`})} key={p}>Draggable {p}</div>
+          ))}
         </div>
       </div>
     )
+    // return (
+    //   <div style={{ width: '510px', height: '800px', overflowY: 'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '100px' }}>
+    //     <div ref={e => this.container = e}>
+    //       <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '30px' }}>D1</div>
+    //       <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '100px' }}>D2</div>
+    //       <div style={{ border: '1px solid #ccc', backgroundColor: '#fff', height: '30px' }}>D3</div>
+    //     </div>
+    //   </div>
+    // )
   }
 }

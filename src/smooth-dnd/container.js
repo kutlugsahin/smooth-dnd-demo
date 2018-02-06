@@ -48,7 +48,8 @@ class OrientationDependentProps {
   }
 
   get(obj, prop) {
-    return obj[this.map[prop]];
+    const mappedProp = this.map[prop];
+    return obj[mappedProp || prop];
   }
 
   set(obj, prop, value) {
@@ -63,14 +64,20 @@ class Container {
     this.registerEvents = this.registerEvents.bind(this);
     this.deregisterEvents = this.deregisterEvents.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
+    this.getProp = this.getProp.bind(this);
+    this.setProp = this.setProp.bind(this);
     this.onScrollPositionChanged = this.onScrollPositionChanged.bind(this);
     this.wrapChildren = this.wrapChildren.bind(this);
     this.setItemStates = this.setItemStates.bind(this);
     this.getElementSize = this.getElementSize.bind(this);
     this.setDraggableVisibility = this.setDraggableVisibility.bind(this);
-    this.calculateDragPosition = this.calculateDragPosition.bind(this);
-    this.findDraggableInPosition = this.findDraggableInPosition.bind(this);
+    this.calculateMouseOverIndex = this.calculateMouseOverIndex.bind(this);
+    this.findDraggableIndexInPosition = this.findDraggableIndexInPosition.bind(this);
     this.getElementBeginEnd = this.getElementBeginEnd.bind(this);
+    this.getShadowBounds = this.getShadowBounds.bind(this);
+    this.getNextAddIndex = this.getNextAddIndex.bind(this);
+    this.getRemoveIndex = this.getRemoveIndex.bind(this);
+    this.isInBoundaries = this.isInBoundaries.bind(this);
     this.containerElement && this.init(element, props);
     this.draggables = [];
     this.scrollables = [];
@@ -99,6 +106,14 @@ class Container {
     }
 
     this.orientationDependentProps = new OrientationDependentProps(this.props.orientation);
+  }
+
+  getProp(obj, prop) {
+    return this.orientationDependentProps.get(obj, prop);
+  }
+
+  setProp(obj, prop, val) { 
+    this.orientationDependentProps.set(obj, prop, val);
   }
 
   wrapChildren() {
@@ -150,35 +165,74 @@ class Container {
   // drag position can be in or out of the container
   handleDrag(draggableInfo) {
     this.state.draggableInfo = draggableInfo;
-    // check if mouse is over container
-    if (this.isDragInside(draggableInfo.position)) {
+    const isDragInside = this.isDragInside(draggableInfo.position)
+    
+    if (isDragInside) {
       draggableInfo.targetContainer = this;
-      // handle drop in and reorder
-      let addIndex = this.calculateDragPosition();
-      let removeIndex = null;
-      if (draggableInfo.container === this && this.props.behaviour === 'move') {
-        removeIndex = draggableInfo.elementIndex;
-        if (removeIndex < addIndex) addIndex++;
-      }
-      this.setItemStates(removeIndex, addIndex, this.orientationDependentProps.get(draggableInfo, 'size'));
-
     } else {
-      // remove target container if it is this
       if (draggableInfo.targetContainer === this) {
         draggableInfo.targetContainer = null;
       }
+    }
 
-      if (draggableInfo.container === this && this.props.behaviour === 'move') {
-        this.setItemStates(draggableInfo.elementIndex, null, this.orientationDependentProps.get(draggableInfo, 'size'));        
+    const isThisSourceContainer = draggableInfo.container === this
+
+    const removeIndex = this.getRemoveIndex(draggableInfo, isThisSourceContainer, this.props.behaviour);
+    let addIndex = this.state.addedIndex;
+
+    if (isDragInside) {
+      if (this.state.addedIndex != null) {
+        const draggingAxisPosition = this.getProp(draggableInfo.position, 'dragPosition');
+        if (!this.isInBoundaries(draggingAxisPosition, this.shadowBeginEnd)) {
+          addIndex = this.getNextAddIndex(this.state.addedIndex, this.calculateMouseOverIndex(draggingAxisPosition), true)
+        }
+      } else {
+        addIndex = removeIndex;
+      }
+    } else {
+      addIndex = null;
+    }
+
+    if (this.state.addedIndex !== addIndex || this.state.removedIndex !== removeIndex) {
+      this.setItemStates(removeIndex, addIndex, this.getProp(draggableInfo, 'size'));
+      this.shadowBeginEnd = this.getShadowBounds();
+      //this.drawShadowRect(this.shadowBeginEnd);
+    }
+  }
+
+  isInBoundaries(position, beginEnd) {
+    return beginEnd && position > beginEnd.begin && position < beginEnd.end;
+  }
+
+  getNextAddIndex(prevAddIndex, mouseOverIndex, isDragInside) {
+    if (!isDragInside) return null;
+    if (mouseOverIndex === null) return prevAddIndex;
+
+    if (prevAddIndex !== null) {
+      if (prevAddIndex <= mouseOverIndex) {
+        return mouseOverIndex + 1;
+      }
+      return mouseOverIndex;
+    } else{
+      return mouseOverIndex;
+    }
+  }
+
+  getRemoveIndex(draggableInfo, fromSelf, behaviour) {
+    if (fromSelf && behaviour === 'move') {
+      if (draggableInfo && draggableInfo.elementIndex > -1) {
+        return draggableInfo.elementIndex;
       }
     }
+
+    return null;
   }
 
   // handle drop of the relavent drag operation
   // drop can be in or out of the container
   handleDrop() {
     const isDroppedIn = this.state.draggableInfo.targetContainer === this;
-
+    this.drawShadowRect(null);
     this.setItemStates(null, null);
   }
 
@@ -225,7 +279,7 @@ class Container {
       if (prevDirection !== currentDirection) {
         const translation = currentDirection === 1 ? size :
           currentDirection === 0 ? 0 : 0 - size;
-        this.orientationDependentProps.set(draggable.style, 'translate', translation);
+        this.setProp(draggable.style, 'translate', translation);
         draggable[draggableBegin] = translation;
       }
     }
@@ -234,13 +288,74 @@ class Container {
     this.state.removedIndex = removedIndex;
   }
 
-  calculateDragPosition() {
-    const dragCenter = this.state.draggableInfo.position;
-    const dragPos = this.orientationDependentProps.get(this.state.draggableInfo.position, 'dragPosition');
-    return this.findDraggableInPosition(dragPos, 0, this.draggables.length - 1);
+  getShadowBounds() {
+    if (this.state.addedIndex !== null) {
+      const shadowSize = this.getProp(this.state.draggableInfo, 'size');
+      let beforeIndex = this.state.addedIndex - 1;
+      let begin = 0;
+      if (beforeIndex === this.state.removedIndex) {
+        beforeIndex--;
+      }
+      if (beforeIndex > -1) {
+        const beforeSize = this.getProp(this.draggables[beforeIndex], 'size');
+        const beforeBounds = this.getElementBeginEnd(this.draggables[beforeIndex]);
+        if (shadowSize < beforeSize) {
+          const threshold = (beforeSize - shadowSize) / 2;
+          begin = beforeBounds.end - threshold;
+        } else {
+          begin = beforeBounds.end;
+        }
+      }
+
+      let end = 10000;
+      let afterIndex = this.state.addedIndex;
+      if (afterIndex === this.state.removedIndex) {
+        afterIndex++;
+      }
+      if (afterIndex < this.draggables.length) {
+        const afterSize = this.getProp(this.draggables[afterIndex], 'size');
+        const afterBounds = this.getElementBeginEnd(this.draggables[afterIndex]);
+        if (shadowSize < afterSize) {
+          const threshold = (afterSize - shadowSize) / 2;
+          end = afterBounds.begin + threshold;
+        } else {
+          end = afterBounds.begin;
+        }
+      }
+
+      return { begin, end };
+    } else {
+      return null;
+    }
   }
 
-  findDraggableInPosition(position, startIndex, endIndex) {
+  drawShadowRect(shadowBeginEnd) {
+    if (!shadowBeginEnd) {
+      if (this.shadowDiv) {
+        this.shadowDiv.parentElement.removeChild(this.shadowDiv);
+        this.shadowDiv = null;
+      }
+    } else {
+      const { begin, end } = shadowBeginEnd;
+      if (!this.shadowDiv) {
+        this.shadowDiv = document.createElement('div');
+        this.shadowDiv.style.position = 'fixed';
+        this.shadowDiv.style.backgroundColor = '#abc';
+        document.body.appendChild(this.shadowDiv);
+      }
+
+      this.shadowDiv.style.left = this.rect.left + 'px';
+      this.shadowDiv.style.top = begin + 'px';
+      this.shadowDiv.style.width = this.rect.right - this.rect.left + 'px';
+      this.shadowDiv.style.height = end - begin + 'px'
+    }
+  }
+
+  calculateMouseOverIndex(position) {
+    return this.findDraggableIndexInPosition(position, 0, this.draggables.length - 1);
+  }
+
+  findDraggableIndexInPosition(position, startIndex, endIndex) {
     if (endIndex < startIndex) return null;
     // binary serach draggable
     if (startIndex === endIndex) {
@@ -254,9 +369,9 @@ class Container {
       const middleIndex = Math.floor((endIndex + startIndex) / 2);   
       const { begin, end } = this.getElementBeginEnd(this.draggables[middleIndex])      
       if (position < begin) {
-        return this.findDraggableInPosition(position, startIndex, middleIndex - 1);
+        return this.findDraggableIndexInPosition(position, startIndex, middleIndex - 1);
       } else if (position > end) {
-        return this.findDraggableInPosition(position, middleIndex + 1, endIndex);
+        return this.findDraggableIndexInPosition(position, middleIndex + 1, endIndex);
       } else {
         return middleIndex;
       }
@@ -264,19 +379,19 @@ class Container {
   }
 
   findSortIndex(position) {
-    let shadowPosition = this.orientationDependentProps.get(this.state.draggableInfo.element, 'size') / 2;
+    let shadowPosition = this.getProp(this.state.draggableInfo.element, 'size') / 2;
     let visibleIndexBeforeShadow = this.state.removedIndex === this.state.addedIndex - 1 ? this.state.removedIndex - 1 : this.state.addedIndex - 1;
-    if (visibleIndexBeforeShadow > -1)
-      shadowPosition += getElementBeginEnd(this.draggables[visibleIndexBeforeShadow]).end;
+    if (visibleIndexBeforeShadow > -1){
+      shadowPosition += this.getElementBeginEnd(this.draggables[visibleIndexBeforeShadow]).end;
     }
   }
 
   getElementBeginEnd(element) {
-    const scale = this.orientationDependentProps.get(this, 'scale') || 1;
+    const scale = this.getProp(this, 'scale') || 1;
     const begin =
-      ((this.orientationDependentProps.get(element, 'distanceToParent') +
-        (element.translate || 0)) * scale) +
-      this.orientationDependentProps.get(this.rect, 'begin');
+      ((this.getProp(element, 'distanceToParent') +
+        (element[draggableBegin] || 0)) * scale) +
+      this.getProp(this.rect, 'begin');
     
     const end = begin + (this.getElementSize(element) * scale);
     return {
@@ -285,7 +400,7 @@ class Container {
   }
 
   getElementSize(element) {
-    return this.orientationDependentProps.get(element, 'size');
+    return this.getProp(element, 'size');
   }
 
   setDraggableVisibility(draggable, isVisible) {
