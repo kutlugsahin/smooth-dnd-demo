@@ -52,12 +52,14 @@ const container = (element, props) => {
     draggableInfo: null,
     removedIndex: null,
     addedIndex: null,
-    visibleRect: null
+    visibleRect: null,
+    orientationDependentProps: null;
   };
 
   const elements = {
     containerElement: null,
-    shadowElement: null
+    shadowElement: null,
+    draggables: []
   }
 
   const init = (element, props)  => {
@@ -75,30 +77,30 @@ const container = (element, props) => {
     state.orientationDependentProps = new OrientationDependentProps(this.props.orientation);
   }
 
-  getProp(obj, prop) {
-    return this.orientationDependentProps.get(obj, prop);
+  const getProp = (obj, prop) => {
+    return state.orientationDependentProps.get(obj, prop);
   }
 
-  setProp(obj, prop, val) {
-    this.orientationDependentProps.set(obj, prop, val);
+  const setProp = (obj, prop, val) => {
+    state.orientationDependentProps.set(obj, prop, val);
   }
 
-  wrapChildren = () => {
+  const wrapChildren = () => {
     // wrap children if they are not
     Array.prototype.map.call(elements.containerElement.children, (child, index) => {
       let wrapper = child;
       if (!Utils.hasClass(child, 'smooth-dnd-draggable-wrapper')) {
         const div = document.createElement('div');
-        div.className = `smooth-dnd-draggable-wrapper ${this.props.orientation}`;
-        this.containerElement.insertBefore(div, child);
+        div.className = `smooth-dnd-draggable-wrapper ${state.props.orientation}`;
+        elements.containerElement.insertBefore(div, child);
         div.appendChild(child);
         wrapper = div;
       }
-      this.draggables[index] = wrapper;
+      elements.draggables[index] = wrapper;
     });
   }
 
-  deregisterEvents() {
+  const deregisterEvents() => {
     this.scrollables.forEach(p => {
       p.removeEventListener('scroll', this.onScrollPositionChanged);
     });
