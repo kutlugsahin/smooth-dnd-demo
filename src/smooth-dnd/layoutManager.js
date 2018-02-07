@@ -130,6 +130,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   return {
     getSize,
     getDistanceToContainerBegining,
+    getContainerRectangles,
     getBeginEnd,
     getAxisValue,
     setTranslation,
