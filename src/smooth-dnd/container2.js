@@ -68,12 +68,14 @@ class Container {
     const props = this.initProps(props);
     const layout = layoutManager(element, props.orientation);
     const draggables = this.wrapChildren(element);
+
     this.handleDrag = this.handleDrag(draggables, layout);
     this.isDragRelevant = this.isDragRelevant(props);
+    this.getDragInsertionIndex = this.getDragInsertionIndex(draggables, layout);
   }
 
   wrapChildren(element) {
-    Array.prototype.map.call(element.children, (child) => {
+    return Array.prototype.map.call(element.children, child => {
       let wrapper = child;
       if (!Utils.hasClass(child, wrapperClass)) {
         const div = document.createElement('div');
@@ -87,8 +89,30 @@ class Container {
   }
 
   handleDrag(draggables, layout) {
+    return ghostRect => draggingInfo => {
+      
+    }
+  }
+
+  onDragEnd(draggables, layout) {
     return (draggingInfo) => {
 
+    }
+  }
+
+  onDragStateChanged(draggables, layout) {
+    const dragHandler = this.handleDrag(draggables, layout);
+
+    return (addIndex, removeIndex) => {
+      const getGhostRect = ...;
+      this.handleDrag = dragHandler(ghostRect);
+    }
+  }
+
+  getDragInsertionIndex(draggables, layout) {
+    return (ghostRect, position, currentIndex) => {
+      const pos = layout.getAxisValue(position);
+      
     }
   }
 }
