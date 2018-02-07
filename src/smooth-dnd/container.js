@@ -6,9 +6,7 @@ import mediator from './mediator';
 import * as Utils from './utils';
 import './container.css';
 
-const translationValue = '__smooth_dnd_draggable_translation_value';
-const draggableBegin = '__smooth_dnd_draggable_draggable_begining';
-const draggableEnd = '__smooth_dnd_draggable_draggable_end';
+
 
 const draggableInfo = {
   element: null,
