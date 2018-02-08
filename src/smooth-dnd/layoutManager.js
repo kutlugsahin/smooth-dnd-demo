@@ -49,28 +49,27 @@ export default function layoutManager(containerElement, orientation, onScroll) {
 
   const scrollListener = Utils.listenScrollParent(containerElement, function() {
     invalidateContainerRectangles(containerElement);
-    onScroll();
+    onScroll && onScroll();
   });
 
   function invalidateContainerRectangles(containerElement) {
-    const rectangles = getContainerRectangles(containerElement);
-    values.rect = rectangles.rect;
-    values.visibleRect = rectangles.visibleRect;
+    values.rect = containerElement.getBoundingClientRect();
+    values.visibleRect = Utils.getVisibleRect(containerElement);
   }
 
   function invalidateContainerScale(containerElement) {
     values.scaleX = (values.rect.right - values.rect.left) / containerElement.offsetWidth;
-    values.scaleY = (values.rect.bottom - values.rect.top) / containerElement.offsetHeigh;
+    values.scaleY = (values.rect.bottom - values.rect.top) / containerElement.offsetHeight;
   }
 
-  function getContainerRectangles(containerElement) {
+  function getContainerRectangles() {
     return {
       rect: values.rect,
       visibleRect: values.visibleRect
     }
   }
 
-  function getContainerScale(containerElement) {
+  function getContainerScale() {
     return { scaleX: values.scaleX, scaleY: values.scaleY };
   }
 
@@ -136,8 +135,9 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     setTranslation,
     getTranslation,
     setVisibility,
-    isVisible
+    isVisible,
     isInVisibleRect,
-    dispose
+    dispose,
+    getContainerScale
   }
 }

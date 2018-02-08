@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import container from './smooth-dnd/container';
+import container from './smooth-dnd/container2';
 
 export default class extends Component {
   constructor(props) {
