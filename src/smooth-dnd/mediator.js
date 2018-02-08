@@ -40,10 +40,10 @@ class Mediator {
       window.document.addEventListener(e, this.onMouseDown);
     });
   }
-  
+
   addMoveListeners() {
     moveEvents.forEach(e => {
-      window.document.addEventListener(e, this. onMouseMove);
+      window.document.addEventListener(e, this.onMouseMove);
     });
   }
 
@@ -65,7 +65,7 @@ class Mediator {
     });
   }
 
-  getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1  }) {
+  getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1 }) {
     const { left, top, right, bottom } = element.firstChild.getBoundingClientRect();
     const midX = left + ((right - left) / 2);
     const midY = top + ((bottom - top) / 2);
@@ -82,7 +82,7 @@ class Mediator {
     clone.style.width = ((right - left) / scaleX) + 'px';
     clone.style.height = ((bottom - top) / scaleY) + 'px';
     clone.style.transform = `scale3d(${scaleX || 1}, ${scaleY || 1}, 1)`;
-    clone.style.transformOrigin = '0 0 0';  
+    clone.style.transformOrigin = '0 0 0';
     clone.style.margin = '0px';
     div.appendChild(clone);
 
@@ -104,7 +104,7 @@ class Mediator {
       elementIndex: draggableIndex,
       payload: container.props.getChildPayload(draggableIndex),
       targetContainer: null,
-      position: {x: 0, y: 0}
+      position: { x: 0, y: 0 }
     }
   }
 
@@ -124,7 +124,7 @@ class Mediator {
   onMouseUp(e) {
     this.removeMoveListeners();
     this.removeReleaseListeners();
-    
+
     if (this.draggableInfo) {
       this.handleDropAnimation(() => {
         (this.dragListeningContainers || []).forEach(p => {
@@ -160,9 +160,9 @@ class Mediator {
       this.dragListeningContainers = this.containers.filter(p => p.isDragRelevant(this.draggableInfo));
       this.dragListeningContainers.forEach(p => p.registerEvents());
     } else {
-     // just update ghost position && draggableInfo position
-      this.ghostInfo.ghost.style.left = `${e.clientX + this.ghostInfo.positionDelta.left}px`; 
-      this.ghostInfo.ghost.style.top = `${e.clientY + this.ghostInfo.positionDelta.top}px`; 
+      // just update ghost position && draggableInfo position
+      this.ghostInfo.ghost.style.left = `${e.clientX + this.ghostInfo.positionDelta.left}px`;
+      this.ghostInfo.ghost.style.top = `${e.clientY + this.ghostInfo.positionDelta.top}px`;
       this.draggableInfo.position.x = e.clientX + this.ghostInfo.centerDelta.x;
       this.draggableInfo.position.y = e.clientY + this.ghostInfo.centerDelta.y;
       this.draggableInfo.clientWidth = this.ghostInfo.clientWidth;
