@@ -5,6 +5,8 @@ import layoutManager from './layoutManager';
 import Mediator from './mediator2';
 import './container.css';
 
+let shadowDiv;
+
 const defaultOptions = {
   groupName: defaultGroupName,
   behaviour: 'move', // move | copy
@@ -21,7 +23,7 @@ function initOptions(props = defaultOptions) {
   return result;
 }
 
-function isDragRelevant({element, options}) {
+function isDragRelevant({ element, options }) {
   return function(draggableInfo) {
     return draggableInfo.container.element === element ||
       draggableInfo.groupName === options.groupName ||
@@ -29,22 +31,46 @@ function isDragRelevant({element, options}) {
   }
 }
 
+
+function reorderDraggables({ draggables }) {
+  return function(addedIndex, removedIndex, element) {
+    if (removedIndex !== null || addedIndex !== null) {
+      let removed = null;
+      if (removedIndex != null) {
+        removed = draggables[removedIndex].parentElement.removeChild(draggables[removedIndex]);
+      }
+
+      if (removed === null) {
+        removed = element;
+      }
+
+      if (addedIndex !== null) {
+
+      }
+    }
+  }
+}
+
+function wrapChild(child, orientation) {
+  const div = document.createElement('div');
+  div.className = `${wrapperClass} ${orientation}`;
+  child.parentElement.insertBefore(div, child);
+  div.appendChild(child);
+  return div;
+}
+
 function wrapChildren(element, orientation) {
   return Array.prototype.map.call(element.children, child => {
     let wrapper = child;
     if (!Utils.hasClass(child, wrapperClass)) {
-      const div = document.createElement('div');
-      div.className = `${wrapperClass} ${orientation}`;
-      element.insertBefore(div, child);
-      div.appendChild(child);
-      wrapper = div;
+      wrapper = wrapChild(child, orientation);
     }
     return wrapper;
   });
 }
 
-function getDragInsertionIndex({draggables, layout}) {
-  const findDraggable = findDraggebleAtPos({layout});
+function getDragInsertionIndex({ draggables, layout }) {
+  const findDraggable = findDraggebleAtPos({ layout });
   return (ghostBeginEnd, pos) => {
     if (!ghostBeginEnd) {
       return findDraggable(draggables, pos);
@@ -60,7 +86,7 @@ function getDragInsertionIndex({draggables, layout}) {
   }
 }
 
-function findDraggebleAtPos({layout}) {
+function findDraggebleAtPos({ layout }) {
   const find = (draggables, pos, startIndex, endIndex) => {
     if (endIndex < startIndex) {
       return null;
@@ -68,7 +94,7 @@ function findDraggebleAtPos({layout}) {
     // binary serach draggable
     if (startIndex === endIndex) {
       let { begin, end } = layout.getBeginEnd(draggables[startIndex])
-      if (pos >= begin && pos <= end) {
+      if (pos > begin && pos <= end) {
         return startIndex;
       } else {
         return null;
@@ -91,7 +117,7 @@ function findDraggebleAtPos({layout}) {
   }
 }
 
-function getShadowBeginEnd({draggables, layout}) {
+function getShadowBeginEnd({ draggables, layout }) {
   return (addIndex, removeIndex, elementSize) => {
     if (addIndex !== null) {
       let beforeIndex = addIndex - 1;
@@ -135,7 +161,7 @@ function getShadowBeginEnd({draggables, layout}) {
 
 function resetDraggables({ draggables, layout }) {
   return function() {
-    for (let index = 0; index < draggables.length; index++) {      
+    for (let index = 0; index < draggables.length; index++) {
       layout.setTranslation(draggables[index], 0);
       layout.setVisibility(draggables[index], true);
     }
@@ -149,6 +175,29 @@ function setTargetContainer(draggableInfo, element) {
     if (draggableInfo.targetElement === element) {
       draggableInfo.targetElement = null;
     }
+  }
+}
+
+function drawShadowRect(shadowBeginEnd, layout) {
+  if (!shadowBeginEnd) {
+    if (shadowDiv) {
+      shadowDiv.parentElement.removeChild(shadowDiv);
+      shadowDiv = null;
+    }
+  } else {
+    const { begin, end } = shadowBeginEnd;
+    if (!shadowDiv) {
+      shadowDiv = document.createElement('div');
+      shadowDiv.style.position = 'fixed';
+      shadowDiv.style.backgroundColor = '#abc';
+      document.body.appendChild(shadowDiv);
+    }
+    const rect = layout.getContainerRectangles().rect;
+
+    shadowDiv.style.left = rect.left + 'px';
+    shadowDiv.style.top = begin + 'px';
+    shadowDiv.style.width = rect.right - rect.left + 'px';
+    shadowDiv.style.height = end - begin + 'px'
   }
 }
 
@@ -168,7 +217,8 @@ function handleRemoveItem({ element, options, draggables, layout }) {
     return {
       pos,
       removedIndex,
-      elementSize
+      elementSize,
+      invalidateShadow: draggableInfo.invalidateShadow
     };
   }
 }
@@ -176,14 +226,17 @@ function handleRemoveItem({ element, options, draggables, layout }) {
 function handleAddItem({ draggables, layout }) {
   let addedIndex = null;
   let shadowBeginEnd = null;
-  const getNextAddedIndex = getDragInsertionIndex({draggables, layout});
+  const getNextAddedIndex = getDragInsertionIndex({ draggables, layout });
   const getShadowBounds = getShadowBeginEnd({ draggables, layout });
   const translate = calculateTranslations({ draggables, layout });
-  return function({ pos, removedIndex, elementSize }) {
+  return function({ pos, removedIndex, elementSize, invalidateShadow }) {
     if (pos === null) {
       addedIndex = null;
-      translate({ addedIndex, removedIndex, elementSize });      
-    } else {  
+      translate({ addedIndex, removedIndex, elementSize });
+    } else {
+      if (invalidateShadow) {
+        shadowBeginEnd = getShadowBounds(addedIndex, removedIndex, elementSize);
+      }
       let nextAddedIndex = getNextAddedIndex(shadowBeginEnd, pos);
       if (nextAddedIndex === null) {
         nextAddedIndex = addedIndex;
@@ -234,25 +287,42 @@ function compose(options) {
     return function(data) {
       return hydratedFunctions.reduce((value, fn) => {
         return fn(value);
-      },data);
+      }, data);
     }
   }
 }
 
 function handleDrag(options) {
   const draggableInfoHandler = compose(options)(handleRemoveItem, handleAddItem);
+  const scrollListener = scrollHandler(options, draggableInfoHandler);
   return function(draggableInfo) {
-    return draggableInfoHandler(draggableInfo);
+    return draggableInfoHandler(scrollListener(draggableInfo));
   }
 }
 
-function handleDrop({ draggables, layout }) {
+function handleDrop({ draggables, layout, options }) {
   const draggablesReset = resetDraggables({ draggables, layout });
-  return function(draggableInfo) {
+  return function({ addedIndex, removedIndex, element, payload }) {
     draggablesReset();
-
     // handle drop
     // ...
+    let actualAddIndex = addedIndex !== null ? (removedIndex < addedIndex ? addedIndex - 1 : addedIndex) : null;
+    options.onDrop && options.onDrop(actualAddIndex, removedIndex);
+  }
+}
+
+function scrollHandler(options, dragHandler) {
+  let lastDraggableInfo = null;
+  options.layout.setScrollListener(function() {
+    if (lastDraggableInfo !== null) {
+      lastDraggableInfo.invalidateShadow = true;
+      dragHandler(lastDraggableInfo);
+      lastDraggableInfo.invalidateShadow = false;
+    }
+  });
+  return function(draggableInfo) {
+    lastDraggableInfo = draggableInfo;
+    return draggableInfo;
   }
 }
 
@@ -270,6 +340,7 @@ function getContainerProps(element, initialOptions) {
 
 function Container(element) {
   return function(options) {
+    let dragResult = null;
     const props = getContainerProps(element, options);
     let dragHandler = handleDrag(props);
     let dropHandler = handleDrop(props);
@@ -281,11 +352,11 @@ function Container(element) {
       getChildPayload: props.options.getChildPayload,
       groupName: props.options.groupName,
       handleDrag: function(draggableInfo) {
-        return dragHandler(draggableInfo);
+        dragResult = dragHandler(draggableInfo);
       },
       handleDrop: function(draggableInfo) {
         dragHandler = handleDrag(props);
-        return dropHandler(draggableInfo);
+        return dropHandler(dragResult);
       }
     }
   }
@@ -297,7 +368,7 @@ export default function(element, options) {
   Mediator.register(container);
   return {
     setOptions: containerIniter,
-    dispose: () => {}
+    dispose: () => { }
   }
 }
 

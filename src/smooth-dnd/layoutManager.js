@@ -43,13 +43,14 @@ function orientationDependentProps(map) {
 export default function layoutManager(containerElement, orientation, onScroll) {
   const propMapper = orientationDependentProps(orientation === 'horizontal' ? horizontalMap : verticalMap);
   const values = {};
+  let registeredScrollListener = onScroll;
 
   invalidateContainerRectangles(containerElement);
   invalidateContainerScale(containerElement);
 
   const scrollListener = Utils.listenScrollParent(containerElement, function() {
     invalidateContainerRectangles(containerElement);
-    onScroll && onScroll();
+    registeredScrollListener && registeredScrollListener();
   });
 
   function invalidateContainerRectangles(containerElement) {
@@ -97,6 +98,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   function setTranslation(element, translation) {
     if (getTranslation(element) !== translation) {
       propMapper.set(element.style, 'translate', translation);
+      element[translationValue] = translation;
     }
   }
 
@@ -120,6 +122,10 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     return x > left && x < right && y > top && y < bottom;
   }
 
+  function setScrollListener(callback) {
+    registeredScrollListener = callback;
+  }
+
   function dispose() {
     if (scrollListener) {
       scrollListener.dispose();
@@ -138,6 +144,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     isVisible,
     isInVisibleRect,
     dispose,
-    getContainerScale
+    getContainerScale,
+    setScrollListener
   }
 }
