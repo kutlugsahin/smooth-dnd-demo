@@ -70,6 +70,17 @@ export const hasClass = (element, cls) => {
   return element.className.split(' ').map(p => p).indexOf(cls) > -1;
 }
 
+export const addClass = (element, cls) => {
+  const classes = element.className.split(' ').map(p => p);
+  classes.push(cls);
+  element.className = classes.join(' ');
+}
+
+export const removeClass = (element, cls) => {
+  const classes = element.className.split(' ').map(p => p).filter(p => p !== cls);
+  element.className = classes.join(' ');
+}
+
 export const debounce = (fn, delay, immediate) => {
   let timer = null;
   return (...params) => {

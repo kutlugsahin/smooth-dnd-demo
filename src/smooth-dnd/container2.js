@@ -1,6 +1,6 @@
 import * as Utils from './utils';
 import LayoutManager from './layoutManager';
-import { defaultGroupName, wrapperClass } from './constants';
+import { defaultGroupName, wrapperClass, animationClass } from './constants';
 import layoutManager from './layoutManager';
 import Mediator from './mediator2';
 import './container.css';
@@ -53,7 +53,7 @@ function reorderDraggables({ draggables }) {
 
 function wrapChild(child, orientation) {
   const div = document.createElement('div');
-  div.className = `${wrapperClass} ${orientation}`;
+  div.className = `${wrapperClass} ${animationClass} ${orientation}`;
   child.parentElement.insertBefore(div, child);
   div.appendChild(child);
   return div;
@@ -161,10 +161,17 @@ function getShadowBeginEnd({ draggables, layout }) {
 
 function resetDraggables({ draggables, layout }) {
   return function() {
-    for (let index = 0; index < draggables.length; index++) {
-      layout.setTranslation(draggables[index], 0);
-      layout.setVisibility(draggables[index], true);
-    }
+    draggables.forEach(p => {
+      Utils.removeClass(p, animationClass);
+      layout.setTranslation(p, 0);
+      layout.setVisibility(p, true);
+    });
+
+    setTimeout(() => {
+      draggables.forEach(p => {
+        Utils.addClass(p, animationClass);
+      });
+    });
   }
 }
 
@@ -300,14 +307,23 @@ function handleDrag(options) {
   }
 }
 
+function handleDropAnimation({ draggables, layout, options }) {
+  return function(draggableInfo, addedIndex, onAnimationEnded) {
+    onAnimationEnded();
+  }
+}
+
 function handleDrop({ draggables, layout, options }) {
   const draggablesReset = resetDraggables({ draggables, layout });
-  return function(draggableInfo, {addedIndex, removedIndex}) {
-    draggablesReset();
-    // handle drop
-    // ...
-    let actualAddIndex = addedIndex !== null ? (removedIndex < addedIndex ? addedIndex - 1 : addedIndex) : null;
-    options.onDrop && options.onDrop(actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
+  const animationHandler = handleDropAnimation({ draggables, layout, options });
+  return function(draggableInfo, { addedIndex, removedIndex }) {
+    animationHandler(draggableInfo, addedIndex, function() {
+      draggablesReset();
+      // handle drop
+      // ...
+      let actualAddIndex = addedIndex !== null ? (removedIndex < addedIndex ? addedIndex - 1 : addedIndex) : null;
+      options.onDrop && options.onDrop(actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
+    })
   }
 }
 

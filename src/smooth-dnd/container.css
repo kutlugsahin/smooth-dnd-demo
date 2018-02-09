@@ -1,6 +1,9 @@
-.smooth-dnd-draggable-wrapper {  
-  transition: transform 0.25s ease;
+.smooth-dnd-draggable-wrapper {
   overflow: auto;
+}
+
+.smooth-dnd-draggable-wrapper.animated{
+  transition: transform 0.25s ease;
 }
 
 .react-smooth-dnd-ghost{
