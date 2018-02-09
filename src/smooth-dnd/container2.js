@@ -302,12 +302,12 @@ function handleDrag(options) {
 
 function handleDrop({ draggables, layout, options }) {
   const draggablesReset = resetDraggables({ draggables, layout });
-  return function({ addedIndex, removedIndex, element, payload }) {
+  return function(draggableInfo, {addedIndex, removedIndex}) {
     draggablesReset();
     // handle drop
     // ...
     let actualAddIndex = addedIndex !== null ? (removedIndex < addedIndex ? addedIndex - 1 : addedIndex) : null;
-    options.onDrop && options.onDrop(actualAddIndex, removedIndex);
+    options.onDrop && options.onDrop(actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
   }
 }
 
@@ -356,7 +356,7 @@ function Container(element) {
       },
       handleDrop: function(draggableInfo) {
         dragHandler = handleDrag(props);
-        return dropHandler(dragResult);
+        return dropHandler(draggableInfo, dragResult);
       }
     }
   }
