@@ -27,7 +27,7 @@ export default class extends Component {
 
   render() {
     return (
-      <div style={{ width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin:'100px' }}>
+      <div style={{ width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin:'0px' }}>
         <div ref={e => { this.container = e; }}>
           {this.state.items.map(p => (
             <div style={Object.assign({},this.dragStyle, {height: `${50 + (Math.random() * 200)}px`})} key={p}>Draggable {p}</div>

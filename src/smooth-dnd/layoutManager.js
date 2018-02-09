@@ -83,10 +83,10 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function getBeginEnd(element) {
-    const begin = getDistanceToContainerBegining(element);
+    const begin = getDistanceToContainerBegining(element) + propMapper.get(values.rect, 'begin');
     return {
       begin,
-      end: begin + getSize(element)
+      end: begin + getSize(element) * propMapper.get(values, 'scale')
     }
   }
 

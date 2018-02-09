@@ -62,7 +62,9 @@ function getDragInsertionIndex({draggables, layout}) {
 
 function findDraggebleAtPos({layout}) {
   const find = (draggables, pos, startIndex, endIndex) => {
-    if (endIndex < startIndex) return null;
+    if (endIndex < startIndex) {
+      return null;
+    }
     // binary serach draggable
     if (startIndex === endIndex) {
       let { begin, end } = layout.getBeginEnd(draggables[startIndex])
@@ -175,13 +177,19 @@ function handleAddItem({ draggables, layout }) {
   let addedIndex = null;
   let shadowBeginEnd = null;
   const getNextAddedIndex = getDragInsertionIndex({draggables, layout});
-  const getShadowBounds = getShadowBeginEnd({draggables, layout});
+  const getShadowBounds = getShadowBeginEnd({ draggables, layout });
+  const translate = calculateTranslations({ draggables, layout });
   return function({ pos, removedIndex, elementSize }) {
     if (pos === null) {
       addedIndex = null;
-    } else {
-      const nextAddedIndex = getNextAddedIndex(shadowBeginEnd, pos);
+      translate({ addedIndex, removedIndex, elementSize });      
+    } else {  
+      let nextAddedIndex = getNextAddedIndex(shadowBeginEnd, pos);
+      if (nextAddedIndex === null) {
+        nextAddedIndex = addedIndex;
+      }
       if (addedIndex !== nextAddedIndex) {
+        translate({ addedIndex: nextAddedIndex, removedIndex, elementSize });
         shadowBeginEnd = getShadowBounds(nextAddedIndex, removedIndex, elementSize);
         addedIndex = nextAddedIndex;
       }
@@ -222,16 +230,17 @@ function calculateTranslations({ draggables, layout }) {
 
 function compose(options) {
   return function(...functions) {
+    const hydratedFunctions = functions.map(p => p(options));
     return function(data) {
-      return functions.reduce((value, fn) => {
-        return fn(options)(value);
+      return hydratedFunctions.reduce((value, fn) => {
+        return fn(value);
       },data);
     }
   }
 }
 
 function handleDrag(options) {
-  const draggableInfoHandler = compose(options)(handleRemoveItem, handleAddItem, calculateTranslations);
+  const draggableInfoHandler = compose(options)(handleRemoveItem, handleAddItem);
   return function(draggableInfo) {
     return draggableInfoHandler(draggableInfo);
   }
