@@ -21,17 +21,35 @@ export default class extends Component {
   }
 
   componentDidMount() {
-    window.container = new container(this.container);
+    window.container = container(this.container);
+    window.container2 = container(this.container2);
+    window.container2 = container(this.container3);
   }
 
 
   render() {
     return (
-      <div style={{ width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin:'150px', border: '1px solid #ccc' }}>
-        <div ref={e => { this.container = e; }}>
-          {this.state.items.map(p => (
-            <div style={Object.assign({},this.dragStyle, {height: `${50 + (Math.random() * 200)}px`})} key={p}>Draggable {p}</div>
-          ))}
+      <div style={{display:'flex', flexDirection:'row'}}>
+        <div style={{float:'none', width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '50px', border: '1px solid #ccc' }}>
+          <div style={{float:'none', position:'relative'}} ref={e => { this.container = e; }}>
+            {this.state.items.map(p => (
+              <div style={Object.assign({}, this.dragStyle, { height: `${50 + (Math.random() * 0)}px` })} key={p}>Draggable {p}</div>
+            ))}
+          </div>
+        </div>
+        <div style={{ float: 'none', width: '510px', height: '800px', overflowY:'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '50px', border: '1px solid #ccc' }}>
+          <div style={{ float: 'none',  position: 'relative' }} ref={e => { this.container2 = e; }}>
+            {this.state.items.map(p => (
+              <div style={Object.assign({}, this.dragStyle, { height: `${50 + (Math.random() * 0)}px` })} key={p}>Draggable {p}</div>
+            ))}
+          </div>
+        </div>
+        <div style={{ float: 'none', width: '510px', height: '800px', overflowY: 'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '50px', border: '1px solid #ccc' }}>
+          <div style={{ float: 'none', position: 'relative' }} ref={e => { this.container3 = e; }}>
+            {this.state.items.map(p => (
+              <div style={Object.assign({}, this.dragStyle, { height: `${50 + (Math.random() * 0)}px` })} key={p}>Draggable {p}</div>
+            ))}
+          </div>
         </div>
       </div>
     )

@@ -239,6 +239,7 @@ function handleAddItem({ draggables, layout }) {
   return function({ pos, removedIndex, elementSize, invalidateShadow }) {
     if (pos === null) {
       addedIndex = null;
+      shadowBeginEnd = null;
       translate({ addedIndex, removedIndex, elementSize });
     } else {
       if (invalidateShadow) {
@@ -354,7 +355,7 @@ function getContainerProps(element, initialOptions) {
   };
 }
 
-function Container(element) {
+function Container(element) {  
   return function(options) {
     let dragResult = null;
     const props = getContainerProps(element, options);

@@ -1,5 +1,6 @@
 .smooth-dnd-draggable-wrapper {
   overflow: auto;
+  float: unset;
 }
 
 .smooth-dnd-draggable-wrapper.animated{
@@ -8,4 +9,13 @@
 
 .react-smooth-dnd-ghost{
   box-shadow: 1px 1px 2px 0px #ddd;
+}
+
+.clearfix:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
 }
