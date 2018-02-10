@@ -221,6 +221,9 @@ function handleRemoveItem({ element, options, draggables, layout }) {
     }
     const pos = layout.isInVisibleRect(draggableInfo.position) ? layout.getAxisValue(draggableInfo.position) : null;
     setTargetContainer(draggableInfo, pos ? element : null);
+    if (pos === null) {
+      elementSize = null;
+    }
     return {
       pos,
       removedIndex,
@@ -272,7 +275,7 @@ function calculateTranslations({ draggables, layout }) {
         const draggable = draggables[index];
         let translate = 0;
         if (removedIndex !== null && removedIndex < index) {
-          translate -= elementSize;
+          translate -= layout.getSize(draggables[removedIndex]);
         }
         if (addedIndex !== null && addedIndex <= index) {
           translate += elementSize;

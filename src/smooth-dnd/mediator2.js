@@ -110,7 +110,7 @@ function onMouseUp(e) {
     handleDropAnimation(() => {
       (dragListeningContainers || []).forEach(p => {
         // call handle drop function of the container if it is either source or target of drag event
-        if (p.element === draggableInfo.element || p.element === draggableInfo.targetElement) {
+        if (p === draggableInfo.container || p.element === draggableInfo.targetElement) {
           p.handleDrop(draggableInfo);
         }
       });
