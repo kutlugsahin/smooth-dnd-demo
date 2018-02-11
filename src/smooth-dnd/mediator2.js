@@ -1,5 +1,6 @@
 import * as Utils from './utils'
 import * as constants from './constants';
+import { ghostClass } from './constants';
 
 const grabEvents = ['mousedown'];
 const moveEvents = ['mousemove'];
@@ -10,6 +11,7 @@ let grabbedElement = null;
 let ghostInfo = null;
 let draggableInfo = null;
 let containers = [];
+let isDragging = false;
 
 function listenEvents() {
   addGrabListeners();
@@ -46,7 +48,7 @@ function removeReleaseListeners() {
 }
 
 function getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1 }) {
-  const { left, top, right, bottom } = element.firstChild.getBoundingClientRect();
+  const { left, top, right, bottom } = element.getBoundingClientRect();
   const midX = left + ((right - left) / 2);
   const midY = top + ((bottom - top) / 2);
   const div = document.createElement('div');
@@ -58,7 +60,7 @@ function getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1 }) {
   div.style.height = bottom - top + 'px';
   div.style.overflow = 'hidden';
   div.className = constants.ghostClass;
-  const clone = element.firstChild.cloneNode(true);
+  const clone = element.cloneNode(true);
   clone.style.width = ((right - left) / scaleX) + 'px';
   clone.style.height = ((bottom - top) / scaleY) + 'px';
   clone.style.transform = `scale3d(${scaleX || 1}, ${scaleY || 1}, 1)`;
@@ -90,15 +92,44 @@ function getDraggableInfo(draggableElement) {
 }
 
 function handleDropAnimation(callback) {
-  document.body.removeChild(ghostInfo.ghost);
-  callback();
+  function endDrop() {
+    Utils.removeClass(ghostInfo.ghost, 'animated');
+    document.body.removeChild(ghostInfo.ghost);
+    callback();
+  }
+
+  function animateGhostToPosition({ top, left }) {
+    Utils.addClass(ghostInfo.ghost, 'animated');
+    ghostInfo.ghost.style.left = left + 'px';
+    ghostInfo.ghost.style.top = top + 'px';
+    setTimeout(function() {
+      endDrop();
+    }, 300);
+  }
+
+  if (draggableInfo.targetElement) {
+    const container = containers.filter(p => p.element === draggableInfo.targetElement)[0];
+    const dragResult = container.getDragResult();
+    animateGhostToPosition(dragResult.shadowBeginEnd.rect);
+  } else {
+    const container = containers.filter(p => p === draggableInfo.container)[0];
+    const { removedIndex } = container.getDragResult();
+    const layout = container.layout;
+    // drag ghost to back
+    const dragSize = layout.getSize(removedIndex);
+    container.getTranslateCalculator(removedIndex, removedIndex, dragSize);
+    const prevDraggableEnd = removedIndex > 0 ? layout.getBeginEnd(container.draggables[removedIndex - 1]).end : layout.getBeginEndOfContainer().begin;
+    animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd));
+  }
 }
 
 function onMouseDown(e) {
-  grabbedElement = Utils.getParent(e.target, '.' + constants.wrapperClass);
-  if (grabbedElement) {
-    addMoveListeners();
-    addReleaseListeners();
+  if (!isDragging) {
+    grabbedElement = Utils.getParent(e.target, '.' + constants.wrapperClass);
+    if (grabbedElement) {
+      addMoveListeners();
+      addReleaseListeners();
+    }
   }
 }
 
@@ -119,6 +150,7 @@ function onMouseUp(e) {
       grabbedElement = null;
       ghostInfo = null;
       draggableInfo = null;
+      isDragging = false;
     });
   }
 }
@@ -126,6 +158,7 @@ function onMouseUp(e) {
 function onMouseMove(e) {
   e.preventDefault();
   if (!draggableInfo) {
+    isDragging = true;
     // first move after grabbing  draggable
     draggableInfo = getDraggableInfo(grabbedElement);
     ghostInfo = getGhostElement(grabbedElement, { x: e.clientX, y: e.clientY }, draggableInfo.container.getScale());

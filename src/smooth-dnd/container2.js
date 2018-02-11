@@ -122,18 +122,22 @@ function getShadowBeginEnd({ draggables, layout }) {
     if (addIndex !== null) {
       let beforeIndex = addIndex - 1;
       let begin = 0;
+      let afterBounds = null;
+      let beforeBounds = null;
       if (beforeIndex === removeIndex) {
         beforeIndex--;
       }
       if (beforeIndex > -1) {
         const beforeSize = layout.getSize(draggables[beforeIndex]);
-        const beforeBounds = layout.getBeginEnd(draggables[beforeIndex]);
+        beforeBounds = layout.getBeginEnd(draggables[beforeIndex]);
         if (elementSize < beforeSize) {
           const threshold = (beforeSize - elementSize) / 2;
           begin = beforeBounds.end - threshold;
         } else {
           begin = beforeBounds.end;
         }
+      } else {
+        beforeBounds = { end: layout.getBeginEndOfContainer().begin };
       }
 
       let end = 10000;
@@ -143,16 +147,25 @@ function getShadowBeginEnd({ draggables, layout }) {
       }
       if (afterIndex < draggables.length) {
         const afterSize = layout.getSize(draggables[afterIndex]);
-        const afterBounds = layout.getBeginEnd(draggables[afterIndex]);
+        afterBounds = layout.getBeginEnd(draggables[afterIndex]);
+
         if (elementSize < afterSize) {
           const threshold = (afterSize - elementSize) / 2;
           end = afterBounds.begin + threshold;
         } else {
           end = afterBounds.begin;
         }
+      } else {
+        afterBounds = { begin: layout.getContainerRectangles().end };        
       }
 
-      return { begin, end };
+      const shadowRectTopLeft = beforeBounds && afterBounds ? layout.getTopLeftOfElementBegin(beforeBounds.end, afterBounds.begin) : null;
+
+      return {
+        begin,
+        end,
+        rect: shadowRectTopLeft
+      };
     } else {
       return null;
     }
@@ -171,12 +184,12 @@ function resetDraggables({ draggables, layout }) {
       draggables.forEach(p => {
         Utils.addClass(p, animationClass);
       });
-    });
+    },50);
   }
 }
 
-function setTargetContainer(draggableInfo, element) {
-  if (element) {
+function setTargetContainer(draggableInfo, element, set = true) {
+  if (element && set) {
     draggableInfo.targetElement = element;
   } else {
     if (draggableInfo.targetElement === element) {
@@ -220,7 +233,7 @@ function handleRemoveItem({ element, options, draggables, layout }) {
       elementSize = layout.getSize(draggableInfo.element);
     }
     const pos = layout.isInVisibleRect(draggableInfo.position) ? layout.getAxisValue(draggableInfo.position) : null;
-    setTargetContainer(draggableInfo, pos ? element : null);
+    setTargetContainer(draggableInfo, element, !!pos);
     if (pos === null) {
       elementSize = null;
     }
@@ -239,7 +252,8 @@ function handleAddItem({ draggables, layout }) {
   const getNextAddedIndex = getDragInsertionIndex({ draggables, layout });
   const getShadowBounds = getShadowBeginEnd({ draggables, layout });
   const translate = calculateTranslations({ draggables, layout });
-  return function({ pos, removedIndex, elementSize, invalidateShadow }) {
+  return function(draggableInfo) {
+    const { pos, removedIndex, elementSize, invalidateShadow } = draggableInfo;
     if (pos === null) {
       addedIndex = null;
       shadowBeginEnd = null;
@@ -261,7 +275,8 @@ function handleAddItem({ draggables, layout }) {
     return {
       addedIndex,
       removedIndex,
-      elementSize
+      elementSize,
+      shadowBeginEnd
     }
   }
 }
@@ -269,7 +284,7 @@ function handleAddItem({ draggables, layout }) {
 function calculateTranslations({ draggables, layout }) {
   let prevAddIndex = null;
   let prevRemoveIndex = null;
-  return function({ addedIndex, removedIndex, elementSize }) {
+  return function({ addedIndex, removedIndex, elementSize, shadowBeginEnd }) {
     if (addedIndex !== prevAddIndex || removedIndex !== prevRemoveIndex) {
       for (let index = 0; index < draggables.length; index++) {
         const draggable = draggables[index];
@@ -287,7 +302,9 @@ function calculateTranslations({ draggables, layout }) {
     }
     return {
       addedIndex: prevAddIndex,
-      removedIndex: prevRemoveIndex
+      removedIndex: prevRemoveIndex,
+      elementSize,
+      shadowBeginEnd
     }
   }
 }
@@ -304,45 +321,20 @@ function compose(options) {
 }
 
 function handleDrag(options) {
-  const draggableInfoHandler = compose(options)(handleRemoveItem, handleAddItem);
-  const scrollListener = scrollHandler(options, draggableInfoHandler);
+  const draggableInfoHandler = compose(options)(handleRemoveItem, handleAddItem);  
   return function(draggableInfo) {
-    return draggableInfoHandler(scrollListener(draggableInfo));
-  }
-}
-
-function handleDropAnimation({ draggables, layout, options }) {
-  return function(draggableInfo, addedIndex, onAnimationEnded) {
-    onAnimationEnded();
+    return draggableInfoHandler(draggableInfo);
   }
 }
 
 function handleDrop({ draggables, layout, options }) {
-  const draggablesReset = resetDraggables({ draggables, layout });
-  const animationHandler = handleDropAnimation({ draggables, layout, options });
+  const draggablesReset = resetDraggables({ draggables, layout });  
   return function(draggableInfo, { addedIndex, removedIndex }) {
-    animationHandler(draggableInfo, addedIndex, function() {
-      draggablesReset();
-      // handle drop
-      // ...
-      let actualAddIndex = addedIndex !== null ? (removedIndex < addedIndex ? addedIndex - 1 : addedIndex) : null;
-      options.onDrop && options.onDrop(actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
-    })
-  }
-}
-
-function scrollHandler(options, dragHandler) {
-  let lastDraggableInfo = null;
-  options.layout.setScrollListener(function() {
-    if (lastDraggableInfo !== null) {
-      lastDraggableInfo.invalidateShadow = true;
-      dragHandler(lastDraggableInfo);
-      lastDraggableInfo.invalidateShadow = false;
-    }
-  });
-  return function(draggableInfo) {
-    lastDraggableInfo = draggableInfo;
-    return draggableInfo;
+    draggablesReset();
+    // handle drop
+    // ...
+    let actualAddIndex = addedIndex !== null ? (removedIndex < addedIndex ? addedIndex - 1 : addedIndex) : null;
+    options.onDrop && options.onDrop(actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
   }
 }
 
@@ -358,12 +350,23 @@ function getContainerProps(element, initialOptions) {
   };
 }
 
-function Container(element) {  
+function Container(element) {
   return function(options) {
     let dragResult = null;
-    const props = getContainerProps(element, options);
+    let lastDraggableInfo = null;
+    const props = getContainerProps(element, options);  
+    const shadowGetter = getShadowBeginEnd(props);
     let dragHandler = handleDrag(props);
     let dropHandler = handleDrop(props);
+
+    props.layout.setScrollListener(function() {
+      if (lastDraggableInfo !== null) {
+        lastDraggableInfo.invalidateShadow = true;
+        dragResult = dragHandler(lastDraggableInfo)
+        lastDraggableInfo.invalidateShadow = false;
+      }
+    });
+
     return {
       element,
       draggables: props.draggables,
@@ -371,12 +374,21 @@ function Container(element) {
       getScale: props.layout.getContainerScale,
       getChildPayload: props.options.getChildPayload,
       groupName: props.options.groupName,
+      layout: props.layout,
+      shadowGetter,
       handleDrag: function(draggableInfo) {
+        lastDraggableInfo = draggableInfo;
         dragResult = dragHandler(draggableInfo);
       },
       handleDrop: function(draggableInfo) {
         dragHandler = handleDrag(props);
         return dropHandler(draggableInfo, dragResult);
+      },
+      getDragResult: function() {
+        return dragResult;
+      },
+      getTranslateCalculator: function(...params) {
+        return calculateTranslations(props)(...params);
       }
     }
   }

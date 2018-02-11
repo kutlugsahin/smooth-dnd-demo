@@ -45,6 +45,11 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   const values = {};
   let registeredScrollListener = onScroll;
 
+  window.addEventListener('resize', function() {
+    invalidateContainerRectangles(containerElement);
+    // invalidateContainerScale(containerElement);
+  });
+
   invalidateContainerRectangles(containerElement);
   invalidateContainerScale(containerElement);
 
@@ -70,6 +75,10 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     }
   }
 
+  function getBeginEndOfContainer() {
+    return { begin: propMapper.get(values.rect, 'begin'), end: propMapper.get(values.rect, 'end') };
+  }
+
   function getContainerScale() {
     return { scaleX: values.scaleX, scaleY: values.scaleY };
   }
@@ -88,7 +97,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     return {
       begin,
       end: begin + getSize(element) * propMapper.get(values, 'scale')
-    }
+    };
   }
 
   function getAxisValue(position) {
@@ -126,6 +135,22 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     registeredScrollListener = callback;
   }
 
+  function getTopLeftOfElementBegin(begin) {
+    let top = 0;
+    let left: 0;
+    if (orientation === 'horizontal') {
+      left = begin;
+      top = values.rect.top;
+    } else {
+      left = values.rect.left;
+      top = begin;
+    }
+
+    return {
+      top, left
+    };
+  }
+
   function dispose() {
     if (scrollListener) {
       scrollListener.dispose();
@@ -136,6 +161,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     getSize,
     getDistanceToContainerBegining,
     getContainerRectangles,
+    getBeginEndOfContainer,
     getBeginEnd,
     getAxisValue,
     setTranslation,
@@ -145,6 +171,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     isInVisibleRect,
     dispose,
     getContainerScale,
-    setScrollListener
+    setScrollListener,
+    getTopLeftOfElementBegin
   }
 }

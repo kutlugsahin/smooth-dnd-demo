@@ -7,8 +7,8 @@
   transition: transform 0.25s ease;
 }
 
-.react-smooth-dnd-ghost{
-  box-shadow: 1px 1px 2px 0px #ddd;
+.smooth-dnd-ghost.animated{
+  transition: all 0.25s ease;
 }
 
 .clearfix:after {
