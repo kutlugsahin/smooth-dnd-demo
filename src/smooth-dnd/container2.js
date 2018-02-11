@@ -381,6 +381,7 @@ function Container(element) {
         dragResult = dragHandler(draggableInfo);
       },
       handleDrop: function(draggableInfo) {
+        lastDraggableInfo = null;
         dragHandler = handleDrag(props);
         return dropHandler(draggableInfo, dragResult);
       },
