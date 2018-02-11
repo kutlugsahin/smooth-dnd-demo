@@ -221,6 +221,29 @@ function drawShadowRect(shadowBeginEnd, layout) {
   }
 }
 
+// function drawShadowRect(shadowBeginEnd, layout) {
+//   if (!shadowBeginEnd) {
+//     if (shadowDiv) {
+//       shadowDiv.parentElement.removeChild(shadowDiv);
+//       shadowDiv = null;
+//     }
+//   } else {
+//     const { begin, end } = shadowBeginEnd;
+//     if (!shadowDiv) {
+//       shadowDiv = document.createElement('div');
+//       shadowDiv.style.position = 'fixed';
+//       shadowDiv.style.backgroundColor = '#abc';
+//       document.body.appendChild(shadowDiv);
+//     }
+//     const rect = layout.getContainerRectangles().rect;
+
+//     shadowDiv.style.left = rect.left + 'px';
+//     shadowDiv.style.top = begin + 'px';
+//     shadowDiv.style.width = rect.right - rect.left + 'px';
+//     shadowDiv.style.height = end - begin + 'px'
+//   }
+// }
+
 function handleRemoveItem({ element, options, draggables, layout }) {
   let removedIndex = null;
   let elementSize = null;
