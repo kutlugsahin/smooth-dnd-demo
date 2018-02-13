@@ -1,6 +1,23 @@
+.smooth-dnd-container.vertical{
+
+}
+
+.smooth-dnd-container.horizontal{
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.smooth-dnd-container.horizontal .smooth-dnd-draggable-wrapper{
+  flex: 0 0 auto;
+  float: left;
+  height: 100%;
+  /* display: inline-block; */
+}
+
+
 .smooth-dnd-draggable-wrapper {
-  overflow: auto;
-  float: unset;
+  overflow: hidden;
 }
 
 .smooth-dnd-draggable-wrapper.animated{

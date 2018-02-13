@@ -4,3 +4,5 @@ export const animationClass = 'animated';
 export const translationValue = '__smooth_dnd_draggable_translation_value';
 export const visibilityValue = '__smooth_dnd_draggable_visibility_value';
 export const ghostClass = 'smooth-dnd-ghost';
+
+export const containerClass = 'smooth-dnd-container';

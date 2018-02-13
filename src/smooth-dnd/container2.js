@@ -1,4 +1,5 @@
 import * as Utils from './utils';
+import * as constants from './constants';
 import LayoutManager from './layoutManager';
 import { defaultGroupName, wrapperClass, animationClass } from './constants';
 import layoutManager from './layoutManager';
@@ -364,6 +365,8 @@ function handleDrop({ draggables, layout, options }) {
 function getContainerProps(element, initialOptions) {
   const options = initOptions(initialOptions);
   const draggables = wrapChildren(element, options.orientation);
+  // set flex classes before layout is inited for scroll listener
+  Utils.addClass(element, `${constants.containerClass} ${options.orientation}`);
   const layout = layoutManager(element, options.orientation);
   return {
     element,

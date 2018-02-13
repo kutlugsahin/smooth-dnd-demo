@@ -4,11 +4,13 @@ import { translationValue, visibilityValue } from './constants';
 
 
 const horizontalMap = {
-  size: 'clientWidth',
+  size: 'offsetWidth',
   distanceToParent: 'offsetLeft',
   translate: 'transform',
   begin: 'left',
   dragPosition: 'x',
+  scrollSize: 'scrollWidth',
+  offsetSize: 'offsetHeight',
   scale: 'scaleX',
   setters: {
     'translate': (val) => `translate3d(${val}px, 0, 0)`
@@ -16,11 +18,13 @@ const horizontalMap = {
 }
 
 const verticalMap = {
-  size: 'clientHeight',
+  size: 'offsetHeight',
   distanceToParent: 'offsetTop',
   translate: 'transform',
   begin: 'top',
   dragPosition: 'y',
+  scrollSize: 'scrollHeight',
+  offsetSize: 'offsetHeight',
   scale: 'scaleY',
   setters: {
     'translate': (val) => `translate3d(0,${val}px, 0)`
@@ -41,7 +45,8 @@ function orientationDependentProps(map) {
 }
 
 export default function layoutManager(containerElement, orientation, onScroll) {
-  const propMapper = orientationDependentProps(orientation === 'horizontal' ? horizontalMap : verticalMap);
+  const map = orientation === 'horizontal' ? horizontalMap : verticalMap;
+  const propMapper = orientationDependentProps(map);
   const values = {};
   let registeredScrollListener = onScroll;
 
@@ -50,10 +55,14 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     // invalidateContainerScale(containerElement);
   });
 
+  setTimeout(() => {
+    invalidateContainerRectangles(containerElement);
+    invalidateContainerScale(containerElement);
+  }, 10);
   invalidateContainerRectangles(containerElement);
   invalidateContainerScale(containerElement);
 
-  const scrollListener = Utils.listenScrollParent(containerElement, function() {
+  const scrollListener = Utils.listenScrollParent(containerElement, map.scrollSize, map.offsetSize, function() {
     invalidateContainerRectangles(containerElement);
     registeredScrollListener && registeredScrollListener();
   });
