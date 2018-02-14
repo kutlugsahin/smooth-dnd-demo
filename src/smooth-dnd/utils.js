@@ -27,16 +27,18 @@ export const listenScrollParent = (element, scrollSizeName, offsetSizeName, clb)
     window.removeEventListener('scroll', clb);
   }
 
-  let currentElement = element;
-  while (currentElement) {
-    if (currentElement[scrollSizeName] > currentElement[offsetSizeName]) {
-      currentElement.addEventListener('scroll', clb);
-      scrollers.push(currentElement);
+  setTimeout(function() {
+    let currentElement = element;
+    while (currentElement) {
+      if (currentElement[scrollSizeName] > currentElement[offsetSizeName]) {
+        currentElement.addEventListener('scroll', clb);
+        scrollers.push(currentElement);
+      }
+      currentElement = currentElement.parentElement;
     }
-    currentElement = currentElement.parentElement;
-  }
 
-  window.addEventListener('scroll', clb);
+    window.addEventListener('scroll', clb);
+  }, 10);
 
   return {
     dispose
@@ -60,7 +62,7 @@ export const getParent = (element, selector) => {
     if (current.matches(selector)) {
       return current;
     }
-    current = current.parentElement;    
+    current = current.parentElement;
   }
 
   return null;
@@ -93,7 +95,7 @@ export const debounce = (fn, delay, immediate) => {
       timer = setTimeout(() => {
         timer = null;
         fn.call(this, ...params);
-      }, delay);  
+      }, delay);
     }
   }
 }

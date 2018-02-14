@@ -124,6 +124,7 @@ function handleDropAnimation(callback) {
 }
 
 function onMouseDown(e) {
+  e.preventDefault();
   if (!isDragging) {
     grabbedElement = Utils.getParent(e.target, '.' + constants.wrapperClass);
     if (grabbedElement) {
@@ -140,6 +141,7 @@ function onMouseUp(e) {
   if (draggableInfo) {
     handleDropAnimation(() => {
       (dragListeningContainers || []).forEach(p => {
+        Utils.removeClass(p.element, 'no-user-select');
         // call handle drop function of the container if it is either source or target of drag event
         if (p === draggableInfo.container || p.element === draggableInfo.targetElement) {
           p.handleDrop(draggableInfo);
@@ -170,6 +172,7 @@ function onMouseMove(e) {
     document.body.appendChild(ghostInfo.ghost);
 
     dragListeningContainers = containers.filter(p => p.isDragRelevant(draggableInfo));
+    dragListeningContainers.forEach(p => Utils.addClass(p.element, 'no-user-select'));
   } else {
     // just update ghost position && draggableInfo position
     ghostInfo.ghost.style.left = `${e.clientX + ghostInfo.positionDelta.left}px`;

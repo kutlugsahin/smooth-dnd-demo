@@ -40,9 +40,9 @@ export default class extends Component {
             </div>
           </div>
           <div style={{ float: 'none', width: '510px', height: '800px', overflowY: 'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '50px', border: '1px solid #ccc' }}>
-            <div style={{ float: 'none', position: 'relative' }} ref={e => { this.container2 = e; }}>
+            <div tabIndex="-1" style={{ float: 'none', position: 'relative' }} ref={e => { this.container2 = e; }}>
               {this.state.items.map(p => (
-                <div style={Object.assign({}, this.dragStyle, { height: `${50 + (Math.random() * 0)}px` })} key={p}>Draggable {p}</div>
+                <div style={Object.assign({}, this.dragStyle, { margin: '2px 50px', backgroundColor: '#abc', height: `${50 + (Math.random() * 0)}px` })} key={p}>Draggable {p}</div>
               ))}
             </div>
           </div>

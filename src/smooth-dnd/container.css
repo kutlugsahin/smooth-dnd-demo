@@ -26,7 +26,7 @@
 }
 
 .smooth-dnd-draggable-wrapper.animated{
-  transition: transform 0.25s ease;
+  transition: transform 0.18s ease;
 }
 
 .smooth-dnd-ghost.animated{
@@ -40,4 +40,8 @@
     visibility: hidden;
     line-height: 0;
     height: 0;
+}
+
+.no-user-select{
+  user-select: none;
 }
