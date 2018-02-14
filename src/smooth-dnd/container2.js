@@ -61,13 +61,14 @@ function wrapChild(child, orientation) {
 }
 
 function wrapChildren(element, orientation) {
-  return Array.prototype.map.call(element.children, child => {
+  const draggables = Array.prototype.map.call(element.children, child => {
     let wrapper = child;
     if (!Utils.hasClass(child, wrapperClass)) {
       wrapper = wrapChild(child, orientation);
     }
     return wrapper;
   });
+  return draggables;
 }
 
 function getDragInsertionIndex({ draggables, layout }) {

@@ -66,7 +66,7 @@ class Mediator {
   }
 
   getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1 }) {
-    const { left, top, right, bottom } = element.firstChild.getBoundingClientRect();
+    const { left, top, right, bottom } = element.getBoundingClientRect();
     const midX = left + ((right - left) / 2);
     const midY = top + ((bottom - top) / 2);
     const div = document.createElement('div');

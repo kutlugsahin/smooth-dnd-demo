@@ -1,8 +1,13 @@
-.smooth-dnd-container.vertical{
+.smooth-dnd-container *{
+  box-sizing: border-box;
+}
 
+.smooth-dnd-container.vertical{
+  position: relative;
 }
 
 .smooth-dnd-container.horizontal{
+  position: relative;
   display: inline-flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -25,7 +30,7 @@
 }
 
 .smooth-dnd-ghost.animated{
-  transition: all 0.1s ease-out;
+  transition: all 0.18s ease-out;
 }
 
 .clearfix:after {

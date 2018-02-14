@@ -104,7 +104,7 @@ function handleDropAnimation(callback) {
     ghostInfo.ghost.style.top = top + 'px';
     setTimeout(function() {
       endDrop();
-    }, 300);
+    }, 200);
   }
 
   if (draggableInfo.targetElement) {

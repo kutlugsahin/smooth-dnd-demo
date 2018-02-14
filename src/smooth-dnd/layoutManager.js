@@ -10,7 +10,8 @@ const horizontalMap = {
   begin: 'left',
   dragPosition: 'x',
   scrollSize: 'scrollWidth',
-  offsetSize: 'offsetHeight',
+  offsetSize: 'offsetWidth',
+  scrollValue: 'scrollLeft',
   scale: 'scaleX',
   setters: {
     'translate': (val) => `translate3d(${val}px, 0, 0)`
@@ -25,6 +26,7 @@ const verticalMap = {
   dragPosition: 'y',
   scrollSize: 'scrollHeight',
   offsetSize: 'offsetHeight',
+  scrollValue: 'scrollTop',
   scale: 'scaleY',
   setters: {
     'translate': (val) => `translate3d(0,${val}px, 0)`
@@ -96,13 +98,13 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     return propMapper.get(element, 'size') * propMapper.get(values, 'scale');
   }
 
-  function getDistanceToContainerBegining(element) {
+  function getDistanceToOffsetParent(element) {
     const distance = propMapper.get(element, 'distanceToParent') + (element[translationValue] || 0);
     return distance * propMapper.get(values, 'scale');
   }
 
   function getBeginEnd(element) {
-    const begin = getDistanceToContainerBegining(element) + propMapper.get(values.rect, 'begin');
+    const begin = getDistanceToOffsetParent(element) + propMapper.get(values.rect, 'begin') - propMapper.get(containerElement, 'scrollValue');
     return {
       begin,
       end: begin + getSize(element) * propMapper.get(values, 'scale')
@@ -168,7 +170,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
 
   return {
     getSize,
-    getDistanceToContainerBegining,
+    //getDistanceToContainerBegining,
     getContainerRectangles,
     getBeginEndOfContainer,
     getBeginEnd,
