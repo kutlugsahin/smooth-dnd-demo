@@ -29,14 +29,24 @@ export default class extends Component {
 
 
 	render() {
+		const childs = this.state.items.map(p => (
+			<div style={Object.assign({}, this.dragStyle, { height: `${50 + (Math.random() * 200)}px` })} key={p}>Draggable {p}</div>
+		));
+
+		const horizontalChild = this.state.items.slice(0, 10).map(p => (
+			<div style={Object.assign({}, this.dragStyle, { width: '150px' })} key={p}>Draggable {p}</div>
+		));
+
+		childs.push(<div style={Object.assign({}, this.dragStyle, { height: `0px` })} key={'asdasds'}></div>);
+		horizontalChild.push(<div style={Object.assign({}, this.dragStyle, { width: `0px` })} key={'qqqqqqqq'}></div>);
+
+		
 		return (
 			<div>
 				<div style={{ display: 'flex', flexDirection: 'row' }}>
 					<div style={{ float: 'none', width: '510px', height: '820px', overflowY: 'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '50px', border: '1px solid #ccc' }}>
 						<div style={{ float: 'none', position: 'relative', height: '800px', overflowY: 'auto' }} ref={e => { this.container = e; }}>
-							{this.state.items.map(p => (
-								<div style={Object.assign({}, this.dragStyle, { height: `${50 + (Math.random() * 200)}px` })} key={p}>Draggable {p}</div>
-							))}
+							{childs}
 						</div>
 					</div>
 					<div style={{ paddingBottom:'100px', width: '510px', height: '800px', overflowY: 'auto', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '50px', border: '1px solid #ccc' }}>
@@ -57,9 +67,7 @@ export default class extends Component {
 
 				<div style={{ overflowX: 'auto', backgroundColor: '#ccc', border: '1px solid #ccc', margin: '100px' }}>
 					<div ref={e => { this.container4 = e; }}>
-						{this.state.items.slice(0, 10).map(p => (
-							<div style={Object.assign({}, this.dragStyle, { width: '150px' })} key={p}>Draggable {p}</div>
-						))}
+						{horizontalChild}
 					</div>
 				</div>
 

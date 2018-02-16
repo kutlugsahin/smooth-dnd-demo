@@ -48,11 +48,20 @@ function wrapChildren(element, orientation) {
 	return draggables;
 }
 
+// function addRemoveLastPivotElement(options) {
+// 	return function(add) {
+// 		const div = document.createElement('div');
+// 		div.className = `${wrapperClass} ${animationClass} ${orientation}`;
+// 		child.parentElement.insertBefore(div, child);
+// 		div.appendChild(child);
+// 	}
+// }
+
 function getDragInsertionIndex({ draggables, layout }) {
 	const findDraggable = findDraggebleAtPos({ layout });
 	return (ghostBeginEnd, pos) => {
 		if (!ghostBeginEnd) {
-			return findDraggable(draggables, pos);
+			return findDraggable(draggables, pos, true);
 		}
 
 		if (pos < ghostBeginEnd.begin) {
@@ -66,15 +75,21 @@ function getDragInsertionIndex({ draggables, layout }) {
 }
 
 function findDraggebleAtPos({ layout }) {
-	const find = (draggables, pos, startIndex, endIndex) => {
+	const find = (draggables, pos, startIndex, endIndex, withRespectToMiddlePoints = false) => {
 		if (endIndex < startIndex) {
-			return null;
+			return startIndex;
 		}
 		// binary serach draggable
 		if (startIndex === endIndex) {
 			let { begin, end } = layout.getBeginEnd(draggables[startIndex]);
+			// mouse pos is inside draggable
+			// now decide which index to return
 			if (pos > begin && pos <= end) {
-				return startIndex;
+				if (withRespectToMiddlePoints) {
+					return (pos < ((end + begin) / 2)) ? startIndex : startIndex + 1;
+				} else {
+					return startIndex;
+				}
 			} else {
 				return null;
 			}
@@ -82,17 +97,21 @@ function findDraggebleAtPos({ layout }) {
 			const middleIndex = Math.floor((endIndex + startIndex) / 2);
 			const { begin, end } = layout.getBeginEnd(draggables[middleIndex]);
 			if (pos < begin) {
-				return find(draggables, pos, startIndex, middleIndex - 1);
+				return find(draggables, pos, startIndex, middleIndex - 1, withRespectToMiddlePoints);
 			} else if (pos > end) {
-				return find(draggables, pos, middleIndex + 1, endIndex);
+				return find(draggables, pos, middleIndex + 1, endIndex, withRespectToMiddlePoints);
 			} else {
-				return middleIndex;
+				if (withRespectToMiddlePoints) {
+					return (pos < ((end + begin) / 2)) ? middleIndex : middleIndex + 1;
+				} else {
+					return middleIndex;
+				}
 			}
 		}
 	};
 
-	return (draggables, pos) => {
-		return find(draggables, pos, 0, draggables.length - 1);
+	return (draggables, pos, withRespectToMiddlePoints = false) => {
+		return find(draggables, pos, 0, draggables.length - 1, withRespectToMiddlePoints);
 	};
 }
 
@@ -177,52 +196,6 @@ function setTargetContainer(draggableInfo, element, set = true) {
 	}
 }
 
-// function drawShadowRect(shadowBeginEnd, layout) {
-// 	if (!shadowBeginEnd) {
-// 		if (shadowDiv) {
-// 			shadowDiv.parentElement.removeChild(shadowDiv);
-// 			shadowDiv = null;
-// 		}
-// 	} else {
-// 		const { begin, end } = shadowBeginEnd;
-// 		if (!shadowDiv) {
-// 			shadowDiv = document.createElement('div');
-// 			shadowDiv.style.position = 'fixed';
-// 			shadowDiv.style.backgroundColor = '#abc';
-// 			document.body.appendChild(shadowDiv);
-// 		}
-// 		const rect = layout.getContainerRectangles().rect;
-
-// 		shadowDiv.style.left = rect.left + 'px';
-// 		shadowDiv.style.top = begin + 'px';
-// 		shadowDiv.style.width = rect.right - rect.left + 'px';
-// 		shadowDiv.style.height = end - begin + 'px';
-// 	}
-// }
-
-// function drawShadowRect(shadowBeginEnd, layout) {
-//   if (!shadowBeginEnd) {
-//     if (shadowDiv) {
-//       shadowDiv.parentElement.removeChild(shadowDiv);
-//       shadowDiv = null;
-//     }
-//   } else {
-//     const { begin, end } = shadowBeginEnd;
-//     if (!shadowDiv) {
-//       shadowDiv = document.createElement('div');
-//       shadowDiv.style.position = 'fixed';
-//       shadowDiv.style.backgroundColor = '#abc';
-//       document.body.appendChild(shadowDiv);
-//     }
-//     const rect = layout.getContainerRectangles().rect;
-
-//     shadowDiv.style.left = rect.left + 'px';
-//     shadowDiv.style.top = begin + 'px';
-//     shadowDiv.style.width = rect.right - rect.left + 'px';
-//     shadowDiv.style.height = end - begin + 'px'
-//   }
-// }
-
 function handleRemoveItem({ element, options, draggables, layout }) {
 	let removedIndex = null;
 	let elementSize = null;
@@ -271,6 +244,13 @@ function handleAddItem({ draggables, layout }) {
 			if (addedIndex !== nextAddedIndex) {
 				translate({ addedIndex: nextAddedIndex, removedIndex, elementSize });
 				shadowBeginEnd = getShadowBounds(nextAddedIndex, removedIndex, elementSize);
+				
+				if (addedIndex === null) {
+					// handle first insert exceptional boundaries of shadow
+					if (pos < shadowBeginEnd.begin) shadowBeginEnd.begin = pos - 5;
+					if (pos > shadowBeginEnd.end) shadowBeginEnd.end = pos + 5;
+				}
+
 				addedIndex = nextAddedIndex;
 			}
 		}

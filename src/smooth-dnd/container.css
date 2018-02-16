@@ -2,12 +2,15 @@
   box-sizing: border-box;
 }
 
-.smooth-dnd-container.vertical{
+.smooth-dnd-container{
   position: relative;
+  background: greenyellow;
+}
+
+.smooth-dnd-container.vertical{
 }
 
 .smooth-dnd-container.horizontal{
-  position: relative;
   display: inline-flex;
   flex-direction: row;
   justify-content: flex-start;
