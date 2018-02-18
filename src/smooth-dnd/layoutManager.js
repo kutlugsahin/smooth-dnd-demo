@@ -1,5 +1,5 @@
 import * as Utils from './utils';
-import { translationValue, visibilityValue } from './constants';
+import { translationValue, visibilityValue, extraSizeForInsertion } from './constants';
 
 
 
@@ -8,11 +8,13 @@ const horizontalMap = {
   distanceToParent: 'offsetLeft',
   translate: 'transform',
   begin: 'left',
+  end: 'right',
   dragPosition: 'x',
   scrollSize: 'scrollWidth',
   offsetSize: 'offsetWidth',
   scrollValue: 'scrollLeft',
   scale: 'scaleX',
+  setSize: 'width',
   setters: {
     'translate': (val) => `translate3d(${val}px, 0, 0)`
   }
@@ -23,11 +25,13 @@ const verticalMap = {
   distanceToParent: 'offsetTop',
   translate: 'transform',
   begin: 'top',
+  end: 'bottom',
   dragPosition: 'y',
   scrollSize: 'scrollHeight',
   offsetSize: 'offsetHeight',
   scrollValue: 'scrollTop',
   scale: 'scaleY',
+  setSize: 'height',
   setters: {
     'translate': (val) => `translate3d(0,${val}px, 0)`
   }
@@ -40,13 +44,14 @@ function orientationDependentProps(map) {
   }
 
   function set(obj, prop, value) {
-    obj[map[prop]] = map.setters[prop](value);
+    obj[map[prop]] = map.setters[prop] ? map.setters[prop](value) : value;
   }
 
   return { get, set };
 }
 
 export default function layoutManager(containerElement, orientation, onScroll) {
+  containerElement[extraSizeForInsertion] = 0;
   const map = orientation === 'horizontal' ? horizontalMap : verticalMap;
   const propMapper = orientationDependentProps(map);
   const values = {};
@@ -58,16 +63,18 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   });
 
   setTimeout(() => {
-    invalidateContainerRectangles(containerElement);
-    invalidateContainerScale(containerElement);
+    invalidate();
   }, 10);
-  invalidateContainerRectangles(containerElement);
-  invalidateContainerScale(containerElement);
+  invalidate();
 
   const scrollListener = Utils.listenScrollParent(containerElement, map.scrollSize, map.offsetSize, function() {
     invalidateContainerRectangles(containerElement);
     registeredScrollListener && registeredScrollListener();
   });
+  function invalidate() {
+    invalidateContainerRectangles(containerElement);
+    invalidateContainerScale(containerElement);
+  }
 
   function invalidateContainerRectangles(containerElement) {
     values.rect = containerElement.getBoundingClientRect();
@@ -87,7 +94,9 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function getBeginEndOfContainer() {
-    return { begin: propMapper.get(values.rect, 'begin'), end: propMapper.get(values.rect, 'end') };
+    const begin = propMapper.get(values.rect, 'begin');
+    const end = propMapper.get(values.rect, 'end');
+    return { begin, end };
   }
 
   function getContainerScale() {
@@ -109,6 +118,10 @@ export default function layoutManager(containerElement, orientation, onScroll) {
       begin,
       end: begin + getSize(element) * propMapper.get(values, 'scale')
     };
+  }
+
+  function setSize(element, size) {
+    propMapper.set(element, 'setSize', size);
   }
 
   function getAxisValue(position) {
@@ -139,7 +152,11 @@ export default function layoutManager(containerElement, orientation, onScroll) {
 
   function isInVisibleRect({ x, y }) {
     const { left, top, right, bottom } = values.visibleRect;
-    return x > left && x < right && y > top && y < bottom;
+    if (orientation === 'vertical') {
+      return x > left && x < right && y > top && y < bottom + containerElement[extraSizeForInsertion];
+    } else {
+      return x > left && x < right + containerElement[extraSizeForInsertion] && y > top && y < bottom;
+    }
   }
 
   function setScrollListener(callback) {
@@ -183,6 +200,8 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     dispose,
     getContainerScale,
     setScrollListener,
-    getTopLeftOfElementBegin
+    setSize,
+    getTopLeftOfElementBegin,
+    invalidate,
   }
 }

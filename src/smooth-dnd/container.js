@@ -1,6 +1,13 @@
 import * as Utils from './utils';
-import * as constants from './constants';
-import { defaultGroupName, wrapperClass, animationClass } from './constants';
+import {
+	defaultGroupName,
+	wrapperClass,
+	animationClass,
+	stretcherElementClass,
+	extraSizeForInsertion,
+	translationValue,
+	containerClass
+} from './constants';
 import layoutManager from './layoutManager';
 import Mediator from './mediator';
 import './container.css';
@@ -48,20 +55,16 @@ function wrapChildren(element, orientation) {
 	return draggables;
 }
 
-// function addRemoveLastPivotElement(options) {
-// 	return function(add) {
-// 		const div = document.createElement('div');
-// 		div.className = `${wrapperClass} ${animationClass} ${orientation}`;
-// 		child.parentElement.insertBefore(div, child);
-// 		div.appendChild(child);
-// 	}
-// }
-
 function getDragInsertionIndex({ draggables, layout }) {
 	const findDraggable = findDraggebleAtPos({ layout });
 	return (ghostBeginEnd, pos) => {
 		if (!ghostBeginEnd) {
-			return findDraggable(draggables, pos, true);
+			return findDraggable(draggables, pos, true) || draggables.length;
+		} else {
+			if (ghostBeginEnd.begin <= pos && ghostBeginEnd.end >= pos) {
+				// position inside ghost
+				return null;
+			}
 		}
 
 		if (pos < ghostBeginEnd.begin) {
@@ -69,7 +72,7 @@ function getDragInsertionIndex({ draggables, layout }) {
 		} else if (pos > ghostBeginEnd.end) {
 			return findDraggable(draggables, pos) + 1;
 		} else {
-			return null;
+			return draggables.length;
 		}
 	};
 }
@@ -170,7 +173,7 @@ function getShadowBeginEnd({ draggables, layout }) {
 	};
 }
 
-function resetDraggables({ draggables, layout }) {
+function resetDraggables({element, draggables, layout }) {
 	return function() {
 		draggables.forEach(p => {
 			Utils.removeClass(p, animationClass);
@@ -199,6 +202,7 @@ function setTargetContainer(draggableInfo, element, set = true) {
 function handleRemoveItem({ element, options, draggables, layout }) {
 	let removedIndex = null;
 	let elementSize = null;
+	let containerStretcherElement = null;
 	return function(draggableInfo) {
 		if (removedIndex === null && draggableInfo.container.element === element && options.behaviour === 'move') {
 			removedIndex = draggableInfo.elementIndex;
@@ -212,6 +216,7 @@ function handleRemoveItem({ element, options, draggables, layout }) {
 		if (pos === null) {
 			elementSize = null;
 		}
+
 		return {
 			pos,
 			removedIndex,
@@ -221,12 +226,12 @@ function handleRemoveItem({ element, options, draggables, layout }) {
 	};
 }
 
-function handleAddItem({ draggables, layout }) {
+function handleAddItem({ element, draggables, layout }) {
 	let addedIndex = null;
 	let shadowBeginEnd = null;
 	const getNextAddedIndex = getDragInsertionIndex({ draggables, layout });
 	const getShadowBounds = getShadowBeginEnd({ draggables, layout });
-	const translate = calculateTranslations({ draggables, layout });
+	const translate = calculateTranslations({ element, draggables, layout });
 	return function(draggableInfo) {
 		const { pos, removedIndex, elementSize, invalidateShadow } = draggableInfo;
 		if (pos === null) {
@@ -263,9 +268,10 @@ function handleAddItem({ draggables, layout }) {
 	};
 }
 
-function calculateTranslations({ draggables, layout }) {
+function calculateTranslations({ element, draggables, layout }) {
 	let prevAddIndex = null;
 	let prevRemoveIndex = null;
+	let paddingAdded = false;
 	return function({ addedIndex, removedIndex, elementSize, shadowBeginEnd }) {
 		if (addedIndex !== prevAddIndex || removedIndex !== prevRemoveIndex) {
 			for (let index = 0; index < draggables.length; index++) {
@@ -279,6 +285,7 @@ function calculateTranslations({ draggables, layout }) {
 				}
 				layout.setTranslation(draggable, translate);
 			}
+
 			prevAddIndex = addedIndex;
 			prevRemoveIndex = removedIndex;
 		}
@@ -309,8 +316,8 @@ function handleDrag(options) {
 	};
 }
 
-function handleDrop({ draggables, layout, options }) {
-	const draggablesReset = resetDraggables({ draggables, layout });  
+function handleDrop({element, draggables, layout, options }) {
+	const draggablesReset = resetDraggables({element, draggables, layout });  
 	return function(draggableInfo, { addedIndex, removedIndex }) {
 		draggablesReset();
 		// handle drop
@@ -320,11 +327,56 @@ function handleDrop({ draggables, layout, options }) {
 	};
 }
 
+function handleInsertionSizeChange({ element, draggables, layout }) {
+	let lastRemovedIndex = null;
+	let lastAddedIndex = null;
+	let strectherElement = null;
+	let stretcherElementAdded = false;
+
+	return function({addedIndex, removedIndex, elementSize}, reset = false) {
+		if (reset) {
+			element[extraSizeForInsertion] = 0;
+			if (strectherElement) {
+				element.removeChild(strectherElement);
+				strectherElement = null;
+			}
+		} else {
+			if (removedIndex === null) {
+				if (addedIndex !== null) {
+					element[extraSizeForInsertion] = elementSize / 2;
+					if (!stretcherElementAdded) {
+						const containerEnd = layout.getBeginEndOfContainer().end;
+						const lastDraggableEnd = layout.getBeginEnd(draggables[draggables.length - 1]).end - draggables[draggables.length - 1][translationValue];
+						if (lastDraggableEnd + elementSize > containerEnd) {
+							strectherElement = document.createElement('div');
+							strectherElement.className = stretcherElementClass;
+							layout.setSize(strectherElement.style, ((elementSize + lastDraggableEnd) - containerEnd) + 'px');
+							element.appendChild(strectherElement);
+						}
+						stretcherElementAdded = true;
+					}
+				} else {
+					element[extraSizeForInsertion] = 0;
+					if (strectherElement) {
+						layout.setTranslation(strectherElement, 0);
+						let toRemove = strectherElement;
+						strectherElement = null;
+						element.removeChild(toRemove);
+						setTimeout(function() {
+						}, 180);
+					}
+					stretcherElementAdded = false;
+				}	
+			}
+		}
+	}
+}
+
 function getContainerProps(element, initialOptions) {
 	const options = initOptions(initialOptions);
 	const draggables = wrapChildren(element, options.orientation);
 	// set flex classes before layout is inited for scroll listener
-	Utils.addClass(element, `${constants.containerClass} ${options.orientation}`);
+	Utils.addClass(element, `${containerClass} ${options.orientation}`);
 	const layout = layoutManager(element, options.orientation);
 	return {
 		element,
@@ -342,13 +394,18 @@ function Container(element) {
 		const shadowGetter = getShadowBeginEnd(props);
 		let dragHandler = handleDrag(props);
 		let dropHandler = handleDrop(props);
+		let insertionStretcherHandler = handleInsertionSizeChange(props);
 
-		props.layout.setScrollListener(function() {
+		function processLastDraggableInfo() {
 			if (lastDraggableInfo !== null) {
 				lastDraggableInfo.invalidateShadow = true;
 				dragResult = dragHandler(lastDraggableInfo);
 				lastDraggableInfo.invalidateShadow = false;
 			}
+		}
+
+		props.layout.setScrollListener(function() {
+			processLastDraggableInfo();
 		});
 
 		return {
@@ -363,10 +420,12 @@ function Container(element) {
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
 				dragResult = dragHandler(draggableInfo);
+				insertionStretcherHandler(dragResult);
 			},
 			handleDrop: function(draggableInfo) {
 				lastDraggableInfo = null;
 				dragHandler = handleDrag(props);
+				insertionStretcherHandler({}, true);
 				return dropHandler(draggableInfo, dragResult);
 			},
 			getDragResult: function() {
@@ -374,6 +433,10 @@ function Container(element) {
 			},
 			getTranslateCalculator: function(...params) {
 				return calculateTranslations(props)(...params);
+			},
+			invalidateRect: function() {
+				props.layout.invalidate();
+				processLastDraggableInfo();
 			}
 		};
 	};
@@ -385,7 +448,12 @@ export default function(element, options) {
 	Mediator.register(container);
 	return {
 		setOptions: containerIniter,
-		dispose: () => { }
+		invalidateRect: function() {
+			container.invalidateRect();
+		},
+		dispose: function() {
+			container.layout.dispose();
+		}
 	};
 }
 

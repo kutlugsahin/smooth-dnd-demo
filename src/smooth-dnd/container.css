@@ -48,3 +48,9 @@
 .no-user-select{
   user-select: none;
 }
+
+.smooth-dnd-stretcher-element{
+  height: 2px;
+  background-color: transparent;
+  /* transition: transform 0.18s ease; */
+}
