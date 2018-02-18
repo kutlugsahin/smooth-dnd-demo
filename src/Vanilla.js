@@ -16,15 +16,15 @@ export default class extends Component {
 			vertialAlign: 'middle',
 			lineHeight: '50px',
 			backgroundColor: 'white',
-			marginTop: '-1px'
+			marginTop: '0px'
 		};
 	}
 
 	componentDidMount() {
 		window.container = container(this.container, { groupName: '1' });
-		//window.container2 = container(this.container2, { groupName: '1' });
+		window.container2 = container(this.container2, { groupName: '1' });
 		window.container3 = container(this.container3, { groupName: '1' });
-		//window.container4 = container(this.container4, { groupName: '1', orientation: 'horizontal' });
+		window.container4 = container(this.container4, { groupName: '1', orientation: 'horizontal' });
 	}
 
 
@@ -40,10 +40,10 @@ export default class extends Component {
 		// childs.push(<div style={Object.assign({}, this.dragStyle, { height: `0px` })} key={'asdasds'}></div>);
 		// horizontalChild.push(<div style={Object.assign({}, this.dragStyle, { width: `0px` })} key={'qqqqqqqq'}></div>);
 
-		
+
 		return (
 			<div>
-				{/* <div style={{ display: 'flex', flexDirection: 'row' }}>
+				<div style={{ display: 'flex', flexDirection: 'row' }}>
 					<div style={{ float: 'none', width: '510px', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', margin: '50px', border: '1px solid #ccc' }}>
 						<div style={{ float: 'none', position: 'relative', height: '800px', overflowY: 'auto' }} ref={e => { this.container = e; }}>
 							{childs}
@@ -69,21 +69,19 @@ export default class extends Component {
 					<div ref={e => { this.container4 = e; }}>
 						{horizontalChild}
 					</div>
-				</div> */}
+				</div>
 
 
-				<div style={{ position: 'fixed', top: '100px', left: '100px', bottom: '100px', width:'300px', overflowY: 'auto', backgroundColor: '#ccc', border: '1px solid #ccc' }}>
+				{/* <div style={{ position: 'fixed', top: '100px', left: '100px', bottom: '100px', width: '300px', overflowY: 'auto', backgroundColor: '#ccc', border: '1px solid #ccc' }}>
 					<div style={{ float: 'none', position: 'relative' }} ref={e => { this.container = e; }}>
 						{childs}
 					</div>
 				</div>
-				<div style={{ marginLeft: '500px', width: '400px', transform: 'scale3d(1,1,1)', backgroundColor: '#ccc', border: '1px solid #ccc' }}>
-					<div style={{ float: 'none', position: 'relative', paddingBottom: '200px', overflow: 'none' }} ref={e => { this.container3 = e; }}>
-						{this.state.items2.map(p => (
-							<div style={Object.assign({}, this.dragStyle, { height: `${50 + (Math.random() * 0)}px` })} key={p}>Draggable {p}</div>
-						))}
-					</div>
-				</div>
+				<div style={{ marginLeft: '500px', width: '400px', paddingBottom: '200px', height: '800px', overflow: 'auto' }} ref={e => { this.container3 = e; }}>
+					{this.state.items2.map(p => (
+						<div style={Object.assign({}, this.dragStyle, { margin: '1px', height: `${50 + (Math.random() * 0)}px` })} key={p}>Draggable {p}</div>
+					))}
+				</div> */}
 			</div>
 		);
 		// return (

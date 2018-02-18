@@ -179,6 +179,14 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     };
   }
 
+  function getScrollSize(element) {
+    return propMapper.get(element, 'scrollSize');
+  }
+
+  function getScrollValue(element) {
+    return propMapper.get(element, 'scrollValue');    
+  }
+
   function dispose() {
     if (scrollListener) {
       scrollListener.dispose();
@@ -202,6 +210,8 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     setScrollListener,
     setSize,
     getTopLeftOfElementBegin,
+    getScrollSize,
+    getScrollValue,
     invalidate,
   }
 }

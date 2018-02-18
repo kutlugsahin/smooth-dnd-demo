@@ -59,7 +59,8 @@ function getDragInsertionIndex({ draggables, layout }) {
 	const findDraggable = findDraggebleAtPos({ layout });
 	return (ghostBeginEnd, pos) => {
 		if (!ghostBeginEnd) {
-			return findDraggable(draggables, pos, true) || draggables.length;
+			const index = findDraggable(draggables, pos, true);
+			return index !== null ? index : draggables.length;
 		} else {
 			if (ghostBeginEnd.begin <= pos && ghostBeginEnd.end >= pos) {
 				// position inside ghost
@@ -345,7 +346,9 @@ function handleInsertionSizeChange({ element, draggables, layout }) {
 				if (addedIndex !== null) {
 					element[extraSizeForInsertion] = elementSize / 2;
 					if (!stretcherElementAdded) {
-						const containerEnd = layout.getBeginEndOfContainer().end;
+						const containerBeginEnd = layout.getBeginEndOfContainer();
+						const hasScrollBar = layout.getScrollSize(element) > layout.getSize(element);
+						const containerEnd = hasScrollBar ? (containerBeginEnd.begin + layout.getScrollSize(element) - layout.getScrollValue(element)) : containerBeginEnd.end;
 						const lastDraggableEnd = layout.getBeginEnd(draggables[draggables.length - 1]).end - draggables[draggables.length - 1][translationValue];
 						if (lastDraggableEnd + elementSize > containerEnd) {
 							strectherElement = document.createElement('div');
