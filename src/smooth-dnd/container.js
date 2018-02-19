@@ -1,4 +1,4 @@
-import * as Utils from './utils';
+import { hasClass, addClass, removeClass, addChildAt, removeChildAt } from './utils';
 import {
 	defaultGroupName,
 	wrapperClass,
@@ -48,12 +48,33 @@ function wrapChild(child, orientation) {
 function wrapChildren(element, orientation) {
 	const draggables = Array.prototype.map.call(element.children, child => {
 		let wrapper = child;
-		if (!Utils.hasClass(child, wrapperClass)) {
+		if (!hasClass(child, wrapperClass)) {
 			wrapper = wrapChild(child, orientation);
 		}
 		return wrapper;
 	});
 	return draggables;
+}
+
+function applyDrop({ element, draggables, layout, options }) {
+	return function(draggableInfo, removeIndex, addIndex, payload, droppedElement) {
+		if (removeIndex !== null) {
+			removeChildAt(element, removeIndex);
+			draggables.splice(removeIndex, 1);
+		}
+
+		if (addIndex !== null) {
+			const wrapper = document.createElement('div');
+			wrapper.className = `${wrapperClass} ${animationClass} ${options.orientation}`;
+			wrapper.appendChild(droppedElement.cloneNode(true));
+			addChildAt(element, wrapper, addIndex);
+			if (addIndex >= draggables.length) {
+				draggables.push(wrapper);
+			} else {
+				draggables.splice(addIndex, 0, wrapper);
+			}
+		}
+	}
 }
 
 function getDragInsertionIndex({ draggables, layout }) {
@@ -178,14 +199,14 @@ function getShadowBeginEnd({ draggables, layout }) {
 function resetDraggables({element, draggables, layout }) {
 	return function() {
 		draggables.forEach(p => {
-			Utils.removeClass(p, animationClass);
+			removeClass(p, animationClass);
 			layout.setTranslation(p, 0);
 			layout.setVisibility(p, true);
 		});
 
 		setTimeout(() => {
 			draggables.forEach(p => {
-				Utils.addClass(p, animationClass);
+				addClass(p, animationClass);
 			});
 		},50);
 	};
@@ -319,15 +340,17 @@ function handleDrag(options) {
 }
 
 function handleDrop({element, draggables, layout, options }) {
-	const draggablesReset = resetDraggables({element, draggables, layout });  
+	const draggablesReset = resetDraggables({ element, draggables, layout }); 
+	const dropHandler = applyDrop({ element, draggables, layout, options });
 	return function(draggableInfo, { addedIndex, removedIndex }) {
 		draggablesReset();
-		// handle drop
-		// ...
-		let actualAddIndex = addedIndex !== null ? ((removedIndex != null && removedIndex < addedIndex) ? addedIndex - 1 : addedIndex) : null;
-		options.onDrop && options.onDrop(actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
-
-		console.log(removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
+		// if drop zone is valid => complete drag else do nothing everything will be reverted by draggablesReset()
+		if (draggableInfo.targetElement) {
+			let actualAddIndex = addedIndex !== null ? ((removedIndex !== null && removedIndex < addedIndex) ? addedIndex - 1 : addedIndex) : null;
+			options.onDrop && options.onDrop(draggableInfo, actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
+			dropHandler(draggableInfo, removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
+			console.log(removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
+		}
 	};
 }
 
@@ -382,7 +405,7 @@ function getContainerProps(element, initialOptions) {
 	const options = initOptions(initialOptions);
 	const draggables = wrapChildren(element, options.orientation);
 	// set flex classes before layout is inited for scroll listener
-	Utils.addClass(element, `${containerClass} ${options.orientation}`);
+	addClass(element, `${containerClass} ${options.orientation}`);
 	const layout = layoutManager(element, options.orientation);
 	return {
 		element,

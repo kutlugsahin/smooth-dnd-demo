@@ -99,3 +99,15 @@ export const debounce = (fn, delay, immediate) => {
     }
   }
 }
+
+export const removeChildAt = (parent, index) => {
+  return parent.removeChild(parent.children[index]);
+}
+
+export const addChildAt = (parent, child, index) => {
+  if (index >= parent.children.lenght) {
+    parent.appendChild(child);
+  } else {
+    parent.insertBefore(child, parent.children[index]);
+  }
+}
