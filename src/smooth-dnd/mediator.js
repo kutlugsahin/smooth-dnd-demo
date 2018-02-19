@@ -112,13 +112,22 @@ function handleDropAnimation(callback) {
 		animateGhostToPosition(dragResult.shadowBeginEnd.rect);
 	} else {
 		const container = containers.filter(p => p === draggableInfo.container)[0];
-		const { removedIndex } = container.getDragResult();
-		const layout = container.layout;
-		// drag ghost to back
-		const dragSize = layout.getSize(removedIndex);
-		container.getTranslateCalculator(removedIndex, removedIndex, dragSize);
-		const prevDraggableEnd = removedIndex > 0 ? layout.getBeginEnd(container.draggables[removedIndex - 1]).end : layout.getBeginEndOfContainer().begin;
-		animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd));
+		if (container.getBehaviour() === 'move') {
+			const { removedIndex } = container.getDragResult();
+			const layout = container.layout;
+			// drag ghost to back
+			const dragSize = layout.getSize(removedIndex);
+			container.getTranslateCalculator(removedIndex, removedIndex, dragSize);
+			const prevDraggableEnd = removedIndex > 0 ? layout.getBeginEnd(container.draggables[removedIndex - 1]).end : layout.getBeginEndOfContainer().begin;
+			animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd));
+		} else {
+			Utils.addClass(ghostInfo.ghost, 'animated');
+			ghostInfo.ghost.style.opacity = '0';
+			ghostInfo.ghost.style.transform = 'scale(0.90)';
+			setTimeout(function() {
+				endDrop();
+			}, 180);
+		}
 	}
 }
 

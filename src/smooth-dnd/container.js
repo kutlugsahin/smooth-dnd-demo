@@ -30,9 +30,10 @@ function initOptions(props = defaultOptions) {
 
 function isDragRelevant({ element, options }) {
 	return function(draggableInfo) {
-		return draggableInfo.container.element === element ||
+		const hasMoveBehaviour = options.behaviour === 'move';
+		return hasMoveBehaviour && (draggableInfo.container.element === element ||
       draggableInfo.groupName === options.groupName ||
-      options.acceptGroups.indexOf(draggableInfo.groupName) > -1;
+      options.acceptGroups.indexOf(draggableInfo.groupName) > -1);
 	};
 }
 
@@ -323,8 +324,10 @@ function handleDrop({element, draggables, layout, options }) {
 		draggablesReset();
 		// handle drop
 		// ...
-		let actualAddIndex = addedIndex !== null ? (removedIndex < addedIndex ? addedIndex - 1 : addedIndex) : null;
+		let actualAddIndex = addedIndex !== null ? ((removedIndex != null && removedIndex < addedIndex) ? addedIndex - 1 : addedIndex) : null;
 		options.onDrop && options.onDrop(actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
+
+		console.log(removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
 	};
 }
 
@@ -440,6 +443,9 @@ function Container(element) {
 			invalidateRect: function() {
 				props.layout.invalidate();
 				processLastDraggableInfo();
+			},
+			getBehaviour: function() {
+				return props.options.behaviour;
 			}
 		};
 	};
