@@ -294,7 +294,6 @@ function handleAddItem({ element, draggables, layout }) {
 function calculateTranslations({ element, draggables, layout }) {
 	let prevAddIndex = null;
 	let prevRemoveIndex = null;
-	let paddingAdded = false;
 	return function({ addedIndex, removedIndex, elementSize, shadowBeginEnd }) {
 		if (addedIndex !== prevAddIndex || removedIndex !== prevRemoveIndex) {
 			for (let index = 0; index < draggables.length; index++) {
@@ -420,7 +419,6 @@ function Container(element) {
 		let dragResult = null;
 		let lastDraggableInfo = null;
 		const props = getContainerProps(element, options);  
-		const shadowGetter = getShadowBeginEnd(props);
 		let dragHandler = handleDrag(props);
 		let dropHandler = handleDrop(props);
 		let insertionStretcherHandler = handleInsertionSizeChange(props);
@@ -445,7 +443,6 @@ function Container(element) {
 			getChildPayload: props.options.getChildPayload,
 			groupName: props.options.groupName,
 			layout: props.layout,
-			shadowGetter,
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
 				dragResult = dragHandler(draggableInfo);
@@ -487,5 +484,29 @@ export default function(element, options) {
 			container.layout.dispose();
 		}
 	};
+}
+
+function getRemovedItem(params) {
+	return (draggableInfo, state) => {
+		
+	}
+}
+
+function getPosition(params) {
+	return (draggableInfo, state) => {
+
+	}
+}
+
+function getElementSize(params) {
+	return (draggableInfo, state) => {
+
+	}
+}
+
+function setTargetContainer(params) {
+	return (draggableInfo, state) => {
+
+	}
 }
 
