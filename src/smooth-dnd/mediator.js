@@ -117,7 +117,13 @@ function handleDropAnimation(callback) {
 			const layout = container.layout;
 			// drag ghost to back
 			const dragSize = layout.getSize(removedIndex);
-			container.getTranslateCalculator(removedIndex, removedIndex, dragSize);
+			container.getTranslateCalculator({
+				dragresult: {
+					removedIndex,
+					addedIndex: removedIndex,
+					elementSize: dragSize
+				}
+			});
 			const prevDraggableEnd = removedIndex > 0 ? layout.getBeginEnd(container.draggables[removedIndex - 1]).end : layout.getBeginEndOfContainer().begin;
 			animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd));
 		} else {
