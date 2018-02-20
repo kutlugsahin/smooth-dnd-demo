@@ -487,26 +487,41 @@ export default function(element, options) {
 }
 
 function getRemovedItem(params) {
-	return (draggableInfo, state) => {
+	return ({draggableInfo, state}) => {
 		
 	}
 }
 
+function setRemovedItemVisibilty(params) {
+	return ({ draggableInfo, state }) => {
+		
+	}
+} 
+
 function getPosition(params) {
-	return (draggableInfo, state) => {
+	return ({draggableInfo, state}) => {
 
 	}
 }
 
 function getElementSize(params) {
-	return (draggableInfo, state) => {
+	return ({draggableInfo, state}) => {
 
 	}
 }
 
 function setTargetContainer(params) {
-	return (draggableInfo, state) => {
+	return ({draggableInfo, state}) => {
 
 	}
+}
+
+function compose(params, ...functions) {
+	const hydratedFunctions = functions.map(p => p(params));
+	return ({draggableInfo, state = {}}) => {
+		return hydratedFunctions.reduce((value, fn) => {
+			return Object.assign(value, fn(draggableInfo, value));
+		}, state);
+	}	
 }
 
