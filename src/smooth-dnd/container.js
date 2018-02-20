@@ -555,7 +555,7 @@ function getDragHandler(params) {
 
 
 function withState(fn) {
-	const state = {};
+	const state = getDefaultDragResult();
 	return (params) => {
 		params.state = state;
 		const result = fn(params);
@@ -564,12 +564,22 @@ function withState(fn) {
 	}
 }
 
+function getDefaultDragResult() {
+	return {
+		addedIndex: null,
+		removedIndex: null,
+		elementSize: null,
+		pos: null,
+		shadowBeginEnd: null
+	}
+}
+
 function compose(params, ...functions) {
 	const hydratedFunctions = functions.map(p => withState(p(params)));
 	return (draggableInfo) => {
 		return hydratedFunctions.reduce((dragResult, fn) => {
 			return Object.assign(dragResult, fn({ draggableInfo, dragResult }));
-		}, {});
+		}, getDefaultDragResult());
 	}
 }
 
