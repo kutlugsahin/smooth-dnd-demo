@@ -116,12 +116,10 @@ function handleDropAnimation(callback) {
 			const { removedIndex } = container.getDragResult();
 			const layout = container.layout;
 			// drag ghost to back
-			const dragSize = layout.getSize(removedIndex);
 			container.getTranslateCalculator({
-				dragresult: {
+				dragResult: {
 					removedIndex,
-					addedIndex: removedIndex,
-					elementSize: dragSize
+					addedIndex: removedIndex
 				}
 			});
 			const prevDraggableEnd = removedIndex > 0 ? layout.getBeginEnd(container.draggables[removedIndex - 1]).end : layout.getBeginEndOfContainer().begin;

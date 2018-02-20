@@ -344,7 +344,7 @@ function Container(element) {
 				return dragResult;
 			},
 			getTranslateCalculator: function(...params) {
-				return calculateTranslations(props)(...params);
+				return withState(calculateTranslations(props))(...params);
 			},
 			invalidateRect: function() {
 				props.layout.invalidate();
@@ -374,7 +374,7 @@ export default function(element, options) {
 
 function getRemovedItem({ draggables, element, options }) {
 	return ({ draggableInfo, dragResult, state }) => {
-		let removedIndex = null;
+		let removedIndex = state.removedIndex;
 		if (state.removedIndex == null && draggableInfo.container.element === element && options.behaviour === 'move') {
 			removedIndex = draggableInfo.elementIndex
 		}
@@ -477,13 +477,13 @@ function getShadowBeginEnd({ draggables, layout }) {
 
 function getDragInsertionIndex({ draggables, layout }) {
 	const findDraggable = findDraggebleAtPos({ layout });
-	return ({ dragResult: { ghostBeginEnd, pos } }) => {
+	return ({ dragResult: { shadowBeginEnd, pos } }) => {
 		let addedIndex = null;
-		if (!ghostBeginEnd) {
+		if (!shadowBeginEnd) {
 			const index = findDraggable(draggables, pos, true);
 			return { addedIndex: index !== null ? index : draggables.length };
 		} else {
-			if (ghostBeginEnd.begin <= pos && ghostBeginEnd.end >= pos) {
+			if (shadowBeginEnd.begin <= pos && shadowBeginEnd.end >= pos) {
 				// position inside ghost
 				return {
 					addedIndex: null
@@ -491,11 +491,11 @@ function getDragInsertionIndex({ draggables, layout }) {
 			}
 		}
 
-		if (pos < ghostBeginEnd.begin) {
+		if (pos < shadowBeginEnd.begin) {
 			return {
 				addedIndex: findDraggable(draggables, pos)
 			}
-		} else if (pos > ghostBeginEnd.end) {
+		} else if (pos > shadowBeginEnd.end) {
 			return {
 				addedIndex: findDraggable(draggables, pos) + 1
 			}
