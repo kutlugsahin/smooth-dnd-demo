@@ -419,7 +419,7 @@ function setTargetContainer({ element }) {
 function getShadowBeginEnd({ draggables, layout }) {
 	return ({ draggableInfo, dragResult, state }) => {
 		const { addedIndex, removedIndex, elementSize, pos } = dragResult;
-		if (pos !== null && addedIndex !== null) {
+		if (pos !== null && addedIndex !== null && addedIndex !== state.addedIndex) {
 
 			let beforeIndex = addedIndex - 1;
 			let begin = 0;
@@ -463,6 +463,8 @@ function getShadowBeginEnd({ draggables, layout }) {
 			const shadowRectTopLeft = beforeBounds && afterBounds ? layout.getTopLeftOfElementBegin(beforeBounds.end, afterBounds.begin) : null;
 
 			return {
+				addedIndex,
+				removedIndex,
 				shadowBeginEnd: {
 					begin,
 					end,
@@ -522,16 +524,18 @@ function calculateTranslations({ element, draggables, layout }) {
 				}
 				layout.setTranslation(draggable, translate);
 			}
+
+			return { addedIndex, removedIndex };
 		}
 	};
 }
 
 function invalidateShadowBeginEnd(params) {
 	const shadowBoundsGetter = getShadowBeginEnd(params);
-	return ({ draggableInfo: { invalidateShadow }, dragResult }) => {
-		if (invalidateShadow) {
+	return ({ draggableInfo, dragResult }) => {
+		if (draggableInfo.invalidateShadow) {
 			return {
-				shadowBeginEnd: shadowBoundsGetter({dragResult})
+				shadowBeginEnd: shadowBoundsGetter({ draggableInfo, dragResult})
 			}
 		}
 		return null;
@@ -548,8 +552,8 @@ function getDragHandler(params) {
 		setTargetContainer,
 		invalidateShadowBeginEnd,
 		getDragInsertionIndex,
+		calculateTranslations,
 		getShadowBeginEnd,
-		calculateTranslations
 	);
 }
 
