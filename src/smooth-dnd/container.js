@@ -240,8 +240,6 @@ function handleDrop({ element, draggables, layout, options }) {
 }
 
 function handleInsertionSizeChange({ element, draggables, layout }) {
-	let lastRemovedIndex = null;
-	let lastAddedIndex = null;
 	let strectherElement = null;
 	let stretcherElementAdded = false;
 
@@ -339,6 +337,7 @@ function Container(element) {
 				dragHandler = getDragHandler(props);
 				insertionStretcherHandler({}, true);
 				return dropHandler(draggableInfo, dragResult);
+				props.layout.invalidate();
 			},
 			getDragResult: function() {
 				return dragResult;
@@ -385,21 +384,18 @@ function getRemovedItem({ draggables, element, options }) {
 }
 
 function setRemovedItemVisibilty({ draggables, layout }) {
-	let prevRemovedIndex = null;
-	return ({ draggableInfo, dragResult, state }) => {
-		if (dragResult.removedIndex !== null && prevRemovedIndex == null) {
-			prevRemovedIndex = dragResult.removedIndex;
+	return ({ draggableInfo, dragResult }) => {
+		if (dragResult.removedIndex !== null) {
 			layout.setVisibility(draggables[dragResult.removedIndex], false);
 		}
-		return { removedIndex: dragResult.removedIndex };
 	}
 }
 
 function getPosition({ layout }) {
 	return ({ draggableInfo, dragResult }) => {
-		return layout.isInVisibleRect(draggableInfo.position) ? {
-			pos: layout.getAxisValue(draggableInfo.position)
-		} : null;
+		return {
+			pos: layout.isInVisibleRect(draggableInfo.position) ? layout.getAxisValue(draggableInfo.position): null
+		}
 	}
 }
 
@@ -409,7 +405,8 @@ function getElementSize({ layout }) {
 		if (dragResult.pos === null) {
 			return null;
 		} else {
-			return { elementSize: elementSize || (elementSize = layout.getSize(draggableInfo.element)) };
+			elementSize = elementSize || layout.getSize(draggableInfo.element)
+			return { elementSize };
 		}
 	}
 }
@@ -424,60 +421,65 @@ function getShadowBeginEnd({ draggables, layout }) {
 	let prevAddedIndex = null; 
 	return ({ draggableInfo, dragResult }) => {
 		const { addedIndex, removedIndex, elementSize, pos } = dragResult;
-		if (pos !== null && addedIndex !== null && addedIndex !== prevAddedIndex) {
-			prevAddedIndex = addedIndex;
-			let beforeIndex = addedIndex - 1;
-			let begin = 0;
-			let afterBounds = null;
-			let beforeBounds = null;
-			if (beforeIndex === removedIndex) {
-				beforeIndex--;
-			}
-			if (beforeIndex > -1) {
-				const beforeSize = layout.getSize(draggables[beforeIndex]);
-				beforeBounds = layout.getBeginEnd(draggables[beforeIndex]);
-				if (elementSize < beforeSize) {
-					const threshold = (beforeSize - elementSize) / 2;
-					begin = beforeBounds.end - threshold;
+		if (pos !== null) {
+			if (addedIndex !== null && (draggableInfo.invalidateShadow || addedIndex !== prevAddedIndex)) {
+				prevAddedIndex = addedIndex;
+				let beforeIndex = addedIndex - 1;
+				let begin = 0;
+				let afterBounds = null;
+				let beforeBounds = null;
+				if (beforeIndex === removedIndex) {
+					beforeIndex--;
+				}
+				if (beforeIndex > -1) {
+					const beforeSize = layout.getSize(draggables[beforeIndex]);
+					beforeBounds = layout.getBeginEnd(draggables[beforeIndex]);
+					if (elementSize < beforeSize) {
+						const threshold = (beforeSize - elementSize) / 2;
+						begin = beforeBounds.end - threshold;
+					} else {
+						begin = beforeBounds.end;
+					}
 				} else {
-					begin = beforeBounds.end;
+					beforeBounds = { end: layout.getBeginEndOfContainer().begin };
 				}
-			} else {
-				beforeBounds = { end: layout.getBeginEndOfContainer().begin };
-			}
 
-			let end = 10000;
-			let afterIndex = addedIndex;
-			if (afterIndex === removedIndex) {
-				afterIndex++;
-			}
-			if (afterIndex < draggables.length) {
-				const afterSize = layout.getSize(draggables[afterIndex]);
-				afterBounds = layout.getBeginEnd(draggables[afterIndex]);
+				let end = 10000;
+				let afterIndex = addedIndex;
+				if (afterIndex === removedIndex) {
+					afterIndex++;
+				}
+				if (afterIndex < draggables.length) {
+					const afterSize = layout.getSize(draggables[afterIndex]);
+					afterBounds = layout.getBeginEnd(draggables[afterIndex]);
 
-				if (elementSize < afterSize) {
-					const threshold = (afterSize - elementSize) / 2;
-					end = afterBounds.begin + threshold;
+					if (elementSize < afterSize) {
+						const threshold = (afterSize - elementSize) / 2;
+						end = afterBounds.begin + threshold;
+					} else {
+						end = afterBounds.begin;
+					}
 				} else {
-					end = afterBounds.begin;
+					afterBounds = { begin: layout.getContainerRectangles().end };
 				}
+
+				const shadowRectTopLeft = beforeBounds && afterBounds ? layout.getTopLeftOfElementBegin(beforeBounds.end, afterBounds.begin) : null;
+
+				return {
+					shadowBeginEnd: {
+						begin,
+						end,
+						rect: shadowRectTopLeft
+					}
+				};
 			} else {
-				afterBounds = { begin: layout.getContainerRectangles().end };
+				return null;
 			}
-
-			const shadowRectTopLeft = beforeBounds && afterBounds ? layout.getTopLeftOfElementBegin(beforeBounds.end, afterBounds.begin) : null;
-
-			return {
-				addedIndex,
-				removedIndex,
-				shadowBeginEnd: {
-					begin,
-					end,
-					rect: shadowRectTopLeft
-				}
-			};
 		} else {
-			return null;
+			prevAddedIndex = null;
+			return {
+				shadowBeginEnd: null
+			};
 		}
 	};
 }
@@ -554,9 +556,12 @@ function invalidateShadowBeginEnd(params) {
 function getNextAddedIndex(params) {
 	const getIndexForPos = getDragInsertionIndex(params);
 	return ({ dragResult }) => {
-		let index = getIndexForPos({dragResult});
-		if (index === null) {
-			index = dragResult.addedIndex;
+		let index = null;
+		if (dragResult.pos !== null) {
+			index = getIndexForPos({ dragResult });
+			if (index === null) {
+				index = dragResult.addedIndex;
+			}
 		}
 		return {
 			addedIndex: index
