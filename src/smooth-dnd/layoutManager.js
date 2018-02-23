@@ -1,5 +1,5 @@
 import * as Utils from './utils';
-import { translationValue, visibilityValue, extraSizeForInsertion, containerInstance } from './constants';
+import { translationValue, visibilityValue, extraSizeForInsertion, containerInstance, containersInDraggable } from './constants';
 
 
 
@@ -64,7 +64,6 @@ export default function layoutManager(containerElement, orientation, onScroll) {
 
   setTimeout(() => {
     invalidate();
-    buildContainerTree();
   }, 10);
   invalidate();
 
@@ -130,12 +129,28 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     return propMapper.get(position, 'dragPosition');
   }
 
+  function updateDescendantContainerRects(container, translation, mapper) {
+    const rect = container.layout.getContainerRectangles().rect;
+    const begin = mapper.get(rect, 'begin') + translation;
+    const end = mapper.get(rect, 'end') + translation;
+    mapper.set(rect, 'begin', begin);
+    mapper.set(rect, 'end', end);
+
+    if (container.childContainers) {
+      container.childContainers.forEach(p => updateDescendantContainerRects(p, translation, mapper));
+    }
+  }
+
   function setTranslation(element, translation) {
     if (getTranslation(element) !== translation) {
       propMapper.set(element.style, 'translate', translation);
       element[translationValue] = translation;
 
-      if(element[])
+      if (element[containersInDraggable]) {
+        element[containersInDraggable].forEach(p => {
+          updateDescendantContainerRects(p, translation, propMapper);
+        });
+      }
     }
   }
 
@@ -199,10 +214,6 @@ export default function layoutManager(containerElement, orientation, onScroll) {
 
   function getPosition(position) {
     return isInVisibleRect(position.x, position.y) ? getAxisValue(position) : null;
-  }
-
-  function buildContainerTree() {
-    
   }
 
   return {

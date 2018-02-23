@@ -23,8 +23,8 @@ export default class extends Component {
 	componentDidMount() {
 		window.container = container(this.container, { groupName: '1', behaviour: 'copy' });
 		window.container2 = container(this.container2, { groupName: '1' });
-		window.container3 = container(this.container3, { groupName: '3' });
-		window.container4 = container(this.container4, { groupName: '2', orientation: 'horizontal' });
+		window.container3 = container(this.container3, { groupName: '1' });
+		window.container4 = container(this.container4, { groupName: '1', orientation: 'horizontal' });
 	}
 
 

@@ -113,13 +113,14 @@ function handleDropAnimation(callback) {
 	} else {
 		const container = containers.filter(p => p === draggableInfo.container)[0];
 		if (container.getBehaviour() === 'move') {
-			const { removedIndex } = container.getDragResult();
+			const { removedIndex, elementSize } = container.getDragResult();
 			const layout = container.layout;
 			// drag ghost to back
 			container.getTranslateCalculator({
 				dragResult: {
 					removedIndex,
-					addedIndex: removedIndex
+					addedIndex: removedIndex,
+					elementSize
 				}
 			});
 			const prevDraggableEnd = removedIndex > 0 ? layout.getBeginEnd(container.draggables[removedIndex - 1]).end : layout.getBeginEndOfContainer().begin;

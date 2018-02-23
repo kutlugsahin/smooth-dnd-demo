@@ -8,6 +8,7 @@ import {
 	translationValue,
 	containerClass,
 	containerInstance,
+	containersInDraggable
 } from './constants';
 import layoutManager from './layoutManager';
 import Mediator from './mediator';
@@ -40,7 +41,7 @@ function isDragRelevant({ element, options }) {
 
 function wrapChild(child, orientation) {
 	const div = document.createElement('div');
-	div.className = `${wrapperClass} ${animationClass} ${orientation}`;
+	div.className = `${wrapperClass} ${orientation} ${animationClass} `;
 	child.parentElement.insertBefore(div, child);
 	div.appendChild(child);
 	return div;
@@ -66,8 +67,9 @@ function applyDrop({ element, draggables, layout, options }) {
 
 		if (addIndex !== null) {
 			const wrapper = document.createElement('div');
-			wrapper.className = `${wrapperClass} ${animationClass} ${options.orientation}`;
+			wrapper.className = `${wrapperClass} ${options.orientation} ${animationClass} `;
 			wrapper.appendChild(droppedElement.cloneNode(true));
+			wrapper[containersInDraggable] = [];
 			addChildAt(element, wrapper, addIndex);
 			if (addIndex >= draggables.length) {
 				draggables.push(wrapper);
@@ -214,17 +216,6 @@ function handleAddItem({ element, draggables, layout }) {
 	};
 }
 
-// function compose(options) {
-// 	return function(...functions) {
-// 		const hydratedFunctions = functions.map(p => p(options));
-// 		return function(data) {
-// 			return hydratedFunctions.reduce((value, fn) => {
-// 				return fn(value);
-// 			}, data);
-// 		};
-// 	};
-// }
-
 function handleDrop({ element, draggables, layout, options }) {
 	const draggablesReset = resetDraggables({ element, draggables, layout });
 	const dropHandler = applyDrop({ element, draggables, layout, options });
@@ -302,14 +293,17 @@ function getContainerProps(element, initialOptions) {
 
 function registerToParentContainer(container) {
 	setTimeout(() => {
-		let parentContainer = container.element.parentElement;
-		while (parentContainer && !parentContainer[containerInstance]) {
-			parentContainer = parentContainer.parentElement;
+		let currentElement = container.element;
+		while (currentElement.parentElement && !currentElement.parentElement[containerInstance]) {
+			currentElement = currentElement.parentElement;
 		}
 
-		if (parentContainer) {
+		if (currentElement.parentElement) {
+			const parentContainer = currentElement.parentElement;
 			container.hasParentContainer = true;
 			parentContainer[containerInstance].childContainers.push(container);
+			//current should be draggable
+			currentElement[containersInDraggable].push(container);
 		}
 		
 	}, 100);
