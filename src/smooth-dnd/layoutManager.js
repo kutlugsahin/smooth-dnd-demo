@@ -1,5 +1,5 @@
 import * as Utils from './utils';
-import { translationValue, visibilityValue, extraSizeForInsertion } from './constants';
+import { translationValue, visibilityValue, extraSizeForInsertion, isContainer } from './constants';
 
 
 
@@ -51,6 +51,7 @@ function orientationDependentProps(map) {
 }
 
 export default function layoutManager(containerElement, orientation, onScroll) {
+  containerElement[isContainer] = true;
   containerElement[extraSizeForInsertion] = 0;
   const map = orientation === 'horizontal' ? horizontalMap : verticalMap;
   const propMapper = orientationDependentProps(map);
@@ -64,6 +65,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
 
   setTimeout(() => {
     invalidate();
+    buildContainerTree();
   }, 10);
   invalidate();
 
@@ -150,7 +152,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     return element[visibilityValue] === undefined || element[visibilityValue];
   }
 
-  function isInVisibleRect({ x, y }) {
+  function isInVisibleRect(x, y) {
     const { left, top, right, bottom } = values.visibleRect;
     if (orientation === 'vertical') {
       return x > left && x < right && y > top && y < bottom + containerElement[extraSizeForInsertion];
@@ -193,6 +195,14 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     }
   }
 
+  function getPosition(position) {
+    return isInVisibleRect(position.x, position.y) ? getAxisValue(position) : null;
+  }
+
+  function buildContainerTree() {
+    
+  }
+
   return {
     getSize,
     //getDistanceToContainerBegining,
@@ -213,5 +223,6 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     getScrollSize,
     getScrollValue,
     invalidate,
+    getPosition,
   }
 }

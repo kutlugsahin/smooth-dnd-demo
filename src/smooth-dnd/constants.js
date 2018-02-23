@@ -1,3 +1,5 @@
+export const isContainer = 'smooth-dnd-draggable-is-container';
+
 export const defaultGroupName = '@@smooth-dnd-default-group@@';
 export const wrapperClass = 'smooth-dnd-draggable-wrapper';
 export const animationClass = 'animated';
