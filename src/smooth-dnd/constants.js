@@ -1,4 +1,4 @@
-export const isContainer = 'smooth-dnd-draggable-is-container';
+export const containerInstance = 'smooth-dnd-container-instance';
 
 export const defaultGroupName = '@@smooth-dnd-default-group@@';
 export const wrapperClass = 'smooth-dnd-draggable-wrapper';

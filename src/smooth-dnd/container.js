@@ -6,7 +6,8 @@ import {
 	stretcherElementClass,
 	extraSizeForInsertion,
 	translationValue,
-	containerClass
+	containerClass,
+	containerInstance,
 } from './constants';
 import layoutManager from './layoutManager';
 import Mediator from './mediator';
@@ -299,6 +300,21 @@ function getContainerProps(element, initialOptions) {
 	};
 }
 
+function registerToParentContainer(container) {
+	setTimeout(() => {
+		let parentContainer = container.element.parentElement;
+		while (parentContainer && !parentContainer[containerInstance]) {
+			parentContainer = parentContainer.parentElement;
+		}
+
+		if (parentContainer) {
+			container.hasParentContainer = true;
+			parentContainer[containerInstance].childContainers.push(container);
+		}
+		
+	}, 100);
+}
+
 function Container(element) {
 	return function(options) {
 		let dragResult = null;
@@ -328,6 +344,8 @@ function Container(element) {
 			getChildPayload: props.options.getChildPayload,
 			groupName: props.options.groupName,
 			layout: props.layout,
+			childContainers: [],
+			hasParentContainer: false,
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
 				dragResult = dragHandler(draggableInfo);
@@ -360,7 +378,9 @@ function Container(element) {
 export default function(element, options) {
 	const containerIniter = Container(element);
 	const container = containerIniter(options);
+	element[containerInstance] = container;
 	Mediator.register(container);
+	registerToParentContainer(container);
 	return {
 		setOptions: containerIniter,
 		invalidateRect: function() {

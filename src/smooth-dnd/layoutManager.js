@@ -1,5 +1,5 @@
 import * as Utils from './utils';
-import { translationValue, visibilityValue, extraSizeForInsertion, isContainer } from './constants';
+import { translationValue, visibilityValue, extraSizeForInsertion, containerInstance } from './constants';
 
 
 
@@ -51,7 +51,6 @@ function orientationDependentProps(map) {
 }
 
 export default function layoutManager(containerElement, orientation, onScroll) {
-  containerElement[isContainer] = true;
   containerElement[extraSizeForInsertion] = 0;
   const map = orientation === 'horizontal' ? horizontalMap : verticalMap;
   const propMapper = orientationDependentProps(map);
@@ -79,7 +78,8 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function invalidateContainerRectangles(containerElement) {
-    values.rect = containerElement.getBoundingClientRect();
+    const { right, left, bottom, top } = containerElement.getBoundingClientRect();
+    values.rect = { right, left, bottom, top };
     values.visibleRect = Utils.getVisibleRect(containerElement);
   }
 
@@ -134,6 +134,8 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     if (getTranslation(element) !== translation) {
       propMapper.set(element.style, 'translate', translation);
       element[translationValue] = translation;
+
+      if(element[])
     }
   }
 
