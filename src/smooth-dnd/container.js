@@ -485,10 +485,16 @@ function getShadowBeginEnd({ draggables, layout }) {
 }
 
 function handleFirstInsertShadowAdjustment() {
+	let lastAddedIndex = null;
 	return ({ dragResult: { pos, addedIndex, shadowBeginEnd } }) => {
-		if (pos !== null && addedIndex === null) {
-			if (pos < shadowBeginEnd.begin) shadowBeginEnd.begin = pos - 5;
-			if (pos > shadowBeginEnd.end) shadowBeginEnd.end = pos + 5;
+		if (pos !== null) {
+			if (addedIndex != null && lastAddedIndex === null) {
+				lastAddedIndex = addedIndex;
+				if (pos < shadowBeginEnd.begin) shadowBeginEnd.begin = pos - 5;
+				if (pos > shadowBeginEnd.end) shadowBeginEnd.end = pos + 5;
+			}	
+		} else {
+			lastAddedIndex = null;
 		}
 	}
 }
