@@ -41,19 +41,14 @@ export function reactDropHandler() {
       }
       const { removedIndex, addedIndex } = dropResult;
       setTimeout(() => {
-        let removedItem;
-        if (removedIndex !== null) {
-          removedItem = draggables.splice(removedIndex, 1)[0];
+        for (var i = 0; i < element.children.length; i++) {
+          draggables[i] = element.children[i];
         }
 
-        if (addedIndex !== null) {
-          const wrapper = removedItem || element.children[addedIndex];
-          if (addedIndex >= draggables.length) {
-            draggables.push(wrapper);
-          } else {
-            draggables.splice(addedIndex, 0, wrapper);
-          }
+        for (var i = 0; i < draggables.length - element.children.length; i++) {
+          draggables.pop();
         }
+        
       }, 10);
     }
   }

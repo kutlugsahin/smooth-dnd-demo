@@ -23,8 +23,8 @@ class App extends Component {
 
   render() {
     return (
-      <div style={{width: '500px', height:'900px', overflowY:'auto', margin:'100px'}}>
-        <Container onDropEnd={(...params) => { this.onDragEnd(...params); }}>
+      <div style={{width: '500px', height:'900px', margin:'100px'}}>
+        <Container style={{ height: '900px',overflowY: 'auto'}} onDropEnd={(...params) => { this.onDragEnd(...params); }}>
           {this.state.items.map((p,i) => {
             return (
               <Draggable key={p}>
@@ -48,9 +48,9 @@ class App extends Component {
       newItems.splice(dragResult.addedIndex, 0, removed);
     }
 
-    this.setState({
-      items: newItems
-    })
+    // this.setState({
+    //   items: newItems
+    // })
   }
 }
 

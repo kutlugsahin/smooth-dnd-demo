@@ -31,7 +31,7 @@ class Container extends Component {
 
   render() {
     return (
-      <div ref={element => { this.containerDiv = element; }}>
+      <div style={this.props.style} ref={element => { this.containerDiv = element; }}>
         {this.props.children}
       </div>
     );
@@ -49,6 +49,7 @@ Container.propTypes = {
   groupName: PropTypes.string,
   orientation: PropTypes.oneOf(['horizontal', 'vertical']),
   children: PropTypes.arrayOf(PropTypes.oneOfType([Draggable])),
+  style: PropTypes.object
 };
 
 Container.defaultProps = {
