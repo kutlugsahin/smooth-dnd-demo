@@ -1,4 +1,5 @@
-import { hasClass, addClass, removeClass, addChildAt, removeChildAt } from './utils';
+import { hasClass, addClass, removeClass } from './utils';
+import { domDropHandler } from './dropHandlers';
 import {
 	defaultGroupName,
 	wrapperClass,
@@ -41,7 +42,7 @@ function isDragRelevant({ element, options }) {
 
 function wrapChild(child, orientation) {
 	const div = document.createElement('div');
-	div.className = `${wrapperClass} ${orientation} ${animationClass} `;
+	div.className = `${wrapperClass} ${orientation} ${animationClass}`;
 	child.parentElement.insertBefore(div, child);
 	div.appendChild(child);
 	return div;
@@ -56,28 +57,6 @@ function wrapChildren(element, orientation) {
 		return wrapper;
 	});
 	return draggables;
-}
-
-function applyDrop({ element, draggables, layout, options }) {
-	return function(draggableInfo, removeIndex, addIndex, payload, droppedElement) {
-		if (removeIndex !== null) {
-			removeChildAt(element, removeIndex);
-			draggables.splice(removeIndex, 1);
-		}
-
-		if (addIndex !== null) {
-			const wrapper = document.createElement('div');
-			wrapper.className = `${wrapperClass} ${options.orientation} ${animationClass} `;
-			wrapper.appendChild(droppedElement.cloneNode(true));
-			wrapper[containersInDraggable] = [];
-			addChildAt(element, wrapper, addIndex);
-			if (addIndex >= draggables.length) {
-				draggables.push(wrapper);
-			} else {
-				draggables.splice(addIndex, 0, wrapper);
-			}
-		}
-	}
 }
 
 function findDraggebleAtPos({ layout }) {
@@ -218,14 +197,19 @@ function handleAddItem({ element, draggables, layout }) {
 
 function handleDrop({ element, draggables, layout, options }) {
 	const draggablesReset = resetDraggables({ element, draggables, layout });
-	const dropHandler = applyDrop({ element, draggables, layout, options });
+	const dropHandler = (options.dropHandler || domDropHandler)(({ element, draggables, layout, options }));
 	return function(draggableInfo, { addedIndex, removedIndex }) {
 		draggablesReset();
 		// if drop zone is valid => complete drag else do nothing everything will be reverted by draggablesReset()
 		if (draggableInfo.targetElement) {
-			let actualAddIndex = addedIndex !== null ? ((removedIndex !== null && removedIndex < addedIndex) ? addedIndex - 1 : addedIndex) : null;
-			options.onDrop && options.onDrop(draggableInfo, actualAddIndex, removedIndex, draggableInfo.payload, draggableInfo.element);
-			dropHandler(draggableInfo, removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
+			let actualAddIndex = addedIndex !== null ? ((removedIndex !== null && removedIndex < addedIndex) ? addedIndex - 1 : addedIndex) : null;			
+			const dropHandlerParams = {
+				removedIndex,
+				addedIndex: actualAddIndex,
+				payload: draggableInfo.payload,
+				droppedElement: draggableInfo.element.firstChild
+			}
+			dropHandler(dropHandlerParams, options.onDropEnd);
 			console.log(removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
 		}
 	};
@@ -309,6 +293,14 @@ function registerToParentContainer(container) {
 	}, 100);
 }
 
+function onChildrenUpdated({ element, draggables }) {
+	return () => {
+		if (element.children.length > draggables.length) {
+			
+		}
+	}
+}
+
 function Container(element) {
 	return function(options) {
 		let dragResult = null;
@@ -349,7 +341,7 @@ function Container(element) {
 				lastDraggableInfo = null;
 				dragHandler = getDragHandler(props);
 				insertionStretcherHandler({}, true);
-				return dropHandler(draggableInfo, dragResult);
+				dropHandler(draggableInfo, dragResult);
 				props.layout.invalidate();
 			},
 			getDragResult: function() {
@@ -364,7 +356,7 @@ function Container(element) {
 			},
 			getBehaviour: function() {
 				return props.options.behaviour;
-			}
+			},
 		};
 	};
 }
@@ -626,5 +618,7 @@ function compose(params) {
 			return result;
 		}
 	}
-}	
+}
+
+
 
