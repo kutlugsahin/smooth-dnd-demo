@@ -156,8 +156,6 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 			}
 		} else {
 			if (Math.abs(clientX - currentX) > maxMoveInDelay || Math.abs(clientY - currentY) > maxMoveInDelay) {
-				clearTimeout(timer);
-			} else {
 				deregisterEvent();
 			}
 		}
