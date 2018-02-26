@@ -138,31 +138,62 @@ function handleDropAnimation(callback) {
 
 function handleDragStartConditions(container, { clientX, clientY }, startDragClb) {
 	const delay = container.getDragDelay();
-	const moveThreshold = 5;
+	const moveThreshold = 2;
+	const maxMoveInDelay = 8;
+	let timer = null;
 
-	const onMove = e => {
+	if (delay) {
+		timer = setTimeout(() => {
+			callCallback();
+		}, delay);
+	}
+
+	function onMove(e) {
 		const { clientX: currentX, clientY: currentY } = e;
-		if (Math.abs(clientX - currentX) > moveThreshold || Math.abs(clientY - currentY) > moveThreshold) {
-			startDragClb();
+		if (!delay) {
+			if (Math.abs(clientX - currentX) > moveThreshold || Math.abs(clientY - currentY) > moveThreshold) {
+				return callCallback();
+			}
+		} else {
+			if (Math.abs(clientX - currentX) > maxMoveInDelay || Math.abs(clientY - currentY) > maxMoveInDelay) {
+				clearTimeout(timer);
+			} else {
+				deregisterEvent();
+			}
 		}
 	};
 
-	const onUp = e => {
+	function onUp() {
+		deregisterEvent();
+	};
+
+	function registerEvents() {
+		moveEvents.forEach(e => {
+			window.document.addEventListener(e, onMove);
+		});
+
+		releaseEvents.forEach(e => {
+			window.document.addEventListener(e, onUp);
+		});
+	}
+
+	function deregisterEvent() {
+		clearTimeout(timer);
 		moveEvents.forEach(e => {
 			window.document.removeEventListener(e, onMove);
 		});
 		releaseEvents.forEach(e => {
 			window.document.removeEventListener(e, onUp);
 		});
-	};
-	
-	moveEvents.forEach(e => {
-		window.document.addEventListener(e, onMove);
-	});
+	}
 
-	releaseEvents.forEach(e => {		
-		window.document.addEventListener(e, onUp);
-	});
+	function callCallback() {
+		clearTimeout(timer);
+		deregisterEvent();
+		startDragClb();
+	}
+
+	registerEvents();
 }
 
 function onMouseDown(e) {
