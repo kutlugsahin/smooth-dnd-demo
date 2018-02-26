@@ -142,12 +142,6 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 	const maxMoveInDelay = 8;
 	let timer = null;
 
-	if (delay) {
-		timer = setTimeout(() => {
-			callCallback();
-		}, delay);
-	}
-
 	function onMove(e) {
 		const { clientX: currentX, clientY: currentY } = e;
 		if (!delay) {
@@ -166,6 +160,12 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 	};
 
 	function registerEvents() {
+		if (delay) {
+			timer = setTimeout(() => {
+				callCallback();
+			}, delay);
+		}
+
 		moveEvents.forEach(e => {
 			window.document.addEventListener(e, onMove);
 		});
@@ -186,6 +186,7 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 	}
 
 	function callCallback() {
+		console.log('asdsadsadsad');
 		clearTimeout(timer);
 		deregisterEvent();
 		startDragClb();
