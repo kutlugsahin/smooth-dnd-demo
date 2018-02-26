@@ -1,4 +1,4 @@
-import { hasClass, addClass, removeClass, addChildAt, removeChildAt } from './utils';
+import { addChildAt, removeChildAt } from './utils';
 import {
   wrapperClass,
   animationClass,
@@ -8,7 +8,7 @@ import {
 
 export function domDropHandler({ element, draggables, layout, options }) {
   return (dropResult, onDropEnd) => {
-    const { removedIndex, addedIndex, payload, droppedElement } = dropResult;
+    const { removedIndex, addedIndex, droppedElement } = dropResult;
     if (removedIndex !== null) {
       removeChildAt(element, removedIndex);
       draggables.splice(removedIndex, 1);
@@ -39,13 +39,13 @@ export function reactDropHandler() {
       if (onDropEnd) {
         onDropEnd(dropResult);
       }
-      const { removedIndex, addedIndex } = dropResult;
+
       setTimeout(() => {
-        for (var i = 0; i < element.children.length; i++) {
+        for (let i = 0; i < element.children.length; i++) {
           draggables[i] = element.children[i];
         }
 
-        for (var i = 0; i < draggables.length - element.children.length; i++) {
+        for (let i = 0; i < draggables.length - element.children.length; i++) {
           draggables.pop();
         }
         

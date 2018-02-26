@@ -9,7 +9,8 @@ import {
 	translationValue,
 	containerClass,
 	containerInstance,
-	containersInDraggable
+	containersInDraggable,
+	defaultGrabHandleClass
 } from './constants';
 import layoutManager from './layoutManager';
 import Mediator from './mediator';
@@ -32,11 +33,13 @@ function initOptions(props = defaultOptions) {
 }
 
 function isDragRelevant({ element, options }) {
-	return function(draggableInfo) {
-		const hasMoveBehaviour = options.behaviour === 'move';
-		return hasMoveBehaviour && (draggableInfo.container.element === element ||
-			draggableInfo.groupName === options.groupName ||
-			options.acceptGroups.indexOf(draggableInfo.groupName) > -1);
+	return function(draggableInfo) {		
+		if (options.behaviour === 'copy') return false;
+		if (draggableInfo.container.element === element) return true;
+		if (draggableInfo.groupName && draggableInfo.groupName === options.groupName) return true;
+		if (options.acceptGroups.indexOf(draggableInfo.groupName) > -1) return true;
+
+		return false;
 	};
 }
 
@@ -124,75 +127,6 @@ function setTargetContainer(draggableInfo, element, set = true) {
 			draggableInfo.targetElement = null;
 		}
 	}
-}
-
-function handleRemoveItem({ element, options, draggables, layout }) {
-	let removedIndex = null;
-	let elementSize = null;
-	let containerStretcherElement = null;
-	return function(draggableInfo) {
-		if (removedIndex === null && draggableInfo.container.element === element && options.behaviour === 'move') {
-			removedIndex = draggableInfo.elementIndex;
-			layout.setVisibility(draggables[removedIndex], false);
-		}
-		if (elementSize === null) {
-			elementSize = layout.getSize(draggableInfo.element);
-		}
-		const pos = layout.isInVisibleRect(draggableInfo.position) ? layout.getAxisValue(draggableInfo.position) : null;
-		setTargetContainer(draggableInfo, element, !!pos);
-		if (pos === null) {
-			elementSize = null;
-		}
-
-		return {
-			pos,
-			removedIndex,
-			elementSize,
-			invalidateShadow: draggableInfo.invalidateShadow
-		};
-	};
-}
-
-function handleAddItem({ element, draggables, layout }) {
-	let addedIndex = null;
-	let shadowBeginEnd = null;
-	const getNextAddedIndex = getDragInsertionIndex({ draggables, layout });
-	const getShadowBounds = getShadowBeginEnd({ draggables, layout });
-	const translate = calculateTranslations({ element, draggables, layout });
-	return function(draggableInfo) {
-		const { pos, removedIndex, elementSize, invalidateShadow } = draggableInfo;
-		if (pos === null) {
-			addedIndex = null;
-			shadowBeginEnd = null;
-			translate({ addedIndex, removedIndex, elementSize });
-		} else {
-			if (invalidateShadow) {
-				shadowBeginEnd = getShadowBounds(addedIndex, removedIndex, elementSize);
-			}
-			let nextAddedIndex = getNextAddedIndex(shadowBeginEnd, pos);
-			if (nextAddedIndex === null) {
-				nextAddedIndex = addedIndex;
-			}
-			if (addedIndex !== nextAddedIndex) {
-				translate({ addedIndex: nextAddedIndex, removedIndex, elementSize });
-				shadowBeginEnd = getShadowBounds(nextAddedIndex, removedIndex, elementSize);
-
-				if (addedIndex === null) {
-					// handle first insert exceptional boundaries of shadow
-					if (pos < shadowBeginEnd.begin) shadowBeginEnd.begin = pos - 5;
-					if (pos > shadowBeginEnd.end) shadowBeginEnd.end = pos + 5;
-				}
-
-				addedIndex = nextAddedIndex;
-			}
-		}
-		return {
-			addedIndex,
-			removedIndex,
-			elementSize,
-			shadowBeginEnd
-		};
-	};
 }
 
 function handleDrop({ element, draggables, layout, options }) {
@@ -291,91 +225,6 @@ function registerToParentContainer(container) {
 		}
 		
 	}, 100);
-}
-
-function onChildrenUpdated({ element, draggables }) {
-	return () => {
-		if (element.children.length > draggables.length) {
-			
-		}
-	}
-}
-
-function Container(element) {
-	return function(options) {
-		let dragResult = null;
-		let lastDraggableInfo = null;
-		const props = getContainerProps(element, options);
-		let dragHandler = getDragHandler(props);
-		let dropHandler = handleDrop(props);
-		let insertionStretcherHandler = handleInsertionSizeChange(props);
-
-		function processLastDraggableInfo() {
-			if (lastDraggableInfo !== null) {
-				lastDraggableInfo.invalidateShadow = true;
-				dragResult = dragHandler(lastDraggableInfo);
-				lastDraggableInfo.invalidateShadow = false;
-			}
-		}
-
-		props.layout.setScrollListener(function() {
-			processLastDraggableInfo();
-		});
-
-		return {
-			element,
-			draggables: props.draggables,
-			isDragRelevant: isDragRelevant(props),
-			getScale: props.layout.getContainerScale,
-			getChildPayload: props.options.getChildPayload,
-			groupName: props.options.groupName,
-			layout: props.layout,
-			childContainers: [],
-			hasParentContainer: false,
-			handleDrag: function(draggableInfo) {
-				lastDraggableInfo = draggableInfo;
-				dragResult = dragHandler(draggableInfo);
-				insertionStretcherHandler(dragResult);
-			},
-			handleDrop: function(draggableInfo) {
-				lastDraggableInfo = null;
-				dragHandler = getDragHandler(props);
-				insertionStretcherHandler({}, true);
-				dropHandler(draggableInfo, dragResult);
-				props.layout.invalidate();
-			},
-			getDragResult: function() {
-				return dragResult;
-			},
-			getTranslateCalculator: function(...params) {
-				return calculateTranslations(props)(...params);
-			},
-			invalidateRect: function() {
-				props.layout.invalidate();
-				processLastDraggableInfo();
-			},
-			getBehaviour: function() {
-				return props.options.behaviour;
-			},
-		};
-	};
-}
-
-export default function(element, options) {
-	const containerIniter = Container(element);
-	const container = containerIniter(options);
-	element[containerInstance] = container;
-	Mediator.register(container);
-	registerToParentContainer(container);
-	return {
-		setOptions: containerIniter,
-		invalidateRect: function() {
-			container.invalidateRect();
-		},
-		dispose: function() {
-			container.layout.dispose();
-		}
-	};
 }
 
 function getRemovedItem({ draggables, element, options }) {
@@ -509,7 +358,6 @@ function handleFirstInsertShadowAdjustment() {
 function getDragInsertionIndex({ draggables, layout }) {
 	const findDraggable = findDraggebleAtPos({ layout });
 	return ({ dragResult: { shadowBeginEnd, pos } }) => {
-		let addedIndex = null;
 		if (!shadowBeginEnd) {
 			const index = findDraggable(draggables, pos, true);
 			return index !== null ? index : draggables.length;
@@ -618,6 +466,102 @@ function compose(params) {
 			return result;
 		}
 	}
+}
+
+// Container definition begin
+function Container(element) {
+	return function(options) {
+		let dragResult = null;
+		let lastDraggableInfo = null;
+		const props = getContainerProps(element, options);
+		let dragHandler = getDragHandler(props);
+		let dropHandler = handleDrop(props);
+		let insertionStretcherHandler = handleInsertionSizeChange(props);
+
+		function processLastDraggableInfo() {
+			if (lastDraggableInfo !== null) {
+				lastDraggableInfo.invalidateShadow = true;
+				dragResult = dragHandler(lastDraggableInfo);
+				lastDraggableInfo.invalidateShadow = false;
+			}
+		}
+
+		props.layout.setScrollListener(function() {
+			processLastDraggableInfo();
+		});
+
+		return {
+			element,
+			draggables: props.draggables,
+			isDragRelevant: isDragRelevant(props),
+			getScale: props.layout.getContainerScale,
+			getChildPayload: props.options.getChildPayload,
+			groupName: props.options.groupName,
+			layout: props.layout,
+			childContainers: [],
+			hasParentContainer: false,
+			handleDrag: function(draggableInfo) {
+				lastDraggableInfo = draggableInfo;
+				dragResult = dragHandler(draggableInfo);
+				insertionStretcherHandler(dragResult);
+			},
+			handleDrop: function(draggableInfo) {
+				lastDraggableInfo = null;
+				dragHandler = getDragHandler(props);
+				insertionStretcherHandler({}, true);
+				dropHandler(draggableInfo, dragResult);
+				props.layout.invalidate();
+			},
+			getDragResult: function() {
+				return dragResult;
+			},
+			getTranslateCalculator: function(...params) {
+				return calculateTranslations(props)(...params);
+			},
+			invalidateRect: function() {
+				props.layout.invalidate();
+				processLastDraggableInfo();
+			},
+			getBehaviour: function() {
+				return props.options.behaviour;
+			},
+			getDragHandleSelector: function() {
+				return props.options.dragHandleSelector;
+			},
+			getDragDelay: () => props.options.dragBeginDelay
+		}; 
+	};
+}
+
+const options = {
+	onDragStart: (itemIndex) => { },
+	onDragMove: ({ }) => { },
+	onDrop: () => { },
+	behaviour: 'move',
+	groupName: 'bla bla', // if not defined => container will not interfere with other containers
+	acceptGroups: [],
+	orientation: 'vertical',
+	dragHandleSelector: null,
+	dragBeginDelay: 0,
+	getChildPayload: (index) => null,
+}
+
+// exported part of container
+export default function(element, options) {
+	const containerIniter = Container(element);
+	const container = containerIniter(options);
+	element[containerInstance] = container;
+	Mediator.register(container);
+	registerToParentContainer(container);
+	return {
+		setOptions: containerIniter,
+		invalidateRect: function() {
+			container.invalidateRect();
+		},
+		dispose: function() {
+			container.layout.dispose();
+		}
+	};
 }
 
 

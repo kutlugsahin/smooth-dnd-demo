@@ -1,5 +1,5 @@
 import * as Utils from './utils';
-import { translationValue, visibilityValue, extraSizeForInsertion, containerInstance, containersInDraggable } from './constants';
+import { translationValue, visibilityValue, extraSizeForInsertion, containersInDraggable } from './constants';
 
 
 

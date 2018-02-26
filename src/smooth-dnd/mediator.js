@@ -136,13 +136,54 @@ function handleDropAnimation(callback) {
 	}
 }
 
+function handleDragStartConditions(container, { clientX, clientY }, startDragClb) {
+	const delay = container.getDragDelay();
+	const moveThreshold = 5;
+
+	const onMove = e => {
+		const { clientX: currentX, clientY: currentY } = e;
+		if (Math.abs(clientX - currentX) > moveThreshold || Math.abs(clientY - currentY) > moveThreshold) {
+			startDragClb();
+		}
+	};
+
+	const onUp = e => {
+		moveEvents.forEach(e => {
+			window.document.removeEventListener(e, onMove);
+		});
+		releaseEvents.forEach(e => {
+			window.document.removeEventListener(e, onUp);
+		});
+	};
+	
+	moveEvents.forEach(e => {
+		window.document.addEventListener(e, onMove);
+	});
+
+	releaseEvents.forEach(e => {		
+		window.document.addEventListener(e, onUp);
+	});
+}
+
 function onMouseDown(e) {
-	e.preventDefault();
 	if (!isDragging) {
 		grabbedElement = Utils.getParent(e.target, '.' + constants.wrapperClass);
 		if (grabbedElement) {
-			addMoveListeners();
-			addReleaseListeners();
+			const container = Utils.getParent(grabbedElement, '.' + constants.containerClass)[constants.containerInstance];
+			const dragHandleSelector = container.getDragHandleSelector();
+
+			let startDrag = true;
+			if (dragHandleSelector && !Utils.getParent(e.target, dragHandleSelector)) {
+				startDrag = false;
+			}
+
+			if (startDrag) {
+				handleDragStartConditions(container, e, () => {
+					e.preventDefault();
+					addMoveListeners();
+					addReleaseListeners();
+				});
+			}
 		}
 	}
 }
