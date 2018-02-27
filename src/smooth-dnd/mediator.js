@@ -155,40 +155,23 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 		}
 	};
 
-	function onUp() {
-		deregisterEvent();
-	};
-
-	function onHTMLDrag() {
-		deregisterEvent();		
-	}
+	function onUp() { deregisterEvent(); };
+	function onHTMLDrag() { deregisterEvent(); }
 
 	function registerEvents() {
 		if (delay) {
-			timer = setTimeout(() => {
-				!deregistered && callCallback();
-			}, delay);
+			timer = setTimeout(callCallback, delay);
 		}
 
-		moveEvents.forEach(e => {
-			window.document.addEventListener(e, onMove);
-		});
-
-		releaseEvents.forEach(e => {
-			window.document.addEventListener(e, onUp);
-		});
-
+		moveEvents.forEach(e => window.document.addEventListener(e, onMove));
+		releaseEvents.forEach(e => window.document.addEventListener(e, onUp));
 		document.addEventListener("drag", onHTMLDrag);
 	}
 
 	function deregisterEvent() {
 		clearTimeout(timer);
-		moveEvents.forEach(e => {
-			window.document.removeEventListener(e, onMove);
-		});
-		releaseEvents.forEach(e => {
-			window.document.removeEventListener(e, onUp);
-		});
+		moveEvents.forEach(e =>	window.document.removeEventListener(e, onMove));
+		releaseEvents.forEach(e => window.document.removeEventListener(e, onUp));
 		document.removeEventListener("drag", onHTMLDrag);		
 	}
 
