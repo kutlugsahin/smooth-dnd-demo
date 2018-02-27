@@ -159,10 +159,14 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 		deregisterEvent();
 	};
 
+	function onHTMLDrag() {
+		deregisterEvent();		
+	}
+
 	function registerEvents() {
 		if (delay) {
 			timer = setTimeout(() => {
-				callCallback();
+				!deregistered && callCallback();
 			}, delay);
 		}
 
@@ -173,6 +177,8 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 		releaseEvents.forEach(e => {
 			window.document.addEventListener(e, onUp);
 		});
+
+		document.addEventListener("drag", onHTMLDrag);
 	}
 
 	function deregisterEvent() {
@@ -183,10 +189,10 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 		releaseEvents.forEach(e => {
 			window.document.removeEventListener(e, onUp);
 		});
+		document.removeEventListener("drag", onHTMLDrag);		
 	}
 
 	function callCallback() {
-		console.log('asdsadsadsad');
 		clearTimeout(timer);
 		deregisterEvent();
 		startDragClb();
