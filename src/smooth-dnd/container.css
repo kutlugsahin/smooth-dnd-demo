@@ -32,6 +32,10 @@
   transition: transform 0.18s ease;
 }
 
+.smooth-dnd-ghost {  
+  
+}
+
 .smooth-dnd-ghost.animated{
   transition: all 0.18s ease-out;
 }

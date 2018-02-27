@@ -9,8 +9,7 @@ import {
 	translationValue,
 	containerClass,
 	containerInstance,
-	containersInDraggable,
-	defaultGrabHandleClass
+	containersInDraggable
 } from './constants';
 import layoutManager from './layoutManager';
 import Mediator from './mediator';
@@ -23,6 +22,10 @@ const defaultOptions = {
 	orientation: 'vertical', // vertical | horizontal
 	getChildPayload: () => { return undefined; }
 };
+
+function getContainer(element) {
+	return element[containerInstance];
+}
 
 function initOptions(props = defaultOptions) {
 	const result = Object.assign({}, defaultOptions, props);
@@ -212,15 +215,15 @@ function getContainerProps(element, initialOptions) {
 function registerToParentContainer(container) {
 	setTimeout(() => {
 		let currentElement = container.element;
-		while (currentElement.parentElement && !currentElement.parentElement[containerInstance]) {
+		while (currentElement.parentElement && !getContainer(currentElement.parentElement)) {
 			currentElement = currentElement.parentElement;
 		}
 
 		if (currentElement.parentElement) {
 			const parentContainer = currentElement.parentElement;
 			container.hasParentContainer = true;
-			parentContainer[containerInstance].childContainers.push(container);
-			container.parentContainer = parentContainer[containerInstance];
+			getContainer(parentContainer).childContainers.push(container);
+			container.setParentContainer(getContainer(parentContainer));
 			//current should be draggable
 			currentElement[containersInDraggable].push(container);
 		}
@@ -248,22 +251,20 @@ function setRemovedItemVisibilty({ draggables, layout }) {
 	}
 }
 
-function getPosition({ layout }) {
-	const container = element[containerInstance];
+function getPosition({ element, layout }) {	
 	return ({ draggableInfo }) => {
 		return {
-			pos: !container.isPosCaptured ? layout.getPosition(draggableInfo.position) : null;
+			pos: !getContainer(element).isPosInChildContainer() ? layout.getPosition(draggableInfo.position) : null
 		}
 	}
 }
 
 function notifyParentOnPositionCapture({ element }) {
-	const container = element[containerInstance];
+	let isCaptured = false;
 	return ({ draggableInfo, dragResult }) => {
-		if (container.parentContainer) {
-			if (dragResult.pos !== null) {
-				container.handlePositionCapture
-			}
+		if (getContainer(element).getParentContainer() && isCaptured !== (dragResult.pos !== null)) {
+			isCaptured = dragResult.pos !== null;
+			getContainer(element).getParentContainer().onChildPositionCaptured(isCaptured);
 		}
 	}
 }
@@ -448,6 +449,7 @@ function getDragHandler(params) {
 		getRemovedItem,
 		setRemovedItemVisibilty,
 		getPosition,
+		notifyParentOnPositionCapture,
 		getElementSize,
 		handleTargetContainer,
 		invalidateShadowBeginEndIfNeeded,
@@ -490,12 +492,22 @@ function Container(element) {
 		let dragHandler = getDragHandler(props);
 		let dropHandler = handleDrop(props);
 		let insertionStretcherHandler = handleInsertionSizeChange(props);
+		let parentContainer = null;
+		let posIsInChildContainer = false;
 
 		function processLastDraggableInfo() {
 			if (lastDraggableInfo !== null) {
 				lastDraggableInfo.invalidateShadow = true;
 				dragResult = dragHandler(lastDraggableInfo);
 				lastDraggableInfo.invalidateShadow = false;
+			}
+		}
+
+		function onChildPositionCaptured(isCaptured) {
+			posIsInChildContainer = isCaptured;
+			if (!parentContainer) {
+				parentContainer.onChildPositionCaptured(isCaptured);
+				dragResult = dragHandler(lastDraggableInfo);
 			}
 		}
 
@@ -513,6 +525,8 @@ function Container(element) {
 			layout: props.layout,
 			childContainers: [],
 			hasParentContainer: false,
+			onChildPositionCaptured,
+			isPosInChildContainer: () => posIsInChildContainer,
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
 				dragResult = dragHandler(draggableInfo);
@@ -541,14 +555,16 @@ function Container(element) {
 			getDragHandleSelector: function() {
 				return props.options.dragHandleSelector;
 			},
-			getDragDelay: () => props.options.dragBeginDelay
+			getDragDelay: () => props.options.dragBeginDelay,
+			setParentContainer: (e) => { parentContainer = e; },
+			getParentContainer: () => parentContainer
 		};
 	};
 }
 
 const options = {
 	onDragStart: (itemIndex) => { },
-	onDragMove: ({ }) => { },
+	onDragMove: () => { },
 	onDrop: () => { },
 	behaviour: 'move',
 	groupName: 'bla bla', // if not defined => container will not interfere with other containers
