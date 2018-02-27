@@ -33,7 +33,7 @@ function initOptions(props = defaultOptions) {
 }
 
 function isDragRelevant({ element, options }) {
-	return function(draggableInfo) {		
+	return function(draggableInfo) {
 		if (options.behaviour === 'copy') return false;
 		if (draggableInfo.container.element === element) return true;
 		if (draggableInfo.groupName && draggableInfo.groupName === options.groupName) return true;
@@ -136,7 +136,7 @@ function handleDrop({ element, draggables, layout, options }) {
 		draggablesReset();
 		// if drop zone is valid => complete drag else do nothing everything will be reverted by draggablesReset()
 		if (draggableInfo.targetElement) {
-			let actualAddIndex = addedIndex !== null ? ((removedIndex !== null && removedIndex < addedIndex) ? addedIndex - 1 : addedIndex) : null;			
+			let actualAddIndex = addedIndex !== null ? ((removedIndex !== null && removedIndex < addedIndex) ? addedIndex - 1 : addedIndex) : null;
 			const dropHandlerParams = {
 				removedIndex,
 				addedIndex: actualAddIndex,
@@ -220,10 +220,11 @@ function registerToParentContainer(container) {
 			const parentContainer = currentElement.parentElement;
 			container.hasParentContainer = true;
 			parentContainer[containerInstance].childContainers.push(container);
+			container.parentContainer = parentContainer[containerInstance];
 			//current should be draggable
 			currentElement[containersInDraggable].push(container);
 		}
-		
+
 	}, 100);
 }
 
@@ -248,9 +249,21 @@ function setRemovedItemVisibilty({ draggables, layout }) {
 }
 
 function getPosition({ layout }) {
+	const container = element[containerInstance];
 	return ({ draggableInfo }) => {
 		return {
-			pos: layout.getPosition(draggableInfo.position)
+			pos: !container.isPosCaptured ? layout.getPosition(draggableInfo.position) : null;
+		}
+	}
+}
+
+function notifyParentOnPositionCapture({ element }) {
+	const container = element[containerInstance];
+	return ({ draggableInfo, dragResult }) => {
+		if (container.parentContainer) {
+			if (dragResult.pos !== null) {
+				container.handlePositionCapture
+			}
 		}
 	}
 }
@@ -259,7 +272,7 @@ function getElementSize({ layout }) {
 	let elementSize = null;
 	return ({ draggableInfo, dragResult }) => {
 		if (dragResult.pos === null) {
-			return elementSize = null ;
+			return elementSize = null;
 		} else {
 			elementSize = elementSize || layout.getSize(draggableInfo.element)
 		}
@@ -348,7 +361,7 @@ function handleFirstInsertShadowAdjustment() {
 				lastAddedIndex = addedIndex;
 				if (pos < shadowBeginEnd.begin) shadowBeginEnd.begin = pos - 5;
 				if (pos > shadowBeginEnd.end) shadowBeginEnd.end = pos + 5;
-			}	
+			}
 		} else {
 			lastAddedIndex = null;
 		}
@@ -529,7 +542,7 @@ function Container(element) {
 				return props.options.dragHandleSelector;
 			},
 			getDragDelay: () => props.options.dragBeginDelay
-		}; 
+		};
 	};
 }
 

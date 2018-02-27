@@ -203,7 +203,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function getScrollValue(element) {
-    return propMapper.get(element, 'scrollValue');    
+    return propMapper.get(element, 'scrollValue');
   }
 
   function dispose() {
