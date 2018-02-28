@@ -19,13 +19,15 @@ class Nested extends Component {
             <div style={itemCls}>Draggable 2</div>
             <div style={itemCls}>Draggable 3</div>
             <div style={itemCls}>Draggable 4</div>
-            <Container groupName="1" style={{backgroundColor: '#abc', padding: '10px'}}>
-              <div style={itemCls}>Draggable 1</div>
-              <div style={itemCls}>Draggable 1 1</div>
-              <div style={itemCls}>Draggable 1 2</div>
-              <div style={itemCls}>Draggable 1 3</div>
-              <div style={itemCls}>Draggable 1 4</div>
-            </Container>
+            <div style={{padding: '10px', backgroundColor: "#bca"}}>
+              <Container groupName="1">
+                <div style={itemCls}>Draggable 1</div>
+                <div style={itemCls}>Draggable 1 1</div>
+                <div style={itemCls}>Draggable 1 2</div>
+                <div style={itemCls}>Draggable 1 3</div>
+                <div style={itemCls}>Draggable 1 4</div>
+              </Container>
+            </div>
           </Container>
         </div>
       </div>
