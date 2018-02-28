@@ -48,7 +48,7 @@ Container.propTypes = {
   behaviour: PropTypes.oneOf(['move', 'copy']),
   groupName: PropTypes.string,
   orientation: PropTypes.oneOf(['horizontal', 'vertical']),
-  children: PropTypes.arrayOf(PropTypes.oneOfType([Draggable])),
+  children: PropTypes.arrayOf(PropTypes.oneOfType([Draggable, Container])),
   style: PropTypes.object
 };
 

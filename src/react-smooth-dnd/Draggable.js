@@ -6,7 +6,7 @@ import {
   animationClass
 } from '../smooth-dnd/constants';
 
-class Draggable extends Component {
+class Draggable extends Component {  
   render() {
     return (
       <div className={`${wrapperClass} ${this.context.orientation} ${animationClass}`}>

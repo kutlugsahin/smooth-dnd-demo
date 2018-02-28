@@ -1,7 +1,7 @@
-import Container from './Container';
-import Draggable from './Draggable';
+import Container from './Container.js';
+import Draggable from './Draggable.js';
 
-export const {
+export {
   Container,
   Draggable
 }

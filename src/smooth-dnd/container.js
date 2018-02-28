@@ -16,7 +16,7 @@ import Mediator from './mediator';
 import './container.css';
 
 const defaultOptions = {
-	groupName: defaultGroupName,
+	groupName: null,
 	behaviour: 'move', // move | copy
 	acceptGroups: [defaultGroupName],
 	orientation: 'vertical', // vertical | horizontal
@@ -24,7 +24,7 @@ const defaultOptions = {
 };
 
 function getContainer(element) {
-	return element[containerInstance];
+	return element ? element[containerInstance] : null;
 }
 
 function initOptions(props = defaultOptions) {
@@ -48,6 +48,7 @@ function isDragRelevant({ element, options }) {
 
 function wrapChild(child, orientation) {
 	const div = document.createElement('div');
+	div[containersInDraggable] = [];
 	div.className = `${wrapperClass} ${orientation} ${animationClass}`;
 	child.parentElement.insertBefore(div, child);
 	div.appendChild(child);
@@ -59,6 +60,8 @@ function wrapChildren(element, orientation) {
 		let wrapper = child;
 		if (!hasClass(child, wrapperClass)) {
 			wrapper = wrapChild(child, orientation);
+		} else {
+			wrapper[containersInDraggable] = [];
 		}
 		return wrapper;
 	});
@@ -212,20 +215,35 @@ function getContainerProps(element, initialOptions) {
 	};
 }
 
+function hasSameGroup(c1, c2) {
+	return c1.groupName === c2.groupName && c1 !== null;
+}
+
+function getRelaventParentContainer(container) {
+	let current = container.element;
+	while (current) {
+		if (current.parentElement && getContainer(current.parentElement) && hasSameGroup(container, getContainer(current.parentElement))) {
+			return {
+				container: getContainer(current.parentElement),
+				draggable: current
+			}	
+		}
+		current = current.parentElement;
+	}
+
+	return null;
+}
+
 function registerToParentContainer(container) {
 	setTimeout(() => {
-		let currentElement = container.element;
-		while (currentElement.parentElement && !getContainer(currentElement.parentElement)) {
-			currentElement = currentElement.parentElement;
-		}
+		const parentInfo = getRelaventParentContainer(container);
 
-		if (currentElement.parentElement) {
-			const parentContainer = currentElement.parentElement;
+		if (parentInfo) {
 			container.hasParentContainer = true;
-			getContainer(parentContainer).childContainers.push(container);
-			container.setParentContainer(getContainer(parentContainer));
+			parentInfo.container.childContainers.push(container);
+			container.setParentContainer(parentInfo.container);
 			//current should be draggable
-			currentElement[containersInDraggable].push(container);
+			parentInfo.draggable[containersInDraggable].push(container);
 		}
 
 	}, 100);
@@ -505,7 +523,7 @@ function Container(element) {
 
 		function onChildPositionCaptured(isCaptured) {
 			posIsInChildContainer = isCaptured;
-			if (!parentContainer) {
+			if (parentContainer) {
 				parentContainer.onChildPositionCaptured(isCaptured);
 				dragResult = dragHandler(lastDraggableInfo);
 			}

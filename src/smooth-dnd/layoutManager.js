@@ -130,11 +130,14 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function updateDescendantContainerRects(container, translation, mapper) {
-    const rect = container.layout.getContainerRectangles().rect;
-    const begin = mapper.get(rect, 'begin') + translation;
-    const end = mapper.get(rect, 'end') + translation;
-    mapper.set(rect, 'begin', begin);
-    mapper.set(rect, 'end', end);
+    // const rect = container.layout.getContainerRectangles().rect;
+    // const begin = mapper.get(rect, 'begin') + translation;
+    // const end = mapper.get(rect, 'end') + translation;
+    // mapper.set(rect, 'begin', begin);
+    // mapper.set(rect, 'end', end);
+    setTimeout(() => {
+      container.layout.invalidate();
+    }, 10);
 
     if (container.childContainers) {
       container.childContainers.forEach(p => updateDescendantContainerRects(p, translation, mapper));
