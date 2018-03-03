@@ -33,6 +33,11 @@
 }
 
 .smooth-dnd-ghost {   
+  
+}
+
+.smooth-dnd-ghost *{
+  box-sizing: border-box;
 }
 
 .smooth-dnd-ghost.animated{
