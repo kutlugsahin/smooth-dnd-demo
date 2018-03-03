@@ -19,10 +19,6 @@ class Container extends Component {
     this.container.dispose();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    
-  }
-
   getChildContext() {
     return {
       orientation: this.props.orientation

@@ -178,49 +178,6 @@ function handleDrop({ element, draggables, layout, options }) {
 	};
 }
 
-function handleInsertionSizeChange({ element, draggables, layout }) {
-	let strectherElement = null;
-	let stretcherElementAdded = false;
-
-	return function({ dragResult: { addedIndex, removedIndex, elementSize } }) {
-		if (removedIndex === null) {
-			if (addedIndex !== null) {
-				if (!stretcherElementAdded) {
-					const containerBeginEnd = layout.getBeginEndOfContainer();
-					const hasScrollBar = layout.getScrollSize(element) > layout.getSize(element);
-					const containerEnd = hasScrollBar ? (containerBeginEnd.begin + layout.getScrollSize(element) - layout.getScrollValue(element)) : containerBeginEnd.end;
-					const lastDraggableEnd = layout.getBeginEnd(draggables[draggables.length - 1]).end - draggables[draggables.length - 1][translationValue];
-					if (lastDraggableEnd + elementSize > containerEnd) {
-						strectherElement = document.createElement('div');
-						strectherElement.className = stretcherElementClass;
-						const stretcherSize = (elementSize + lastDraggableEnd) - containerEnd;
-						layout.setSize(strectherElement.style, `${stretcherSize}px`);
-						element.appendChild(strectherElement);
-						element[stretcherElementInstance] = strectherElement;
-					}
-					stretcherElementAdded = true;
-					setTimeout(() => {
-						layout.invalidateRects();
-					}, 100);
-				}
-			} else {
-				if (strectherElement) {
-					layout.setTranslation(strectherElement, 0);
-					let toRemove = strectherElement;
-					strectherElement = null;
-					element.removeChild(toRemove);
-					element[stretcherElementInstance] = null;
-				}
-				stretcherElementAdded = false;
-				setTimeout(() => {
-					layout.invalidateRects();
-				}, 100);
-
-			}
-		}
-	}
-}
-
 function getContainerProps(element, initialOptions) {
 	const options = initOptions(initialOptions);
 	const draggables = wrapChildren(element, options.orientation, options.animationDuration);
@@ -325,6 +282,123 @@ function handleTargetContainer({ element }) {
 	}
 }
 
+function getDragInsertionIndex({ draggables, layout }) {
+	const findDraggable = findDraggebleAtPos({ layout });
+	return ({ dragResult: { shadowBeginEnd, pos } }) => {
+		if (!shadowBeginEnd) {
+			const index = findDraggable(draggables, pos, true);
+			return index !== null ? index : draggables.length;
+		} else {
+			if (shadowBeginEnd.begin <= pos && shadowBeginEnd.end >= pos) {
+				// position inside ghost
+				return null;
+			}
+		}
+
+		if (pos < shadowBeginEnd.begin) {
+			return findDraggable(draggables, pos);
+		} else if (pos > shadowBeginEnd.end) {
+			return findDraggable(draggables, pos) + 1;
+		} else {
+			return draggables.length;
+		}
+	};
+}
+
+function invalidateShadowBeginEndIfNeeded(params) {
+	const shadowBoundsGetter = getShadowBeginEnd(params);
+	return ({ draggableInfo, dragResult }) => {
+		if (draggableInfo.invalidateShadow) {
+			return shadowBoundsGetter({ draggableInfo, dragResult })
+		}
+		return null;
+	}
+}
+
+function getNextAddedIndex(params) {
+	const getIndexForPos = getDragInsertionIndex(params);
+	return ({ dragResult }) => {
+		let index = null;
+		if (dragResult.pos !== null) {
+			index = getIndexForPos({ dragResult });
+			if (index === null) {
+				index = dragResult.addedIndex;
+			}
+		}
+		return {
+			addedIndex: index
+		}
+	}
+}
+
+function handleInsertionSizeChange({ element, draggables, layout }) {
+	let strectherElement = null;
+	let stretcherElementAdded = false;
+
+	return function({ dragResult: { addedIndex, removedIndex, elementSize } }) {
+		if (removedIndex === null) {
+			if (addedIndex !== null) {
+				if (!stretcherElementAdded) {
+					const containerBeginEnd = layout.getBeginEndOfContainer();
+					const hasScrollBar = layout.getScrollSize(element) > layout.getSize(element);
+					const containerEnd = hasScrollBar ? (containerBeginEnd.begin + layout.getScrollSize(element) - layout.getScrollValue(element)) : containerBeginEnd.end;
+					const lastDraggableEnd = layout.getBeginEnd(draggables[draggables.length - 1]).end - draggables[draggables.length - 1][translationValue];
+					if (lastDraggableEnd + elementSize > containerEnd) {
+						strectherElement = document.createElement('div');
+						strectherElement.className = stretcherElementClass;
+						const stretcherSize = (elementSize + lastDraggableEnd) - containerEnd;
+						layout.setSize(strectherElement.style, `${stretcherSize}px`);
+						element.appendChild(strectherElement);
+						element[stretcherElementInstance] = strectherElement;
+					}
+					stretcherElementAdded = true;
+					setTimeout(() => {
+						layout.invalidateRects();
+					}, 100);
+				}
+			} else {
+				if (strectherElement) {
+					layout.setTranslation(strectherElement, 0);
+					let toRemove = strectherElement;
+					strectherElement = null;
+					element.removeChild(toRemove);
+					element[stretcherElementInstance] = null;
+				}
+				stretcherElementAdded = false;
+				setTimeout(() => {
+					layout.invalidateRects();
+				}, 100);
+
+			}
+		}
+	}
+}
+
+function calculateTranslations({ element, draggables, layout }) {
+	let prevAddedIndex = null;
+	let prevRemovedIndex = null;
+	return function({ dragResult: { addedIndex, removedIndex, elementSize } }) {
+		if (addedIndex !== prevAddedIndex || removedIndex !== prevRemovedIndex) {
+			for (let index = 0; index < draggables.length; index++) {
+				const draggable = draggables[index];
+				let translate = 0;
+				if (removedIndex !== null && removedIndex < index) {
+					translate -= layout.getSize(draggables[removedIndex]);
+				}
+				if (addedIndex !== null && addedIndex <= index) {
+					translate += elementSize;
+				}
+				layout.setTranslation(draggable, translate);
+			}
+
+			prevAddedIndex = addedIndex;
+			prevRemovedIndex = removedIndex;
+
+			return { addedIndex, removedIndex };
+		}
+	};
+}
+
 function getShadowBeginEnd({ draggables, layout }) {
 	let prevAddedIndex = null;
 	return ({ draggableInfo, dragResult }) => {
@@ -403,81 +477,6 @@ function handleFirstInsertShadowAdjustment() {
 			}
 		} else {
 			lastAddedIndex = null;
-		}
-	}
-}
-
-function getDragInsertionIndex({ draggables, layout }) {
-	const findDraggable = findDraggebleAtPos({ layout });
-	return ({ dragResult: { shadowBeginEnd, pos } }) => {
-		if (!shadowBeginEnd) {
-			const index = findDraggable(draggables, pos, true);
-			return index !== null ? index : draggables.length;
-		} else {
-			if (shadowBeginEnd.begin <= pos && shadowBeginEnd.end >= pos) {
-				// position inside ghost
-				return null;
-			}
-		}
-
-		if (pos < shadowBeginEnd.begin) {
-			return findDraggable(draggables, pos);
-		} else if (pos > shadowBeginEnd.end) {
-			return findDraggable(draggables, pos) + 1;
-		} else {
-			return draggables.length;
-		}
-	};
-}
-
-
-function calculateTranslations({ element, draggables, layout }) {
-	let prevAddedIndex = null;
-	let prevRemovedIndex = null;
-	return function({ dragResult: { addedIndex, removedIndex, elementSize } }) {
-		if (addedIndex !== prevAddedIndex || removedIndex !== prevRemovedIndex) {
-			for (let index = 0; index < draggables.length; index++) {
-				const draggable = draggables[index];
-				let translate = 0;
-				if (removedIndex !== null && removedIndex < index) {
-					translate -= layout.getSize(draggables[removedIndex]);
-				}
-				if (addedIndex !== null && addedIndex <= index) {
-					translate += elementSize;
-				}
-				layout.setTranslation(draggable, translate);
-			}
-
-			prevAddedIndex = addedIndex;
-			prevRemovedIndex = removedIndex;
-
-			return { addedIndex, removedIndex };
-		}
-	};
-}
-
-function invalidateShadowBeginEndIfNeeded(params) {
-	const shadowBoundsGetter = getShadowBeginEnd(params);
-	return ({ draggableInfo, dragResult }) => {
-		if (draggableInfo.invalidateShadow) {
-			return shadowBoundsGetter({ draggableInfo, dragResult })
-		}
-		return null;
-	}
-}
-
-function getNextAddedIndex(params) {
-	const getIndexForPos = getDragInsertionIndex(params);
-	return ({ dragResult }) => {
-		let index = null;
-		if (dragResult.pos !== null) {
-			index = getIndexForPos({ dragResult });
-			if (index === null) {
-				index = dragResult.addedIndex;
-			}
-		}
-		return {
-			addedIndex: index
 		}
 	}
 }

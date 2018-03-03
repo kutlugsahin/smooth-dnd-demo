@@ -145,7 +145,7 @@ function handleDropAnimation(callback) {
 
 function handleDragStartConditions(container, { clientX, clientY }, startDragClb) {
 	const delay = container.getDragDelay();
-	const moveThreshold = 2;
+	const moveThreshold = 1;
 	const maxMoveInDelay = 8;
 	let timer = null;
 
