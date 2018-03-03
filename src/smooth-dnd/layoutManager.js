@@ -54,7 +54,9 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   containerElement[extraSizeForInsertion] = 0;
   const map = orientation === 'horizontal' ? horizontalMap : verticalMap;
   const propMapper = orientationDependentProps(map);
-  const values = {};
+  const values = {
+    translation: 0
+  };
   let registeredScrollListener = onScroll;
 
   window.addEventListener('resize', function() {
@@ -95,8 +97,8 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function getBeginEndOfContainer() {
-    const begin = propMapper.get(values.rect, 'begin');
-    const end = propMapper.get(values.rect, 'end');
+    const begin = propMapper.get(values.rect, 'begin') + values.translation;
+    const end = propMapper.get(values.rect, 'end') + values.translation;
     return { begin, end };
   }
 
@@ -114,7 +116,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function getBeginEnd(element) {
-    const begin = getDistanceToOffsetParent(element) + propMapper.get(values.rect, 'begin') - propMapper.get(containerElement, 'scrollValue');
+    const begin = getDistanceToOffsetParent(element) + (propMapper.get(values.rect, 'begin') + values.translation) - propMapper.get(containerElement, 'scrollValue');
     return {
       begin,
       end: begin + getSize(element) * propMapper.get(values, 'scale')
@@ -137,7 +139,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     // mapper.set(rect, 'end', end);
     setTimeout(() => {
       container.layout.invalidate();
-    }, 10);
+    }, 200);
 
     if (container.childContainers) {
       container.childContainers.forEach(p => updateDescendantContainerRects(p, translation, mapper));
@@ -163,7 +165,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
 
   function setVisibility(element, isVisible) {
     if (element[visibilityValue] === undefined || element[visibilityValue] !== isVisible) {
-      element.style.visibility = isVisible ? 'visible' : 'hidden';
+      element.style.visibility = isVisible ? 'inherit' : 'hidden';
       element[visibilityValue] = isVisible;
     }
   }

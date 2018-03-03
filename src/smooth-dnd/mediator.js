@@ -197,8 +197,8 @@ function onMouseDown(e) {
 			}
 
 			if (startDrag) {
+				e.preventDefault();
 				handleDragStartConditions(container, e, () => {
-					e.preventDefault();
 					addMoveListeners();
 					addReleaseListeners();
 				});

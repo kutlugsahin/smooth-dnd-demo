@@ -5,7 +5,8 @@ const itemCls = {
   height: '50px',
   border: '1px solid #ccc',
   margin: '5px',
-  textAlign: 'center'
+  textAlign: 'center',
+  backgroundColor: '#eee'
 }
 
 class Nested extends Component {

@@ -1,4 +1,4 @@
-import { hasClass, addClass, removeClass } from './utils';
+import { hasClass, addClass, removeClass, getParent } from './utils';
 import { domDropHandler } from './dropHandlers';
 import {
 	defaultGroupName,
@@ -38,6 +38,12 @@ function initOptions(props = defaultOptions) {
 function isDragRelevant({ element, options }) {
 	return function(draggableInfo) {
 		if (options.behaviour === 'copy') return false;
+		
+		const parentWrapper = getParent(element, '.' + wrapperClass);
+		if (parentWrapper === draggableInfo.element) {
+			return false;
+		}
+
 		if (draggableInfo.container.element === element) return true;
 		if (draggableInfo.groupName && draggableInfo.groupName === options.groupName) return true;
 		if (options.acceptGroups.indexOf(draggableInfo.groupName) > -1) return true;
@@ -525,7 +531,9 @@ function Container(element) {
 			posIsInChildContainer = isCaptured;
 			if (parentContainer) {
 				parentContainer.onChildPositionCaptured(isCaptured);
-				dragResult = dragHandler(lastDraggableInfo);
+				if (lastDraggableInfo) {
+					dragResult = dragHandler(lastDraggableInfo);
+				}
 			}
 		}
 
@@ -552,6 +560,7 @@ function Container(element) {
 			},
 			handleDrop: function(draggableInfo) {
 				lastDraggableInfo = null;
+				onChildPositionCaptured(false);
 				dragHandler = getDragHandler(props);
 				insertionStretcherHandler({}, true);
 				dropHandler(draggableInfo, dragResult);
