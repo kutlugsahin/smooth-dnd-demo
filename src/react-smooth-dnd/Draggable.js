@@ -9,7 +9,7 @@ import {
 class Draggable extends Component {  
   render() {
     return (
-      <div className={`${wrapperClass} ${this.context.orientation} ${animationClass}`}>
+      <div className={`${wrapperClass} ${this.context.orientation} ${animationClass}`} {...this.props}>
         {this.props.children}
       </div>
     );

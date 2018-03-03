@@ -23,7 +23,7 @@ export default class extends Component {
 	componentDidMount() {
 		window.container = container(this.container, { groupName: '1', behaviour: 'copy' });
 		window.container2 = container(this.container2, { groupName: '1', dragHandleSelector: '.handle' });
-		window.container3 = container(this.container3, { groupName: '1', dragBeginDelay: 50 });
+		window.container3 = container(this.container3, { groupName: '1', dragBeginDelay: 50, animationDuration: 300, dragClass: 'ghost' });
 		window.container4 = container(this.container4, { orientation: 'horizontal' });
 	}
 

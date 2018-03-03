@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container } from './react-smooth-dnd';
+import { Container, Draggable } from './react-smooth-dnd';
 
 const itemCls = {
   height: '50px',
@@ -14,13 +14,18 @@ class Nested extends Component {
     return (
       <div>
         <div>
-          <Container groupName="1">
-            <div style={itemCls}>Draggable</div>
-            <div style={itemCls}>Draggable 1</div>
-            <div style={itemCls}>Draggable 2</div>
-            <div style={itemCls}>Draggable 3</div>
-            <div style={itemCls}>Draggable 4</div>
-            <div style={{padding: '10px', backgroundColor: "#bca"}}>
+          <Container groupName="1" getChildPayload={(index) => index}>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable><div style={itemCls}>Draggable</div></Draggable>
+            <Draggable style={{padding: '10px', backgroundColor: '#abc'}}>
               <Container groupName="1">
                 <div style={itemCls}>Draggable 1</div>
                 <div style={itemCls}>Draggable 1 1</div>
@@ -28,7 +33,7 @@ class Nested extends Component {
                 <div style={itemCls}>Draggable 1 3</div>
                 <div style={itemCls}>Draggable 1 4</div>
               </Container>
-            </div>
+            </Draggable>
           </Container>
         </div>
       </div>

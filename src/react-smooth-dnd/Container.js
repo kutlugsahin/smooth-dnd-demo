@@ -48,8 +48,13 @@ Container.propTypes = {
   behaviour: PropTypes.oneOf(['move', 'copy']),
   groupName: PropTypes.string,
   orientation: PropTypes.oneOf(['horizontal', 'vertical']),
-  children: PropTypes.arrayOf(PropTypes.oneOfType([Draggable, Container])),
-  style: PropTypes.object
+  //children: PropTypes.arrayOf(PropTypes.oneOfType([Draggable, Container])),
+  style: PropTypes.object,
+  dragHandleSelector: PropTypes.string,
+  dragBeginDelay: PropTypes.number,
+  animationDuration: PropTypes.number,
+  getChildPayload: PropTypes.func,
+  dragClass: PropTypes.string
 };
 
 Container.defaultProps = {

@@ -44,7 +44,9 @@ function orientationDependentProps(map) {
   }
 
   function set(obj, prop, value) {
-    obj[map[prop]] = map.setters[prop] ? map.setters[prop](value) : value;
+    requestAnimationFrame(() => {
+      obj[map[prop]] = map.setters[prop] ? map.setters[prop](value) : value;
+    });
   }
 
   return { get, set };

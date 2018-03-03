@@ -24,7 +24,7 @@ const defaultOptions = {
 	animationDuration: 180
 };
 
-function setAnimation(element, add, animationDuration){
+function setAnimation(element, add, animationDuration) {
 	if (add) {
 		addClass(element, animationClass);
 		element.style.transitionDuration = animationDuration + 'ms';
@@ -65,7 +65,7 @@ function isDragRelevant({ element, options }) {
 
 function wrapChild(child, orientation) {
 	const div = document.createElement('div');
-	div.className = `${wrapperClass} ${orientation} ${animationClass}`;	
+	div.className = `${wrapperClass} ${orientation} ${animationClass}`;
 	child.parentElement.insertBefore(div, child);
 	div.appendChild(child);
 	return div;
@@ -77,7 +77,7 @@ function wrapChildren(element, orientation, animationDuration) {
 		if (!hasClass(child, wrapperClass)) {
 			wrapper = wrapChild(child, orientation, animationDuration);
 		}
-			
+
 		wrapper.style.transitionDuration = animationDuration + 'ms';
 		wrapper[containersInDraggable] = [];
 		wrapper[translationValue] = 0;
@@ -185,7 +185,7 @@ function handleInsertionSizeChange({ element, draggables, layout }) {
 	return function({ dragResult: { addedIndex, removedIndex, elementSize } }) {
 		if (removedIndex === null) {
 			if (addedIndex !== null) {
-				if (!stretcherElementAdded) {					
+				if (!stretcherElementAdded) {
 					const containerBeginEnd = layout.getBeginEndOfContainer();
 					const hasScrollBar = layout.getScrollSize(element) > layout.getSize(element);
 					const containerEnd = hasScrollBar ? (containerBeginEnd.begin + layout.getScrollSize(element) - layout.getScrollValue(element)) : containerBeginEnd.end;
@@ -556,6 +556,22 @@ function Container(element) {
 			processLastDraggableInfo();
 		});
 
+		function dispose(container) {
+			const parentInfo = getRelaventParentContainer(container);
+
+			if (parentInfo) {
+				const indexInParentContainer = parentInfo.container.childContainers.indexOf(container);
+				if (indexInParentContainer > -1) {
+					parentInfo.container.childContainers.splice(indexInParentContainer, 1);
+				}
+				
+				const indexInDraggable = parentInfo.draggable[containersInDraggable].indexOf(container);
+				if (indexInDraggable > -1) {
+					parentInfo.draggable[containersInDraggable].splice(indexInDraggable, 1);
+				}
+			}
+		}
+
 		return {
 			element,
 			draggables: props.draggables,
@@ -567,6 +583,7 @@ function Container(element) {
 			childContainers,
 			hasParentContainer: false,
 			onChildPositionCaptured,
+			dispose,
 			isPosInChildContainer: () => posIsInChildContainer,
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
@@ -601,7 +618,7 @@ function Container(element) {
 			onTranslated: () => {
 				processLastDraggableInfo();
 			},
-			getOptions: () => props.options
+			getOptions: () => props.options,
 		};
 	};
 }
@@ -618,6 +635,7 @@ const options = {
 	dragBeginDelay: 0,
 	animationDuration: 180,
 	getChildPayload: (index) => null,
+	dragClass: 'some class',
 }
 
 // exported part of container
@@ -634,6 +652,7 @@ export default function(element, options) {
 		},
 		dispose: function() {
 			container.layout.dispose();
+			container.dispose(container);
 		}
 	};
 }

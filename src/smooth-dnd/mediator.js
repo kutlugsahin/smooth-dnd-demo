@@ -46,8 +46,12 @@ function removeReleaseListeners() {
 	});
 }
 
-function getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1 }) {
+function getGhostElement(element, { x, y }, container) {
+	const { scaleX = 1, scaleY = 1 } = container.getScale();
 	const { left, top, right, bottom } = element.getBoundingClientRect();
+	if (container.getOptions().dragClass) {
+		Utils.addClass(element.childNodes[0], container.getOptions().dragClass);
+	}
 	const midX = left + ((right - left) / 2);
 	const midY = top + ((bottom - top) / 2);
 	const div = document.createElement('div');
@@ -100,7 +104,7 @@ function handleDropAnimation(callback) {
 
 	function animateGhostToPosition({ top, left }, duration) {
 		Utils.addClass(ghostInfo.ghost, 'animated');
-		ghostInfo.ghost.style.transitionDuration = duration + 'ms';
+		ghostInfo.ghost.style.transitionDuration = duration - 10 + 'ms';
 		ghostInfo.ghost.style.left = left + 'px';
 		ghostInfo.ghost.style.top = top + 'px';
 		setTimeout(function() {
@@ -129,12 +133,12 @@ function handleDropAnimation(callback) {
 			animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd), container.getOptions().animationDuration);
 		} else {
 			Utils.addClass(ghostInfo.ghost, 'animated');
-			ghostInfo.ghost.style.transitionDuration = 180 + 'ms';
+			ghostInfo.ghost.style.transitionDuration = container.getOptions().animationDuration + 'ms';
 			ghostInfo.ghost.style.opacity = '0';
 			ghostInfo.ghost.style.transform = 'scale(0.90)';
 			setTimeout(function() {
 				endDrop();
-			}, 180);
+			}, container.getOptions().animationDuration);
 		}
 	}
 }
@@ -173,9 +177,9 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 
 	function deregisterEvent() {
 		clearTimeout(timer);
-		moveEvents.forEach(e =>	window.document.removeEventListener(e, onMove));
+		moveEvents.forEach(e => window.document.removeEventListener(e, onMove));
 		releaseEvents.forEach(e => window.document.removeEventListener(e, onUp));
-		document.removeEventListener("drag", onHTMLDrag);		
+		document.removeEventListener("drag", onHTMLDrag);
 	}
 
 	function callCallback() {
@@ -239,7 +243,7 @@ function onMouseMove(e) {
 		isDragging = true;
 		// first move after grabbing  draggable
 		draggableInfo = getDraggableInfo(grabbedElement);
-		ghostInfo = getGhostElement(grabbedElement, { x: e.clientX, y: e.clientY }, draggableInfo.container.getScale());
+		ghostInfo = getGhostElement(grabbedElement, { x: e.clientX, y: e.clientY }, draggableInfo.container);
 		draggableInfo.position = {
 			x: e.clientX + ghostInfo.centerDelta.x,
 			y: e.clientY + ghostInfo.centerDelta.y
