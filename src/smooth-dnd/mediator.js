@@ -104,18 +104,18 @@ function handleDropAnimation(callback) {
 
 	function animateGhostToPosition({ top, left }, duration) {
 		Utils.addClass(ghostInfo.ghost, 'animated');
-		ghostInfo.ghost.style.transitionDuration = duration - 10 + 'ms';
+		ghostInfo.ghost.style.transitionDuration = duration + 'ms';
 		ghostInfo.ghost.style.left = left + 'px';
 		ghostInfo.ghost.style.top = top + 'px';
 		setTimeout(function() {
 			endDrop();
-		}, duration);
+		}, duration + 10);
 	}
 
 	if (draggableInfo.targetElement) {
 		const container = containers.filter(p => p.element === draggableInfo.targetElement)[0];
 		const dragResult = container.getDragResult();
-		animateGhostToPosition(dragResult.shadowBeginEnd.rect, container.getOptions().animationDuration);
+		animateGhostToPosition(dragResult.shadowBeginEnd.rect, Math.max(150, container.getOptions().animationDuration / 2));
 	} else {
 		const container = containers.filter(p => p === draggableInfo.container)[0];
 		if (container.getBehaviour() === 'move') {
