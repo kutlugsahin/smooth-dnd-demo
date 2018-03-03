@@ -6,5 +6,5 @@ import Vanilla from './Vanilla';
 import Nested from './Nested';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<Vanilla />, document.getElementById('root'));
+ReactDOM.render(<Nested />, document.getElementById('root'));
 registerServiceWorker();
