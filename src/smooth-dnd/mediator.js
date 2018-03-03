@@ -1,9 +1,9 @@
 import * as Utils from './utils';
 import * as constants from './constants';
 
-const grabEvents = ['mousedown'];
-const moveEvents = ['mousemove'];
-const releaseEvents = ['mouseup'];
+const grabEvents = ['mousedown', 'touchstart'];
+const moveEvents = ['mousemove', 'touchmove'];
+const releaseEvents = ['mouseup', 'touchend'];
 
 let dragListeningContainers = null;
 let grabbedElement = null;
@@ -149,8 +149,8 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 	const maxMoveInDelay = 8;
 	let timer = null;
 
-	function onMove(e) {
-		const { clientX: currentX, clientY: currentY } = e;
+	function onMove(event) {
+		const { clientX: currentX, clientY: currentY } = getPointerEvent(event);
 		if (!delay) {
 			if (Math.abs(clientX - currentX) > moveThreshold || Math.abs(clientY - currentY) > moveThreshold) {
 				return callCallback();
@@ -191,7 +191,8 @@ function handleDragStartConditions(container, { clientX, clientY }, startDragClb
 	registerEvents();
 }
 
-function onMouseDown(e) {
+function onMouseDown(event) {
+	const e = getPointerEvent(event);
 	if (!isDragging) {
 		grabbedElement = Utils.getParent(e.target, '.' + constants.wrapperClass);
 		if (grabbedElement) {
@@ -204,7 +205,7 @@ function onMouseDown(e) {
 			}
 
 			if (startDrag) {
-				e.preventDefault();
+				//e.preventDefault();
 				handleDragStartConditions(container, e, () => {
 					addMoveListeners();
 					addReleaseListeners();
@@ -217,7 +218,7 @@ function onMouseDown(e) {
 function onMouseUp() {
 	removeMoveListeners();
 	removeReleaseListeners();
-
+	document.body.style.touchAction = null;
 	if (draggableInfo) {
 		handleDropAnimation(() => {
 			(dragListeningContainers || []).forEach(p => {
@@ -237,9 +238,14 @@ function onMouseUp() {
 	}
 }
 
-function onMouseMove(e) {
-	e.preventDefault();
+function getPointerEvent(e) {
+	return e.touches ? e.touches[0] : e;	
+}
+
+function onMouseMove(event) {
+	const e = getPointerEvent(event);
 	if (!draggableInfo) {
+		document.body.style.touchAction = 'none';
 		isDragging = true;
 		// first move after grabbing  draggable
 		draggableInfo = getDraggableInfo(grabbedElement);
