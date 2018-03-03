@@ -5,7 +5,7 @@ import {
 	wrapperClass,
 	animationClass,
 	stretcherElementClass,
-	extraSizeForInsertion,
+	stretcherElementInstance,
 	translationValue,
 	containerClass,
 	containerInstance,
@@ -20,8 +20,19 @@ const defaultOptions = {
 	behaviour: 'move', // move | copy
 	acceptGroups: [defaultGroupName],
 	orientation: 'vertical', // vertical | horizontal
-	getChildPayload: () => { return undefined; }
+	getChildPayload: () => { return undefined; },
+	animationDuration: 180
 };
+
+function setAnimation(element, add, animationDuration){
+	if (add) {
+		addClass(element, animationClass);
+		element.style.transitionDuration = animationDuration + 'ms';
+	} else {
+		removeClass(element, animationClass);
+		element.style.transitionDuration = null;
+	}
+}
 
 function getContainer(element) {
 	return element ? element[containerInstance] : null;
@@ -38,7 +49,7 @@ function initOptions(props = defaultOptions) {
 function isDragRelevant({ element, options }) {
 	return function(draggableInfo) {
 		if (options.behaviour === 'copy') return false;
-		
+
 		const parentWrapper = getParent(element, '.' + wrapperClass);
 		if (parentWrapper === draggableInfo.element) {
 			return false;
@@ -54,21 +65,22 @@ function isDragRelevant({ element, options }) {
 
 function wrapChild(child, orientation) {
 	const div = document.createElement('div');
-	div[containersInDraggable] = [];
-	div.className = `${wrapperClass} ${orientation} ${animationClass}`;
+	div.className = `${wrapperClass} ${orientation} ${animationClass}`;	
 	child.parentElement.insertBefore(div, child);
 	div.appendChild(child);
 	return div;
 }
 
-function wrapChildren(element, orientation) {
+function wrapChildren(element, orientation, animationDuration) {
 	const draggables = Array.prototype.map.call(element.children, child => {
 		let wrapper = child;
 		if (!hasClass(child, wrapperClass)) {
-			wrapper = wrapChild(child, orientation);
-		} else {
-			wrapper[containersInDraggable] = [];
+			wrapper = wrapChild(child, orientation, animationDuration);
 		}
+			
+		wrapper.style.transitionDuration = animationDuration + 'ms';
+		wrapper[containersInDraggable] = [];
+		wrapper[translationValue] = 0;
 		return wrapper;
 	});
 	return draggables;
@@ -115,17 +127,22 @@ function findDraggebleAtPos({ layout }) {
 	};
 }
 
-function resetDraggables({ element, draggables, layout }) {
+function resetDraggables({ element, draggables, layout, options }) {
 	return function() {
 		draggables.forEach(p => {
-			removeClass(p, animationClass);
+			setAnimation(p, false);
 			layout.setTranslation(p, 0);
 			layout.setVisibility(p, true);
 		});
 
+		if (element[stretcherElementInstance]) {
+			element[stretcherElementInstance].parentNode.removeChild(element[stretcherElementInstance]);
+			element[stretcherElementInstance] = null;
+		}
+
 		setTimeout(() => {
 			draggables.forEach(p => {
-				addClass(p, animationClass);
+				setAnimation(p, true, options.animationDuration);
 			});
 		}, 50);
 	};
@@ -142,7 +159,7 @@ function setTargetContainer(draggableInfo, element, set = true) {
 }
 
 function handleDrop({ element, draggables, layout, options }) {
-	const draggablesReset = resetDraggables({ element, draggables, layout });
+	const draggablesReset = resetDraggables({ element, draggables, layout, options });
 	const dropHandler = (options.dropHandler || domDropHandler)(({ element, draggables, layout, options }));
 	return function(draggableInfo, { addedIndex, removedIndex }) {
 		draggablesReset();
@@ -165,43 +182,40 @@ function handleInsertionSizeChange({ element, draggables, layout }) {
 	let strectherElement = null;
 	let stretcherElementAdded = false;
 
-	return function({ addedIndex, removedIndex, elementSize }, reset = false) {
-		if (reset) {
-			element[extraSizeForInsertion] = 0;
-			if (strectherElement) {
-				element.removeChild(strectherElement);
-				strectherElement = null;
-			}
-		} else {
-			if (removedIndex === null) {
-				if (addedIndex !== null) {
-					if (!stretcherElementAdded) {
-						const containerBeginEnd = layout.getBeginEndOfContainer();
-						const hasScrollBar = layout.getScrollSize(element) > layout.getSize(element);
-						const containerEnd = hasScrollBar ? (containerBeginEnd.begin + layout.getScrollSize(element) - layout.getScrollValue(element)) : containerBeginEnd.end;
-						const lastDraggableEnd = layout.getBeginEnd(draggables[draggables.length - 1]).end - draggables[draggables.length - 1][translationValue];
-						if (lastDraggableEnd + elementSize > containerEnd) {
-							strectherElement = document.createElement('div');
-							strectherElement.className = stretcherElementClass;
-							const stretcherSize = (elementSize + lastDraggableEnd) - containerEnd;
-							element[extraSizeForInsertion] = stretcherSize;
-							layout.setSize(strectherElement.style, `${stretcherSize}px`);
-							element.appendChild(strectherElement);
-						}
-						stretcherElementAdded = true;
+	return function({ dragResult: { addedIndex, removedIndex, elementSize } }) {
+		if (removedIndex === null) {
+			if (addedIndex !== null) {
+				if (!stretcherElementAdded) {					
+					const containerBeginEnd = layout.getBeginEndOfContainer();
+					const hasScrollBar = layout.getScrollSize(element) > layout.getSize(element);
+					const containerEnd = hasScrollBar ? (containerBeginEnd.begin + layout.getScrollSize(element) - layout.getScrollValue(element)) : containerBeginEnd.end;
+					const lastDraggableEnd = layout.getBeginEnd(draggables[draggables.length - 1]).end - draggables[draggables.length - 1][translationValue];
+					if (lastDraggableEnd + elementSize > containerEnd) {
+						strectherElement = document.createElement('div');
+						strectherElement.className = stretcherElementClass;
+						const stretcherSize = (elementSize + lastDraggableEnd) - containerEnd;
+						layout.setSize(strectherElement.style, `${stretcherSize}px`);
+						element.appendChild(strectherElement);
+						element[stretcherElementInstance] = strectherElement;
 					}
-				} else {
-					element[extraSizeForInsertion] = 0;
-					if (strectherElement) {
-						layout.setTranslation(strectherElement, 0);
-						let toRemove = strectherElement;
-						strectherElement = null;
-						element.removeChild(toRemove);
-						setTimeout(function() {
-						}, 180);
-					}
-					stretcherElementAdded = false;
+					stretcherElementAdded = true;
+					setTimeout(() => {
+						layout.invalidateRects();
+					}, 100);
 				}
+			} else {
+				if (strectherElement) {
+					layout.setTranslation(strectherElement, 0);
+					let toRemove = strectherElement;
+					strectherElement = null;
+					element.removeChild(toRemove);
+					element[stretcherElementInstance] = null;
+				}
+				stretcherElementAdded = false;
+				setTimeout(() => {
+					layout.invalidateRects();
+				}, 100);
+
 			}
 		}
 	}
@@ -209,10 +223,10 @@ function handleInsertionSizeChange({ element, draggables, layout }) {
 
 function getContainerProps(element, initialOptions) {
 	const options = initOptions(initialOptions);
-	const draggables = wrapChildren(element, options.orientation);
+	const draggables = wrapChildren(element, options.orientation, options.animationDuration);
 	// set flex classes before layout is inited for scroll listener
 	addClass(element, `${containerClass} ${options.orientation}`);
-	const layout = layoutManager(element, options.orientation);
+	const layout = layoutManager(element, options.orientation, options.animationDuration);
 	return {
 		element,
 		draggables,
@@ -232,7 +246,7 @@ function getRelaventParentContainer(container) {
 			return {
 				container: getContainer(current.parentElement),
 				draggable: current
-			}	
+			}
 		}
 		current = current.parentElement;
 	}
@@ -275,7 +289,7 @@ function setRemovedItemVisibilty({ draggables, layout }) {
 	}
 }
 
-function getPosition({ element, layout }) {	
+function getPosition({ element, layout }) {
 	return ({ draggableInfo }) => {
 		return {
 			pos: !getContainer(element).isPosInChildContainer() ? layout.getPosition(draggableInfo.position) : null
@@ -478,6 +492,7 @@ function getDragHandler(params) {
 		handleTargetContainer,
 		invalidateShadowBeginEndIfNeeded,
 		getNextAddedIndex,
+		handleInsertionSizeChange,
 		calculateTranslations,
 		getShadowBeginEnd,
 		handleFirstInsertShadowAdjustment
@@ -515,9 +530,9 @@ function Container(element) {
 		const props = getContainerProps(element, options);
 		let dragHandler = getDragHandler(props);
 		let dropHandler = handleDrop(props);
-		let insertionStretcherHandler = handleInsertionSizeChange(props);
 		let parentContainer = null;
 		let posIsInChildContainer = false;
+		let childContainers = [];
 
 		function processLastDraggableInfo() {
 			if (lastDraggableInfo !== null) {
@@ -549,20 +564,18 @@ function Container(element) {
 			getChildPayload: props.options.getChildPayload,
 			groupName: props.options.groupName,
 			layout: props.layout,
-			childContainers: [],
+			childContainers,
 			hasParentContainer: false,
 			onChildPositionCaptured,
 			isPosInChildContainer: () => posIsInChildContainer,
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
 				dragResult = dragHandler(draggableInfo);
-				insertionStretcherHandler(dragResult);
 			},
 			handleDrop: function(draggableInfo) {
 				lastDraggableInfo = null;
 				onChildPositionCaptured(false);
 				dragHandler = getDragHandler(props);
-				insertionStretcherHandler({}, true);
 				dropHandler(draggableInfo, dragResult);
 				props.layout.invalidate();
 			},
@@ -584,7 +597,11 @@ function Container(element) {
 			},
 			getDragDelay: () => props.options.dragBeginDelay,
 			setParentContainer: (e) => { parentContainer = e; },
-			getParentContainer: () => parentContainer
+			getParentContainer: () => parentContainer,
+			onTranslated: () => {
+				processLastDraggableInfo();
+			},
+			getOptions: () => props.options
 		};
 	};
 }
@@ -599,6 +616,7 @@ const options = {
 	orientation: 'vertical',
 	dragHandleSelector: null,
 	dragBeginDelay: 0,
+	animationDuration: 180,
 	getChildPayload: (index) => null,
 }
 

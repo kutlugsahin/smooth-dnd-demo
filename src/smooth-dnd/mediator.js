@@ -93,23 +93,25 @@ function getDraggableInfo(draggableElement) {
 function handleDropAnimation(callback) {
 	function endDrop() {
 		Utils.removeClass(ghostInfo.ghost, 'animated');
+		ghostInfo.ghost.style.transitionDuration = null;
 		document.body.removeChild(ghostInfo.ghost);
 		callback();
 	}
 
-	function animateGhostToPosition({ top, left }) {
+	function animateGhostToPosition({ top, left }, duration) {
 		Utils.addClass(ghostInfo.ghost, 'animated');
+		ghostInfo.ghost.style.transitionDuration = duration + 'ms';
 		ghostInfo.ghost.style.left = left + 'px';
 		ghostInfo.ghost.style.top = top + 'px';
 		setTimeout(function() {
 			endDrop();
-		}, 180);
+		}, duration);
 	}
 
 	if (draggableInfo.targetElement) {
 		const container = containers.filter(p => p.element === draggableInfo.targetElement)[0];
 		const dragResult = container.getDragResult();
-		animateGhostToPosition(dragResult.shadowBeginEnd.rect);
+		animateGhostToPosition(dragResult.shadowBeginEnd.rect, container.getOptions().animationDuration);
 	} else {
 		const container = containers.filter(p => p === draggableInfo.container)[0];
 		if (container.getBehaviour() === 'move') {
@@ -124,9 +126,10 @@ function handleDropAnimation(callback) {
 				}
 			});
 			const prevDraggableEnd = removedIndex > 0 ? layout.getBeginEnd(container.draggables[removedIndex - 1]).end : layout.getBeginEndOfContainer().begin;
-			animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd));
+			animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd), container.getOptions().animationDuration);
 		} else {
 			Utils.addClass(ghostInfo.ghost, 'animated');
+			ghostInfo.ghost.style.transitionDuration = 180 + 'ms';
 			ghostInfo.ghost.style.opacity = '0';
 			ghostInfo.ghost.style.transform = 'scale(0.90)';
 			setTimeout(function() {

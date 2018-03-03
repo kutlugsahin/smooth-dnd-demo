@@ -29,15 +29,14 @@
 }
 
 .smooth-dnd-draggable-wrapper.animated{
-  transition: transform 0.18s ease;
+  transition: transform ease;
 }
 
-.smooth-dnd-ghost {  
-  
+.smooth-dnd-ghost {   
 }
 
 .smooth-dnd-ghost.animated{
-  transition: all 0.18s ease-out;
+  transition: all ease-out;
 }
 
 .clearfix:after {
