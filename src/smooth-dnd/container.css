@@ -2,13 +2,12 @@
   box-sizing: border-box;
 }
 
-.disable-touch-action{
+.smooth-dnd-disable-touch-action{
   touch-action: none;
 }
 
 .smooth-dnd-container{
   position: relative;
-  background: greenyellow;
 }
 
 .smooth-dnd-container.vertical{
@@ -57,7 +56,7 @@
     height: 0;
 }
 
-.no-user-select{
+.smooth-dnd-no-user-select{
   user-select: none;
 }
 

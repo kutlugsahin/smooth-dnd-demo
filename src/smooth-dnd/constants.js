@@ -16,3 +16,6 @@ export const stretcherElementClass = 'smooth-dnd-stretcher-element';
 export const stretcherElementInstance = 'smooth-dnd-stretcher-instance'
 
 export const isDraggableDetached = 'smoth-dnd-is-draggable-detached';
+
+export const disbaleTouchActions = 'smooth-dnd-disable-touch-action';
+export const noUserSelectClass = 'smooth-dnd-no-user-select';

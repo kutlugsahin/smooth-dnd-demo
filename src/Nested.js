@@ -14,7 +14,7 @@ class Nested extends Component {
     return (
       <div>
         <div>
-          <Container groupName="1" getChildPayload={(index) => index}>
+          <Container groupName="1" getChildPayload={(index) => index} dragBeginDelay={200}>
             <Draggable><div style={itemCls}>Draggable</div></Draggable>
             <Draggable><div style={itemCls}>Draggable</div></Draggable>
             <Draggable><div style={itemCls}>Draggable</div></Draggable>
@@ -25,8 +25,8 @@ class Nested extends Component {
             <Draggable><div style={itemCls}>Draggable</div></Draggable>
             <Draggable><div style={itemCls}>Draggable</div></Draggable>
             <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable style={{padding: '10px', backgroundColor: '#abc'}}>
-              <Container groupName="1">
+            <Draggable style={{ padding: '10px', backgroundColor: '#abc' }}>
+              <Container groupName="1" dragBeginDelay={200}>
                 <div style={itemCls}>Draggable 1</div>
                 <div style={itemCls}>Draggable 1 1</div>
                 <div style={itemCls}>Draggable 1 2</div>

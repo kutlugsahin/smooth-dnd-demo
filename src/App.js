@@ -1,56 +1,26 @@
 import React, { Component } from 'react';
-import Container from './react-smooth-dnd/Container';
-import Draggable from './react-smooth-dnd/Draggable';
+import * as simples from './demo/pages/simple';
+import Navigator from './demo/navigator';
 
-const dragStyle = {
-  height: '50px',
-  textAlign: 'center',
-  border: '1px solid #ccc',
-  vertialAlign: 'middle',
-  lineHeight: '50px',
-  backgroundColor: 'white',
-  marginTop: '0px'
-};
 
 class App extends Component {
   constructor(props) {
-    super(props);
+    super();
     this.state = {
-      items: Array(50).fill().map((p, i) => i)
+      page: simples.Simple
     }
-    this.onDragEnd = this.onDragEnd.bind(this);
   }
 
   render() {
+    const Page = this.state.page;
     return (
-      <div style={{width: '500px', height:'900px', margin:'100px'}}>
-        <Container style={{ height: '900px',overflowY: 'auto'}} onDropEnd={(...params) => { this.onDragEnd(...params); }}>
-          {this.state.items.map((p,i) => {
-            return (
-              <Draggable key={p}>
-                <div style={dragStyle}>Draggable {p}</div>
-              </Draggable>
-            );
-           })}
-        </Container>
+      <div className="app">
+        <div className="nav-panel"><Navigator onPage={page => this.setState({ page })} /></div>
+        <div className="demo-panel">
+          <Page />
+        </div>
       </div>
     );
-  }
-
-  onDragEnd(dragResult) {
-    const newItems = [...this.state.items];
-    let removed = null;
-    if (dragResult.removedIndex !== null) {
-      removed = newItems.splice(dragResult.removedIndex, 1)[0];
-    }
-
-    if (dragResult.addedIndex !== null) {
-      newItems.splice(dragResult.addedIndex, 0, removed);
-    }
-
-    // this.setState({
-    //   items: newItems
-    // })
   }
 }
 
