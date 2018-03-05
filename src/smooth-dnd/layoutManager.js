@@ -82,14 +82,14 @@ export default function layoutManager(containerElement, orientation, _animationD
   }
 
   function invalidateContainerRectangles(containerElement) {
-    const { right, left, bottom, top } = containerElement.getBoundingClientRect();
-    values.rect = { right, left, bottom, top };
-    values.visibleRect = Utils.getVisibleRect(containerElement);
+    values.rect = Utils.getContainerRect(containerElement);
+    values.visibleRect = Utils.getVisibleRect(containerElement, values.rect);
   }
 
   function invalidateContainerScale(containerElement) {
-    values.scaleX = (values.rect.right - values.rect.left) / containerElement.offsetWidth;
-    values.scaleY = (values.rect.bottom - values.rect.top) / containerElement.offsetHeight;
+    const rect = containerElement.getBoundingClientRect();
+    values.scaleX = (rect.right - rect.left) / containerElement.offsetWidth;
+    values.scaleY = (rect.bottom - rect.top) / containerElement.offsetHeight;
   }
 
   function getContainerRectangles() {

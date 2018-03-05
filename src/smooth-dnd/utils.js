@@ -7,33 +7,78 @@ export const getIntersection = (rect1, rect2) => {
   }
 }
 
-export const isScrolling(element, dimension){
-  if(dimension){
-
+export const getIntersectionOnAxis = (rect1, rect2, axis) => {
+  if (axis === 'x') {
+    return {
+      left: Math.max(rect1.left, rect2.left),
+      top: rect1.top,
+      right: Math.min(rect1.right, rect2.right),
+      bottom: rect1.bottom
+    }
   } else {
-    const overflow = element.style.overflow;
-    const overFlowAxis = element.style[`overflow${dimension}`];
-    const general = overflow === 'auto' || overflow === 'scroll';
-    const dimensionScroll = overFlowAxis === 'auto' || overFlowAxis === 'scroll';
-    return 
+    return {
+      left: rect1.left,
+      top: Math.max(rect1.top, rect2.top),
+      right: rect1.right,
+      bottom: Math.min(rect1.bottom, rect2.bottom),
+    }
   }
 }
 
-export const getVisibleRect = (element) => {
+export const getContainerRect = (element) => {
+  const _rect = element.getBoundingClientRect();
+  const rect = { 
+    left: _rect.left,
+    right: _rect.right + 10,
+    top: _rect.top,
+    bottom: _rect.bottom
+  }
+  
+  if (hasBiggerChild(element, 'x') && !isScrollingOrHidden(element, 'X')) {
+    const width = rect.right - rect.left;
+    rect.right = rect.right + element.scrollWidth - width;
+  }
+
+  if (hasBiggerChild(element, 'y') && !isScrollingOrHidden(element, 'Y')) {
+    const height = rect.bottom - rect.top;
+    rect.bottom = rect.bottom + element.scrollHeight - height;
+  }
+
+  return rect;
+}
+
+export const isScrollingOrHidden = (element, axis) => {
+  const overflow = element.style.overflow;
+  const overFlowAxis = element.style[`overflow${axis}`];
+  const general = overflow === 'auto' || overflow === 'scroll' || overflow === 'hidden';
+  const dimensionScroll = overFlowAxis === 'auto' || overFlowAxis === 'scroll' || overFlowAxis === 'hidden';
+  return general || dimensionScroll;
+}
+
+export const hasBiggerChild = (element, axis) => {
+  if (axis === 'x') {
+    return element.scrollWidth > element.clientWidth
+  } else {
+    return element.scrollHeight > element.clientHeight;
+  }
+}
+
+export const getVisibleRect = (element, elementRect) => {
   let currentElement = element;
-  let rect = element.getBoundingClientRect();
+  let rect = elementRect || getContainerRect(element);
   currentElement = element.parentElement;
   while (currentElement) {
-    if (currentElement.scrollHeight > currentElement.clientHeight) {
-      if(currentElement.style.overflow)
-      rect = getIntersection(rect, currentElement.getBoundingClientRect());
+    if (hasBiggerChild(currentElement, 'x') && isScrollingOrHidden(currentElement, 'X')) {
+      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'x');
     }
 
-    if (currentElement.scrollWidth > currentElement.clientWidth) {
-      
+    if (hasBiggerChild(currentElement, 'y') && isScrollingOrHidden(currentElement, 'Y')) {
+      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'y');
     }
+
     currentElement = currentElement.parentElement;
   }
+
   return rect;
 }
 
