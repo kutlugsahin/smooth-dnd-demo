@@ -7,12 +7,30 @@ export const getIntersection = (rect1, rect2) => {
   }
 }
 
+export const isScrolling(element, dimension){
+  if(dimension){
+
+  } else {
+    const overflow = element.style.overflow;
+    const overFlowAxis = element.style[`overflow${dimension}`];
+    const general = overflow === 'auto' || overflow === 'scroll';
+    const dimensionScroll = overFlowAxis === 'auto' || overFlowAxis === 'scroll';
+  }
+}
+
 export const getVisibleRect = (element) => {
   let currentElement = element;
   let rect = element.getBoundingClientRect();
   currentElement = element.parentElement;
   while (currentElement) {
-    rect = getIntersection(rect, currentElement.getBoundingClientRect());
+    if (currentElement.scrollHeight > currentElement.clientHeight) {
+      if(currentElement.style.overflow)
+      rect = getIntersection(rect, currentElement.getBoundingClientRect());
+    }
+
+    if (currentElement.scrollWidth > currentElement.clientWidth) {
+      
+    }
     currentElement = currentElement.parentElement;
   }
   return rect;

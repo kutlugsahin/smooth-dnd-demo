@@ -5,8 +5,7 @@ const itemCls = {
   height: '50px',
   border: '1px solid #ccc',
   margin: '5px',
-  textAlign: 'center',
-  backgroundColor: '#eee'
+  textAlign: 'center'
 }
 
 class Nested extends Component {
@@ -14,26 +13,21 @@ class Nested extends Component {
     return (
       <div>
         <div>
-          <Container groupName="1" getChildPayload={(index) => index} dragBeginDelay={200}>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable><div style={itemCls}>Draggable</div></Draggable>
-            <Draggable style={{ padding: '10px', backgroundColor: '#abc' }}>
-              <Container groupName="1" dragBeginDelay={200}>
+          <Container groupName="1">
+            <div style={itemCls}>Draggable</div>
+            <div style={itemCls}>Draggable 1</div>
+            <div style={itemCls}>Draggable 2</div>
+            <div style={itemCls}>Draggable 3</div>
+            <div style={itemCls}>Draggable 4</div>
+            <div style={{padding: '10px', backgroundColor: "#bca"}}>
+              <Container groupName="1">
                 <div style={itemCls}>Draggable 1</div>
                 <div style={itemCls}>Draggable 1 1</div>
                 <div style={itemCls}>Draggable 1 2</div>
                 <div style={itemCls}>Draggable 1 3</div>
                 <div style={itemCls}>Draggable 1 4</div>
               </Container>
-            </Draggable>
+            </div>
           </Container>
         </div>
       </div>
