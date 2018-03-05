@@ -15,6 +15,7 @@ export const isScrolling(element, dimension){
     const overFlowAxis = element.style[`overflow${dimension}`];
     const general = overflow === 'auto' || overflow === 'scroll';
     const dimensionScroll = overFlowAxis === 'auto' || overFlowAxis === 'scroll';
+    return 
   }
 }
 
