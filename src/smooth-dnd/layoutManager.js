@@ -70,7 +70,11 @@ export default function layoutManager(containerElement, orientation, _animationD
   setTimeout(() => {
     invalidate();
   }, 10);
-  invalidate();
+  // invalidate();
+
+  const buildQuery = (url, params) => {
+    return `${url}?${Object.keys(params).map(p => `${p}=${params[p]}`).join('&')}`;
+  }
 
   const scrollListener = Utils.listenScrollParent(containerElement, map.scrollSize, map.offsetSize, function() {
     invalidateContainerRectangles(containerElement);
@@ -81,9 +85,23 @@ export default function layoutManager(containerElement, orientation, _animationD
     invalidateContainerScale(containerElement);
   }
 
+  let visibleRect;
   function invalidateContainerRectangles(containerElement) {
     values.rect = Utils.getContainerRect(containerElement);
     values.visibleRect = Utils.getVisibleRect(containerElement, values.rect);
+
+    // if (visibleRect) {
+    //   visibleRect.parentNode.removeChild(visibleRect);
+    // }
+    // visibleRect = document.createElement('div');
+    // visibleRect.style.position = 'fixed';
+    // visibleRect.style.border = '1px solid red';
+    // visibleRect.style.top = values.visibleRect.top + 'px';
+    // visibleRect.style.left = values.visibleRect.left + 'px';
+    // visibleRect.style.width = values.visibleRect.right - values.visibleRect.left + 'px';
+    // visibleRect.style.height = values.visibleRect.bottom - values.visibleRect.top + 'px';
+    // document.body.appendChild(visibleRect);
+
   }
 
   function invalidateContainerScale(containerElement) {
@@ -222,6 +240,11 @@ export default function layoutManager(containerElement, orientation, _animationD
   function dispose() {
     if (scrollListener) {
       scrollListener.dispose();
+    }
+
+    if (visibleRect) {
+      visibleRect.parentNode.removeChild(visibleRect);
+      visibleRect = null;
     }
   }
 

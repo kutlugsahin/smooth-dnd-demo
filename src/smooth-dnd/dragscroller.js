@@ -1,6 +1,6 @@
 import { isScrolling } from './utils';
 
-const maxSpeed = 900; // px/s
+const maxSpeed = 1500; // px/s
 const minSpeed = 20; // px/s
 
 function getScrollableParent(element, axis) {
@@ -39,7 +39,7 @@ function requestFrame(element, layout) {
         distanceDiff = direction === 'begin' ? (0 - distanceDiff) : distanceDiff;
         const scrollTo = layout.getScrollValue(element) + distanceDiff;
         layout.setScrollValue(element, scrollTo);
-        console.log(scrollTo);
+        // console.log(scrollTo);
         request = null;
         start();
       });
@@ -64,13 +64,14 @@ function requestFrame(element, layout) {
 
 function getAutoScrollInfo(layout, pos, elementSize) {
   const { begin, end } = layout.getBeginEndOfContainerVisibleRect();
-  const moveDistance = 100;
+  const moveDistance = elementSize * 1.5;
   if (end - pos < moveDistance) {
     return {
       direction: 'end',
       speedFactor: (moveDistance - (end - pos)) / moveDistance
     }
   } else if (pos - begin < moveDistance) {
+    console.log(pos - begin);
     return {
       direction: 'begin',
       speedFactor: (moveDistance - (pos - begin)) / moveDistance
