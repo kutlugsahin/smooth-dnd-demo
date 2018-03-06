@@ -1,6 +1,6 @@
 import { hasClass, addClass, removeClass, getParent } from './utils';
 import { domDropHandler } from './dropHandlers';
-import dragScroller from './dragscroller';
+import dragscroller from './dragscroller';
 import {
 	defaultGroupName,
 	wrapperClass,
@@ -495,8 +495,7 @@ function getDragHandler(params) {
 		handleInsertionSizeChange,
 		calculateTranslations,
 		getShadowBeginEnd,
-		handleFirstInsertShadowAdjustment,
-		dragScroller
+		handleFirstInsertShadowAdjustment
 	);
 }
 
@@ -531,6 +530,7 @@ function Container(element) {
 		const props = getContainerProps(element, options);
 		let dragHandler = getDragHandler(props);
 		let dropHandler = handleDrop(props);
+		let handleScrollOnDrag = dragscroller(props);
 		let parentContainer = null;
 		let posIsInChildContainer = false;
 		let childContainers = [];
@@ -589,12 +589,15 @@ function Container(element) {
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
 				dragResult = dragHandler(draggableInfo);
+				handleScrollOnDrag({ draggableInfo, dragResult });
 			},
 			handleDrop: function(draggableInfo) {
 				lastDraggableInfo = null;
 				onChildPositionCaptured(false);
 				dragHandler = getDragHandler(props);
 				dropHandler(draggableInfo, dragResult);
+				handleScrollOnDrag({ reset: true });
+				handleScrollOnDrag = dragscroller(props);
 				props.layout.invalidate();
 			},
 			getDragResult: function() {

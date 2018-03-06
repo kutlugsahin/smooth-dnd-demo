@@ -1,6 +1,6 @@
 import { isScrolling } from './utils';
 
-const maxSpeed = 500; // px/s
+const maxSpeed = 1500; // px/s
 const minSpeed = 50; // px/s
 
 function getScrollableParent(element, axis) {
@@ -30,15 +30,20 @@ function requestFrame(element, layout) {
   }
 
   function start() {
-    request = requestAnimationFrame((timestamp) => {
-      if (startTime === null) { startTime = timestamp };
-      const timeDiff = timestamp - startTime;
-      startTime = timestamp;
-      let distanceDiff = (timeDiff / 1000) * speed;
-      distanceDiff = direction === 'begin' ? (0 - distanceDiff) : distanceDiff;
-      layout.setScrollValue(element, layout.getScrollValue(element) + distanceDiff);
-      start();
-    });
+    if (request === null) {
+      request = requestAnimationFrame((timestamp) => {
+        if (startTime === null) { startTime = timestamp };
+        const timeDiff = timestamp - startTime;
+        startTime = timestamp;
+        let distanceDiff = (timeDiff / 1000) * speed;
+        distanceDiff = direction === 'begin' ? (0 - distanceDiff) : distanceDiff;
+        const scrollTo = layout.getScrollValue(element) + distanceDiff;
+        layout.setScrollValue(element, scrollTo);
+        console.log(scrollTo);
+        request = null;
+        start();
+      });
+    }
   }
 
   function stop() {
@@ -79,12 +84,16 @@ export default ({ element, layout, options }) => {
   const axis = options.orientation === 'vertical' ? 'Y' : 'X';
   let scrollableParent = getScrollableParent(element, axis);
   let animator = requestFrame(element, layout);
-  return ({ draggableInfo, dragResult }) => {
+  return ({ draggableInfo, dragResult, reset }) => {
+    if (reset) {
+      animator.stop();
+      return null;
+    }
     if (dragResult.pos !== null) {
       if (lastPos === null) {
         scrollableParent = getScrollableParent(element, axis);
         animator.stop();
-        animator = requestFrame(element, layout);
+        animator = requestFrame(scrollableParent, layout);
       }
       const autoScrollInfo = getAutoScrollInfo(layout, dragResult.pos, dragResult.elementSize);
       if (autoScrollInfo) {
@@ -92,6 +101,7 @@ export default ({ element, layout, options }) => {
       } else {
         animator.stop();
       }
+      lastPos = dragResult.pos;
     }
 
     lastPos = dragResult.pos;

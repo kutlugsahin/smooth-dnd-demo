@@ -34,12 +34,12 @@ export const getContainerRect = (element) => {
     bottom: _rect.bottom
   }
   
-  if (hasBiggerChild(element, 'X') && !isScrollingOrHidden(element, 'X')) {
+  if (hasBiggerChild(element, 'x') && !isScrollingOrHidden(element, 'x')) {
     const width = rect.right - rect.left;
     rect.right = rect.right + element.scrollWidth - width;
   }
 
-  if (hasBiggerChild(element, 'Y') && !isScrollingOrHidden(element, 'Y')) {
+  if (hasBiggerChild(element, 'y') && !isScrollingOrHidden(element, 'y')) {
     const height = rect.bottom - rect.top;
     rect.bottom = rect.bottom + element.scrollHeight - height;
   }
@@ -48,23 +48,25 @@ export const getContainerRect = (element) => {
 }
 
 export const isScrolling = (element, axis) => {
-  const overflow = element.style.overflow;
-  const overFlowAxis = element.style[`overflow${axis}`];
+  const style = window.getComputedStyle(element);
+  const overflow = style['overflow'];
+  const overFlowAxis = style[`overflow-${axis}`];
   const general = overflow === 'auto' || overflow === 'scroll';
   const dimensionScroll = overFlowAxis === 'auto' || overFlowAxis === 'scroll';
   return general || dimensionScroll;
 }
 
 export const isScrollingOrHidden = (element, axis) => {
-  const overflow = element.style.overflow;
-  const overFlowAxis = element.style[`overflow${axis}`];
+  const style = window.getComputedStyle(element);
+  const overflow = style['overflow'];
+  const overFlowAxis = style[`overflow-${axis}`];
   const general = overflow === 'auto' || overflow === 'scroll' || overflow === 'hidden';
   const dimensionScroll = overFlowAxis === 'auto' || overFlowAxis === 'scroll' || overFlowAxis === 'hidden';
   return general || dimensionScroll;
 }
 
 export const hasBiggerChild = (element, axis) => {
-  if (axis === 'X') {
+  if (axis === 'x') {
     return element.scrollWidth > element.clientWidth
   } else {
     return element.scrollHeight > element.clientHeight;
@@ -80,12 +82,12 @@ export const getVisibleRect = (element, elementRect) => {
   let rect = elementRect || getContainerRect(element);
   currentElement = element.parentElement;
   while (currentElement) {
-    if (hasBiggerChild(currentElement, 'X') && isScrollingOrHidden(currentElement, 'X')) {
-      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'X');
+    if (hasBiggerChild(currentElement, 'x') && isScrollingOrHidden(currentElement, 'x')) {
+      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'x');
     }
 
-    if (hasBiggerChild(currentElement, 'Y') && isScrollingOrHidden(currentElement, 'Y')) {
-      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'Y');
+    if (hasBiggerChild(currentElement, 'y') && isScrollingOrHidden(currentElement, 'y')) {
+      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'y');
     }
 
     currentElement = currentElement.parentElement;
