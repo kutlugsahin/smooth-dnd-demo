@@ -1,5 +1,6 @@
 import { hasClass, addClass, removeClass, getParent } from './utils';
 import { domDropHandler } from './dropHandlers';
+import dragScroller from './dragscroller';
 import {
 	defaultGroupName,
 	wrapperClass,
@@ -494,7 +495,8 @@ function getDragHandler(params) {
 		handleInsertionSizeChange,
 		calculateTranslations,
 		getShadowBeginEnd,
-		handleFirstInsertShadowAdjustment
+		handleFirstInsertShadowAdjustment,
+		dragScroller
 	);
 }
 

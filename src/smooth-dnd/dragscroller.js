@@ -3,7 +3,7 @@ import { isScrolling } from './utils';
 const maxSpeed = 500; // px/s
 const minSpeed = 50; // px/s
 
-function getScrollableParents(element, axis) {
+function getScrollableParent(element, axis) {
   let current = element;
   while (current) {
     if (isScrolling(current)) {
@@ -42,10 +42,12 @@ function requestFrame(element, layout) {
   }
 
   function stop() {
-    cancelAnimationFrame(request);
-    isAnimating = false;
-    startTime = null;
-    request = null;
+    if (isAnimating) {
+      cancelAnimationFrame(request);
+      isAnimating = false;
+      startTime = null;
+      request = null;
+    }
   }
 
   return {
