@@ -217,7 +217,10 @@ function onMouseDown(event) {
 			}
 
 			if (startDrag) {
-				handleDragStartConditions(e, container.getDragDelay(), () => {			
+				handleDragStartConditions(e, container.getDragDelay(), () => {	
+					setTimeout(() => {
+						window.getSelection().empty();
+					}, 0);
 					addMoveListeners();
 					addReleaseListeners();
 				});
