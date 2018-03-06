@@ -288,6 +288,9 @@ function Mediator() {
 	return {
 		register: function(container) {
 			containers.push(container);
+		},
+		unregister: function(container) {
+			containers.splice(containers.indexOf(container), 1);
 		}
 	};
 }

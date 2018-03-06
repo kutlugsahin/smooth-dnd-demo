@@ -17,6 +17,7 @@ class Container extends Component {
 
   componentWillUnmount() {
     this.container.dispose();
+    this.container = null;
   }
 
   getChildContext() {

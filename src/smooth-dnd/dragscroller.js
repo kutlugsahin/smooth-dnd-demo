@@ -1,7 +1,7 @@
 import { isScrolling } from './utils';
 
-const maxSpeed = 1500; // px/s
-const minSpeed = 50; // px/s
+const maxSpeed = 900; // px/s
+const minSpeed = 20; // px/s
 
 function getScrollableParent(element, axis) {
   let current = element;
@@ -64,7 +64,7 @@ function requestFrame(element, layout) {
 
 function getAutoScrollInfo(layout, pos, elementSize) {
   const { begin, end } = layout.getBeginEndOfContainerVisibleRect();
-  const moveDistance = elementSize / 2;
+  const moveDistance = 100;
   if (end - pos < moveDistance) {
     return {
       direction: 'end',
@@ -102,6 +102,8 @@ export default ({ element, layout, options }) => {
         animator.stop();
       }
       lastPos = dragResult.pos;
+    } else {
+      animator.stop();
     }
 
     lastPos = dragResult.pos;

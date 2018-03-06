@@ -17,7 +17,7 @@ class Horizontal extends Component {
     super();
 
     this.state = {
-      items1: generateItems(25, (_, i) => ({ id: i, data: `Source Draggable - ${i}` })),
+      items1: generateItems(5, (_, i) => ({ id: i, data: `Source Draggable - ${i}` })),
       items2: generateItems(25, (_, i) => ({ id: i, data: `Draggable 2 - ${i}` })),
       items3: generateItems(25, (_, i) => ({ id: i, data: `Draggable 3 - ${i}` })),
       items4: generateItems(25, (_, i) => ({ id: i, data: `Draggable 4 - ${i}` })),

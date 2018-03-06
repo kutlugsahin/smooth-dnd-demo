@@ -655,6 +655,7 @@ export default function(element, options) {
 			container.invalidateRect();
 		},
 		dispose: function() {
+			Mediator.unregister(container)
 			container.layout.dispose();
 			container.dispose(container);
 		}
