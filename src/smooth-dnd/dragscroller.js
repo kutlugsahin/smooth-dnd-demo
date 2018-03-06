@@ -19,26 +19,26 @@ function requestFrame(element, layout) {
   let startTime = null;
   let direction = null;
   let speed = null;
-  
+
   function animate(_direction, _speed) {
     direction = _direction;
     speed = _speed;
     isAnimating = true;
-    start();
+    if(isAnimating){
+      start();
+    }
   }
 
   function start() {
-    if (!isAnimating) {
-      request = requestAnimationFrame((timestamp) => {
-        if (startTime === null) { startTime = timestamp };
-        const timeDiff = timestamp - startTime;
-        startTime = timestamp;
-        let distanceDiff = (timeDiff / 1000) * speed;
-        distanceDiff = direction === 'begin' ? (0 - distanceDiff) : distanceDiff;
-        layout.setScrollValue(element, layout.getScrollValue(element) + distanceDiff);
-        start();        
-      });
-    }
+    request = requestAnimationFrame((timestamp) => {
+      if (startTime === null) { startTime = timestamp };
+      const timeDiff = timestamp - startTime;
+      startTime = timestamp;
+      let distanceDiff = (timeDiff / 1000) * speed;
+      distanceDiff = direction === 'begin' ? (0 - distanceDiff) : distanceDiff;
+      layout.setScrollValue(element, layout.getScrollValue(element) + distanceDiff);
+      start();
+    });
   }
 
   function stop() {
