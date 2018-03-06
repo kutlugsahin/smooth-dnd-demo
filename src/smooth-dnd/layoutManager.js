@@ -238,6 +238,7 @@ export default function layoutManager(containerElement, orientation, _animationD
     //getDistanceToContainerBegining,
     getContainerRectangles,
     getBeginEndOfContainer,
+    getBeginEndOfContainerVisibleRect,
     getBeginEnd,
     getAxisValue,
     setTranslation,
