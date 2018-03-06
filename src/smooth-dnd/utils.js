@@ -34,17 +34,25 @@ export const getContainerRect = (element) => {
     bottom: _rect.bottom
   }
   
-  if (hasBiggerChild(element, 'x') && !isScrollingOrHidden(element, 'X')) {
+  if (hasBiggerChild(element, 'X') && !isScrollingOrHidden(element, 'X')) {
     const width = rect.right - rect.left;
     rect.right = rect.right + element.scrollWidth - width;
   }
 
-  if (hasBiggerChild(element, 'y') && !isScrollingOrHidden(element, 'Y')) {
+  if (hasBiggerChild(element, 'Y') && !isScrollingOrHidden(element, 'Y')) {
     const height = rect.bottom - rect.top;
     rect.bottom = rect.bottom + element.scrollHeight - height;
   }
 
   return rect;
+}
+
+export const isScrolling = (element, axis) => {
+  const overflow = element.style.overflow;
+  const overFlowAxis = element.style[`overflow${axis}`];
+  const general = overflow === 'auto' || overflow === 'scroll';
+  const dimensionScroll = overFlowAxis === 'auto' || overFlowAxis === 'scroll';
+  return general || dimensionScroll;
 }
 
 export const isScrollingOrHidden = (element, axis) => {
@@ -56,11 +64,15 @@ export const isScrollingOrHidden = (element, axis) => {
 }
 
 export const hasBiggerChild = (element, axis) => {
-  if (axis === 'x') {
+  if (axis === 'X') {
     return element.scrollWidth > element.clientWidth
   } else {
     return element.scrollHeight > element.clientHeight;
   }
+}
+
+export const hasScrollBar = (element, axis) => {
+  return hasBiggerChild(element, axis) && isScrolling(element, axis);
 }
 
 export const getVisibleRect = (element, elementRect) => {
@@ -68,12 +80,12 @@ export const getVisibleRect = (element, elementRect) => {
   let rect = elementRect || getContainerRect(element);
   currentElement = element.parentElement;
   while (currentElement) {
-    if (hasBiggerChild(currentElement, 'x') && isScrollingOrHidden(currentElement, 'X')) {
-      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'x');
+    if (hasBiggerChild(currentElement, 'X') && isScrollingOrHidden(currentElement, 'X')) {
+      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'X');
     }
 
-    if (hasBiggerChild(currentElement, 'y') && isScrollingOrHidden(currentElement, 'Y')) {
-      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'y');
+    if (hasBiggerChild(currentElement, 'Y') && isScrollingOrHidden(currentElement, 'Y')) {
+      rect = getIntersectionOnAxis(rect, currentElement.getBoundingClientRect(), 'Y');
     }
 
     currentElement = currentElement.parentElement;

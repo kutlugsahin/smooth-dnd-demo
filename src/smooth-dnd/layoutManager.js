@@ -105,6 +105,12 @@ export default function layoutManager(containerElement, orientation, _animationD
     return { begin, end };
   }
 
+  function getBeginEndOfContainerVisibleRect() {
+    const begin = propMapper.get(values.visibleRect, 'begin') + values.translation;
+    const end = propMapper.get(values.visibleRect, 'end') + values.translation;
+    return { begin, end };
+  }
+
   function getContainerScale() {
     return { scaleX: values.scaleX, scaleY: values.scaleY };
   }
@@ -209,6 +215,10 @@ export default function layoutManager(containerElement, orientation, _animationD
     return propMapper.get(element, 'scrollValue');
   }
 
+  function setScrollValue(element, val) {
+    return propMapper.set(element, 'scrollValue', val);
+  }
+
   function dispose() {
     if (scrollListener) {
       scrollListener.dispose();
@@ -242,6 +252,7 @@ export default function layoutManager(containerElement, orientation, _animationD
     getTopLeftOfElementBegin,
     getScrollSize,
     getScrollValue,
+    setScrollValue,
     invalidate,
     invalidateRects,
     getPosition,
