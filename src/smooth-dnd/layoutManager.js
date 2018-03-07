@@ -1,5 +1,5 @@
 import * as Utils from './utils';
-import { translationValue, visibilityValue, extraSizeForInsertion } from './constants';
+import { translationValue, visibilityValue, extraSizeForInsertion, containersInDraggable } from './constants';
 
 
 
@@ -44,18 +44,23 @@ function orientationDependentProps(map) {
   }
 
   function set(obj, prop, value) {
-    obj[map[prop]] = map.setters[prop] ? map.setters[prop](value) : value;
+    requestAnimationFrame(() => {
+      obj[map[prop]] = map.setters[prop] ? map.setters[prop](value) : value;
+    });
   }
 
   return { get, set };
 }
 
-export default function layoutManager(containerElement, orientation, onScroll) {
+export default function layoutManager(containerElement, orientation, _animationDuration) {
   containerElement[extraSizeForInsertion] = 0;
+  const animationDuration = _animationDuration;
   const map = orientation === 'horizontal' ? horizontalMap : verticalMap;
   const propMapper = orientationDependentProps(map);
-  const values = {};
-  let registeredScrollListener = onScroll;
+  const values = {
+    translation: 0
+  };
+  let registeredScrollListener = null;
 
   window.addEventListener('resize', function() {
     invalidateContainerRectangles(containerElement);
@@ -65,9 +70,9 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   setTimeout(() => {
     invalidate();
   }, 10);
-  invalidate();
+  // invalidate();
 
-  const scrollListener = Utils.listenScrollParent(containerElement, map.scrollSize, map.offsetSize, function() {
+  const scrollListener = Utils.listenScrollParent(containerElement, function() {
     invalidateContainerRectangles(containerElement);
     registeredScrollListener && registeredScrollListener();
   });
@@ -76,14 +81,29 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     invalidateContainerScale(containerElement);
   }
 
+  let visibleRect;
   function invalidateContainerRectangles(containerElement) {
-    values.rect = containerElement.getBoundingClientRect();
-    values.visibleRect = Utils.getVisibleRect(containerElement);
+    values.rect = Utils.getContainerRect(containerElement);
+    values.visibleRect = Utils.getVisibleRect(containerElement, values.rect);
+
+    // if (visibleRect) {
+    //   visibleRect.parentNode.removeChild(visibleRect);
+    // }
+    // visibleRect = document.createElement('div');
+    // visibleRect.style.position = 'fixed';
+    // visibleRect.style.border = '1px solid red';
+    // visibleRect.style.top = values.visibleRect.top + 'px';
+    // visibleRect.style.left = values.visibleRect.left + 'px';
+    // visibleRect.style.width = values.visibleRect.right - values.visibleRect.left + 'px';
+    // visibleRect.style.height = values.visibleRect.bottom - values.visibleRect.top + 'px';
+    // document.body.appendChild(visibleRect);
+
   }
 
   function invalidateContainerScale(containerElement) {
-    values.scaleX = (values.rect.right - values.rect.left) / containerElement.offsetWidth;
-    values.scaleY = (values.rect.bottom - values.rect.top) / containerElement.offsetHeight;
+    const rect = containerElement.getBoundingClientRect();
+    values.scaleX = (rect.right - rect.left) / containerElement.offsetWidth;
+    values.scaleY = (rect.bottom - rect.top) / containerElement.offsetHeight;
   }
 
   function getContainerRectangles() {
@@ -93,9 +113,22 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     }
   }
 
+  function getBeginEndOfDOMRect(rect) {
+    return {
+      begin: propMapper.get(rect, 'begin'),
+      end: propMapper.get(rect, 'end')
+    }
+  }
+
   function getBeginEndOfContainer() {
-    const begin = propMapper.get(values.rect, 'begin');
-    const end = propMapper.get(values.rect, 'end');
+    const begin = propMapper.get(values.rect, 'begin') + values.translation;
+    const end = propMapper.get(values.rect, 'end') + values.translation;
+    return { begin, end };
+  }
+
+  function getBeginEndOfContainerVisibleRect() {
+    const begin = propMapper.get(values.visibleRect, 'begin') + values.translation;
+    const end = propMapper.get(values.visibleRect, 'end') + values.translation;
     return { begin, end };
   }
 
@@ -113,7 +146,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function getBeginEnd(element) {
-    const begin = getDistanceToOffsetParent(element) + propMapper.get(values.rect, 'begin') - propMapper.get(containerElement, 'scrollValue');
+    const begin = getDistanceToOffsetParent(element) + (propMapper.get(values.rect, 'begin') + values.translation) - propMapper.get(containerElement, 'scrollValue');
     return {
       begin,
       end: begin + getSize(element) * propMapper.get(values, 'scale')
@@ -128,10 +161,26 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     return propMapper.get(position, 'dragPosition');
   }
 
+  function updateDescendantContainerRects(container) {
+    container.layout.invalidateRects();
+    container.onTranslated();
+    if (container.childContainers) {
+      container.childContainers.forEach(p => updateDescendantContainerRects(p));
+    }
+  }
+
   function setTranslation(element, translation) {
     if (getTranslation(element) !== translation) {
       propMapper.set(element.style, 'translate', translation);
       element[translationValue] = translation;
+
+      if (element[containersInDraggable]) {
+        setTimeout(() => {
+          element[containersInDraggable].forEach(p => {
+            updateDescendantContainerRects(p)
+          });
+        }, animationDuration + 20);
+      }
     }
   }
 
@@ -141,7 +190,7 @@ export default function layoutManager(containerElement, orientation, onScroll) {
 
   function setVisibility(element, isVisible) {
     if (element[visibilityValue] === undefined || element[visibilityValue] !== isVisible) {
-      element.style.visibility = isVisible ? 'visible' : 'hidden';
+      element.style.visibility = isVisible ? 'inherit' : 'hidden';
       element[visibilityValue] = isVisible;
     }
   }
@@ -150,12 +199,12 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     return element[visibilityValue] === undefined || element[visibilityValue];
   }
 
-  function isInVisibleRect({ x, y }) {
+  function isInVisibleRect(x, y) {
     const { left, top, right, bottom } = values.visibleRect;
     if (orientation === 'vertical') {
-      return x > left && x < right && y > top && y < bottom + containerElement[extraSizeForInsertion];
+      return x > left && x < right && y > top && y < bottom;
     } else {
-      return x > left && x < right + containerElement[extraSizeForInsertion] && y > top && y < bottom;
+      return x > left && x < right  && y > top && y < bottom;
     }
   }
 
@@ -184,20 +233,39 @@ export default function layoutManager(containerElement, orientation, onScroll) {
   }
 
   function getScrollValue(element) {
-    return propMapper.get(element, 'scrollValue');    
+    return propMapper.get(element, 'scrollValue');
+  }
+
+  function setScrollValue(element, val) {
+    return propMapper.set(element, 'scrollValue', val);
   }
 
   function dispose() {
     if (scrollListener) {
       scrollListener.dispose();
     }
+
+    if (visibleRect) {
+      visibleRect.parentNode.removeChild(visibleRect);
+      visibleRect = null;
+    }
+  }
+
+  function getPosition(position) {
+    return isInVisibleRect(position.x, position.y) ? getAxisValue(position) : null;
+  }
+
+  function invalidateRects() {
+    invalidateContainerRectangles(containerElement);
   }
 
   return {
     getSize,
     //getDistanceToContainerBegining,
     getContainerRectangles,
+    getBeginEndOfDOMRect,
     getBeginEndOfContainer,
+    getBeginEndOfContainerVisibleRect,
     getBeginEnd,
     getAxisValue,
     setTranslation,
@@ -212,6 +280,9 @@ export default function layoutManager(containerElement, orientation, onScroll) {
     getTopLeftOfElementBegin,
     getScrollSize,
     getScrollValue,
+    setScrollValue,
     invalidate,
+    invalidateRects,
+    getPosition,
   }
 }

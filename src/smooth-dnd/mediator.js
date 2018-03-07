@@ -1,9 +1,9 @@
 import * as Utils from './utils';
 import * as constants from './constants';
 
-const grabEvents = ['mousedown'];
-const moveEvents = ['mousemove'];
-const releaseEvents = ['mouseup'];
+const grabEvents = ['mousedown', 'touchstart'];
+const moveEvents = ['mousemove', 'touchmove'];
+const releaseEvents = ['mouseup', 'touchend'];
 
 let dragListeningContainers = null;
 let grabbedElement = null;
@@ -12,42 +12,50 @@ let draggableInfo = null;
 let containers = [];
 let isDragging = false;
 
+Utils.addClass(document.body, 'clearfix');
+
+const isMobile = Utils.isMobile();
+
 function listenEvents() {
 	addGrabListeners();
 }
 
 function addGrabListeners() {
 	grabEvents.forEach(e => {
-		window.document.addEventListener(e, onMouseDown);
+		window.document.addEventListener(e, onMouseDown, {passive: false});
 	});
 }
 
 function addMoveListeners() {
 	moveEvents.forEach(e => {
-		window.document.addEventListener(e, onMouseMove);
+		window.document.addEventListener(e, onMouseMove, { passive: false });
 	});
 }
 
 function removeMoveListeners() {
 	moveEvents.forEach(e => {
-		window.document.removeEventListener(e, onMouseMove);
+		window.document.removeEventListener(e, onMouseMove, { passive: false });
 	});
 }
 
 function addReleaseListeners() {
 	releaseEvents.forEach(e => {
-		window.document.addEventListener(e, onMouseUp);
+		window.document.addEventListener(e, onMouseUp, { passive: false });
 	});
 }
 
 function removeReleaseListeners() {
 	releaseEvents.forEach(e => {
-		window.document.removeEventListener(e, onMouseUp);
+		window.document.removeEventListener(e, onMouseUp, { passive: false });
 	});
 }
 
-function getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1 }) {
+function getGhostElement(element, { x, y }, container) {
+	const { scaleX = 1, scaleY = 1 } = container.getScale();
 	const { left, top, right, bottom } = element.getBoundingClientRect();
+	if (container.getOptions().dragClass) {
+		Utils.addClass(element.childNodes[0], container.getOptions().dragClass);
+	}
 	const midX = left + ((right - left) / 2);
 	const midY = top + ((bottom - top) / 2);
 	const div = document.createElement('div');
@@ -77,7 +85,7 @@ function getGhostElement(element, { x, y }, { scaleX = 1, scaleY = 1 }) {
 }
 
 function getDraggableInfo(draggableElement) {
-	const container = containers.filter(p => Utils.hasParent(draggableElement, p.element))[0];
+	const container = containers.filter(p => draggableElement.parentElement === p.element)[0];
 	const draggableIndex = container.draggables.indexOf(draggableElement);
 	return {
 		container,
@@ -93,50 +101,136 @@ function getDraggableInfo(draggableElement) {
 function handleDropAnimation(callback) {
 	function endDrop() {
 		Utils.removeClass(ghostInfo.ghost, 'animated');
+		ghostInfo.ghost.style.transitionDuration = null;
 		document.body.removeChild(ghostInfo.ghost);
 		callback();
 	}
 
-	function animateGhostToPosition({ top, left }) {
+	function animateGhostToPosition({ top, left }, duration) {
 		Utils.addClass(ghostInfo.ghost, 'animated');
+		ghostInfo.ghost.style.transitionDuration = duration + 'ms';
 		ghostInfo.ghost.style.left = left + 'px';
 		ghostInfo.ghost.style.top = top + 'px';
 		setTimeout(function() {
 			endDrop();
-		}, 180);
+		}, duration + 10);
 	}
 
 	if (draggableInfo.targetElement) {
 		const container = containers.filter(p => p.element === draggableInfo.targetElement)[0];
 		const dragResult = container.getDragResult();
-		animateGhostToPosition(dragResult.shadowBeginEnd.rect);
+		animateGhostToPosition(dragResult.shadowBeginEnd.rect, Math.max(150, container.getOptions().animationDuration / 2));
 	} else {
 		const container = containers.filter(p => p === draggableInfo.container)[0];
 		if (container.getBehaviour() === 'move') {
-			const { removedIndex } = container.getDragResult();
+			const { removedIndex, elementSize } = container.getDragResult();
 			const layout = container.layout;
 			// drag ghost to back
-			container.getTranslateCalculator(removedIndex, removedIndex);
+			container.getTranslateCalculator({
+				dragResult: {
+					removedIndex,
+					addedIndex: removedIndex,
+					elementSize
+				}
+			});
 			const prevDraggableEnd = removedIndex > 0 ? layout.getBeginEnd(container.draggables[removedIndex - 1]).end : layout.getBeginEndOfContainer().begin;
-			animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd));
+			animateGhostToPosition(layout.getTopLeftOfElementBegin(prevDraggableEnd), container.getOptions().animationDuration);
 		} else {
 			Utils.addClass(ghostInfo.ghost, 'animated');
+			ghostInfo.ghost.style.transitionDuration = container.getOptions().animationDuration + 'ms';
 			ghostInfo.ghost.style.opacity = '0';
 			ghostInfo.ghost.style.transform = 'scale(0.90)';
 			setTimeout(function() {
 				endDrop();
-			}, 180);
+			}, container.getOptions().animationDuration);
 		}
 	}
 }
 
-function onMouseDown(e) {
-	e.preventDefault();
+const handleDragStartConditions = (function handleDragStartConditions() {
+	let startEvent;
+	let delay;
+	let clb;
+	let timer = null;
+	const moveThreshold = 1;
+	const maxMoveInDelay = 8;
+
+	function onMove(event) {
+		const { clientX: currentX, clientY: currentY } = getPointerEvent(event);
+		if (!delay) {
+			if (Math.abs(startEvent.clientX - currentX) > moveThreshold || Math.abs(startEvent.clientY - currentY) > moveThreshold) {
+				return callCallback();
+			}
+		} else {
+			if (Math.abs(startEvent.clientX - currentX) > maxMoveInDelay || Math.abs(startEvent.clientY - currentY) > maxMoveInDelay) {
+				deregisterEvent();
+			}
+		}
+	};
+
+	function onUp() { deregisterEvent(); };
+	function onHTMLDrag() { deregisterEvent(); }
+
+	function registerEvents() {
+		if (delay) {
+			timer = setTimeout(callCallback, delay);
+		}
+
+		moveEvents.forEach(e => window.document.addEventListener(e, onMove), { passive: false });
+		releaseEvents.forEach(e => window.document.addEventListener(e, onUp), { passive: false });
+		document.addEventListener("drag", onHTMLDrag, { passive: false });
+	}
+
+	function deregisterEvent() {
+		clearTimeout(timer);
+		moveEvents.forEach(e => window.document.removeEventListener(e, onMove), { passive: false });
+		releaseEvents.forEach(e => window.document.removeEventListener(e, onUp), { passive: false });
+		document.removeEventListener("drag", onHTMLDrag, { passive: false });
+	}
+
+	function callCallback() {
+		clearTimeout(timer);
+		deregisterEvent();
+		clb();
+	}
+
+	return function(_startEvent, _delay, _clb) {
+		startEvent = getPointerEvent(_startEvent);
+		delay = _delay || (isMobile ? 200 : 0);
+		clb = _clb;
+
+		registerEvents();
+	}
+})();
+
+function onMouseDown(event) {
+	const e = getPointerEvent(event);
 	if (!isDragging) {
 		grabbedElement = Utils.getParent(e.target, '.' + constants.wrapperClass);
 		if (grabbedElement) {
-			addMoveListeners();
-			addReleaseListeners();
+			const container = Utils.getParent(grabbedElement, '.' + constants.containerClass)[constants.containerInstance];
+			const dragHandleSelector = container.getOptions().dragHandleSelector;
+			const nonDragAreaSelector = container.getOptions().nonDragAreaSelector;
+
+			let startDrag = true;
+			if (dragHandleSelector && !Utils.getParent(e.target, dragHandleSelector)) {
+				startDrag = false;
+			}
+
+			if (nonDragAreaSelector && Utils.getParent(e.target, nonDragAreaSelector)) {
+				startDrag = false;
+			}
+
+			if (startDrag) {
+				event.preventDefault();
+				handleDragStartConditions(e, container.getDragDelay(), () => {	
+					setTimeout(() => {
+						window.getSelection().empty();
+					}, 0);
+					addMoveListeners();
+					addReleaseListeners();
+				});
+			}
 		}
 	}
 }
@@ -144,15 +238,12 @@ function onMouseDown(e) {
 function onMouseUp() {
 	removeMoveListeners();
 	removeReleaseListeners();
-
 	if (draggableInfo) {
 		handleDropAnimation(() => {
+			document.body.style.touchAction = null;
 			(dragListeningContainers || []).forEach(p => {
-				Utils.removeClass(p.element, 'no-user-select');
-				// call handle drop function of the container if it is either source or target of drag event
-				if (p === draggableInfo.container || p.element === draggableInfo.targetElement) {
+				Utils.removeClass(p.element, constants.noUserSelectClass);
 					p.handleDrop(draggableInfo);
-				}
 			});
 
 			dragListeningContainers = null;
@@ -164,13 +255,18 @@ function onMouseUp() {
 	}
 }
 
-function onMouseMove(e) {
-	e.preventDefault();
+function getPointerEvent(e) {
+	return e.touches ? e.touches[0] : e;	
+}
+
+function onMouseMove(event) {
+	event.preventDefault();
+	const e = getPointerEvent(event);
 	if (!draggableInfo) {
 		isDragging = true;
 		// first move after grabbing  draggable
 		draggableInfo = getDraggableInfo(grabbedElement);
-		ghostInfo = getGhostElement(grabbedElement, { x: e.clientX, y: e.clientY }, draggableInfo.container.getScale());
+		ghostInfo = getGhostElement(grabbedElement, { x: e.clientX, y: e.clientY }, draggableInfo.container);
 		draggableInfo.position = {
 			x: e.clientX + ghostInfo.centerDelta.x,
 			y: e.clientY + ghostInfo.centerDelta.y
@@ -179,7 +275,7 @@ function onMouseMove(e) {
 		document.body.appendChild(ghostInfo.ghost);
 
 		dragListeningContainers = containers.filter(p => p.isDragRelevant(draggableInfo));
-		dragListeningContainers.forEach(p => Utils.addClass(p.element, 'no-user-select'));
+		dragListeningContainers.forEach(p => Utils.addClass(p.element, constants.noUserSelectClass));
 	} else {
 		// just update ghost position && draggableInfo position
 		ghostInfo.ghost.style.left = `${e.clientX + ghostInfo.positionDelta.left}px`;
@@ -198,6 +294,9 @@ function Mediator() {
 	return {
 		register: function(container) {
 			containers.push(container);
+		},
+		unregister: function(container) {
+			containers.splice(containers.indexOf(container), 1);
 		}
 	};
 }

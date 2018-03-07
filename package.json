@@ -11,10 +11,14 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "devDependencies": {
     "eslint": "^4.17.0",
-    "eslint-plugin-react": "^7.6.1"
-  }
+    "eslint-plugin-react": "^7.6.1",
+    "gh-pages": "^1.1.0"
+  },
+  "homepage": "http://kutlugsahin.github.io/react-smooth-dnd"
 }

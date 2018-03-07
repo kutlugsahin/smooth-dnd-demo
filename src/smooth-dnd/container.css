@@ -2,25 +2,29 @@
   box-sizing: border-box;
 }
 
+.smooth-dnd-disable-touch-action{
+  touch-action: none;
+}
+
 .smooth-dnd-container{
   position: relative;
-  background: greenyellow;
 }
 
 .smooth-dnd-container.vertical{
 }
 
 .smooth-dnd-container.horizontal{
-  display: inline-flex;
+  /* display: inline-flex;
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: flex-start; */
+  white-space: nowrap;
 }
 
 .smooth-dnd-container.horizontal .smooth-dnd-draggable-wrapper{
-  flex: 0 0 auto;
-  float: left;
+  /* flex: 0 0 auto;
+  float: left; */
   height: 100%;
-  /* display: inline-block; */
+  display: inline-block;
 }
 
 
@@ -29,11 +33,19 @@
 }
 
 .smooth-dnd-draggable-wrapper.animated{
-  transition: transform 0.18s ease;
+  transition: transform ease;
+}
+
+.smooth-dnd-ghost {   
+  
+}
+
+.smooth-dnd-ghost *{
+  box-sizing: border-box;
 }
 
 .smooth-dnd-ghost.animated{
-  transition: all 0.18s ease-out;
+  transition: all ease-out;
 }
 
 .clearfix:after {
@@ -45,12 +57,19 @@
     height: 0;
 }
 
-.no-user-select{
+.smooth-dnd-no-user-select{
   user-select: none;
 }
 
 .smooth-dnd-stretcher-element{
-  height: 2px;
   background-color: transparent;
-  /* transition: transform 0.18s ease; */
+}
+
+.smooth-dnd-stretcher-element.vertical{
+  height: 1px;
+}
+
+.smooth-dnd-stretcher-element.horizontal{
+  height: 100%;
+  display: inline-block;
 }
