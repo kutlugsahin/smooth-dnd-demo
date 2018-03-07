@@ -290,13 +290,13 @@ function getDragInsertionIndex({ draggables, layout }) {
 			const index = findDraggable(draggables, pos, true);
 			return index !== null ? index : draggables.length;
 		} else {
-			if (shadowBeginEnd.begin <= pos && shadowBeginEnd.end >= pos) {
+			if (shadowBeginEnd.begin + shadowBeginEnd.beginAdjustment <= pos && shadowBeginEnd.end >= pos) {
 				// position inside ghost
 				return null;
 			}
 		}
 
-		if (pos < shadowBeginEnd.begin) {
+		if (pos < shadowBeginEnd.begin + shadowBeginEnd.beginAdjustment) {
 			return findDraggable(draggables, pos);
 		} else if (pos > shadowBeginEnd.end) {
 			return findDraggable(draggables, pos) + 1;
@@ -405,10 +405,11 @@ function calculateTranslations({ element, draggables, layout }) {
 function getShadowBeginEnd({ draggables, layout }) {
 	let prevAddedIndex = null;
 	return ({ draggableInfo, dragResult }) => {
-		const { addedIndex, removedIndex, elementSize, pos } = dragResult;
+		const { addedIndex, removedIndex, elementSize, pos, shadowBeginEnd } = dragResult;
 		if (pos !== null) {
 			if (addedIndex !== null && (draggableInfo.invalidateShadow || addedIndex !== prevAddedIndex)) {
-				prevAddedIndex = addedIndex;
+				if (prevAddedIndex)
+					prevAddedIndex = addedIndex;
 				let beforeIndex = addedIndex - 1;
 				let begin = 0;
 				let afterBounds = null;
@@ -454,7 +455,8 @@ function getShadowBeginEnd({ draggables, layout }) {
 					shadowBeginEnd: {
 						begin,
 						end,
-						rect: shadowRectTopLeft
+						rect: shadowRectTopLeft,
+						beginAdjustment: shadowBeginEnd ? shadowBeginEnd.beginAdjustment : 0,
 					}
 				};
 			} else {
@@ -473,15 +475,26 @@ function handleFirstInsertShadowAdjustment() {
 	let lastAddedIndex = null;
 	return ({ dragResult: { pos, addedIndex, shadowBeginEnd }, draggableInfo: { invalidateShadow } }) => {
 		if (pos !== null) {
-			if (addedIndex != null && (lastAddedIndex === null || invalidateShadow)) {
-				console.log(invalidateShadow);
+			if (addedIndex != null && lastAddedIndex === null) {
+				if (pos < shadowBeginEnd.begin) {
+					const beginAdjustment = pos - shadowBeginEnd.begin - 5;
+					shadowBeginEnd.beginAdjustment = beginAdjustment;
+				}
 				lastAddedIndex = addedIndex;
-				if (pos < shadowBeginEnd.begin) shadowBeginEnd.begin = pos - 5;
-				if (pos > shadowBeginEnd.end) shadowBeginEnd.end = pos + 5;
 			}
 		} else {
 			lastAddedIndex = null;
 		}
+	}
+}
+
+function resetShadowAdjustment() {
+	let lastAddedIndex = null;
+	return ({ dragResult: { addedIndex, shadowBeginEnd } }) => {
+		if (addedIndex !== lastAddedIndex && lastAddedIndex !== null) {
+			shadowBeginEnd.beginAdjustment = 0;
+		}
+		lastAddedIndex = addedIndex;
 	}
 }
 
@@ -568,7 +581,7 @@ function Container(element) {
 				if (indexInParentContainer > -1) {
 					parentInfo.container.childContainers.splice(indexInParentContainer, 1);
 				}
-				
+
 				const indexInDraggable = parentInfo.draggable[containersInDraggable].indexOf(container);
 				if (indexInDraggable > -1) {
 					parentInfo.draggable[containersInDraggable].splice(indexInDraggable, 1);
