@@ -332,6 +332,16 @@ function getNextAddedIndex(params) {
 	}
 }
 
+function resetShadowAdjustment() {
+	let lastAddedIndex = null;
+	return ({ dragResult: { addedIndex, shadowBeginEnd } }) => {
+		if (addedIndex !== lastAddedIndex && lastAddedIndex !== null) {
+			shadowBeginEnd.beginAdjustment = 0;
+		}
+		lastAddedIndex = addedIndex;
+	}
+}
+
 function handleInsertionSizeChange({ element, draggables, layout, options }) {
 	let strectherElement = null;
 	let stretcherElementAdded = false;
@@ -485,16 +495,6 @@ function handleFirstInsertShadowAdjustment() {
 		} else {
 			lastAddedIndex = null;
 		}
-	}
-}
-
-function resetShadowAdjustment() {
-	let lastAddedIndex = null;
-	return ({ dragResult: { addedIndex, shadowBeginEnd } }) => {
-		if (addedIndex !== lastAddedIndex && lastAddedIndex !== null) {
-			shadowBeginEnd.beginAdjustment = 0;
-		}
-		lastAddedIndex = addedIndex;
 	}
 }
 
