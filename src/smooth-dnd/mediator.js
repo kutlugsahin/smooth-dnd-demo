@@ -12,7 +12,7 @@ let draggableInfo = null;
 let containers = [];
 let isDragging = false;
 
-Utils.addClass(document.body, 'clearfix');
+// Utils.addClass(document.body, 'clearfix');
 
 const isMobile = Utils.isMobile();
 
