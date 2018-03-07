@@ -117,6 +117,13 @@ export default function layoutManager(containerElement, orientation, _animationD
     }
   }
 
+  function getBeginEndOfDOMRect(rect) {
+    return {
+      begin: propMapper.get(rect, 'begin'),
+      end: propMapper.get(rect, 'end')
+    }
+  }
+
   function getBeginEndOfContainer() {
     const begin = propMapper.get(values.rect, 'begin') + values.translation;
     const end = propMapper.get(values.rect, 'end') + values.translation;
@@ -260,6 +267,7 @@ export default function layoutManager(containerElement, orientation, _animationD
     getSize,
     //getDistanceToContainerBegining,
     getContainerRectangles,
+    getBeginEndOfDOMRect,
     getBeginEndOfContainer,
     getBeginEndOfContainerVisibleRect,
     getBeginEnd,

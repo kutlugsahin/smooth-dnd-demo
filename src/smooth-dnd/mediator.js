@@ -222,6 +222,7 @@ function onMouseDown(event) {
 			}
 
 			if (startDrag) {
+				event.preventDefault();
 				handleDragStartConditions(e, container.getDragDelay(), () => {	
 					setTimeout(() => {
 						window.getSelection().empty();

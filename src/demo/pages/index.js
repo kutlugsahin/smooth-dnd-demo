@@ -2,6 +2,7 @@ import * as simples from './simple';
 import Groups from './groups';
 import Copy from './copy';
 import Horizontal from './horizontal';
+import Nested from './nested';
 
 
 
@@ -12,4 +13,5 @@ export default [
   { title: 'DnD between Containers', type: Groups },
   { title: 'Copy form source', type: Copy },
   { title: 'Horizontal', type: Horizontal },
+  { title: 'Nested', type: Nested },
 ]
