@@ -96,7 +96,7 @@ export const getVisibleRect = (element, elementRect) => {
   return rect;
 }
 
-export const listenScrollParent = (element, scrollSizeName, offsetSizeName, clb) => {
+export const listenScrollParent = (element, clb) => {
   let scrollers = [];
   const dispose = () => {
     scrollers.forEach(p => {
@@ -108,7 +108,7 @@ export const listenScrollParent = (element, scrollSizeName, offsetSizeName, clb)
   setTimeout(function() {
     let currentElement = element;
     while (currentElement) {
-      if (currentElement[scrollSizeName] > currentElement[offsetSizeName]) {
+      if (isScrolling(currentElement, 'x') || isScrolling(currentElement, 'y')) {
         currentElement.addEventListener('scroll', clb);
         scrollers.push(currentElement);
       }

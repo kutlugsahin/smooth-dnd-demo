@@ -72,11 +72,7 @@ export default function layoutManager(containerElement, orientation, _animationD
   }, 10);
   // invalidate();
 
-  const buildQuery = (url, params) => {
-    return `${url}?${Object.keys(params).map(p => `${p}=${params[p]}`).join('&')}`;
-  }
-
-  const scrollListener = Utils.listenScrollParent(containerElement, map.scrollSize, map.offsetSize, function() {
+  const scrollListener = Utils.listenScrollParent(containerElement, function() {
     invalidateContainerRectangles(containerElement);
     registeredScrollListener && registeredScrollListener();
   });
