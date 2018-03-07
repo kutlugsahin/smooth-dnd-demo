@@ -173,7 +173,7 @@ function handleDrop({ element, draggables, layout, options }) {
 				payload: draggableInfo.payload,
 				droppedElement: draggableInfo.element.firstChild
 			}
-			dropHandler(dropHandlerParams, options.onDropEnd);
+			dropHandler(dropHandlerParams, options.onDrop);
 			console.log(removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
 		}
 	};

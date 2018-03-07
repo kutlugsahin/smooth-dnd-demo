@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Container from '../../react-smooth-dnd/Container';
 import Draggable from '../../react-smooth-dnd/Draggable';
+import { applyDrag } from './utils';
 
 function generateItems(count, creator) {
   return Array(count).fill().map(creator);
@@ -15,6 +16,9 @@ const groupStyle = {
 class Nested extends Component {
   constructor() {
     super();
+
+    this.containerOnDrop = this.containerOnDrop.bind(this);
+    this.containerOnDrop2 = this.containerOnDrop2.bind(this);
 
     const items = generateItems(30, (_, i) => ({
       id: i, type: 'draggable', data: `Container 1 Draggable - ${i}`
@@ -44,7 +48,7 @@ class Nested extends Component {
     return (
       <div>
         <div className="simple-page" style={{border: '1px solid #ddd'}}>
-          <Container>
+          <Container onDrop={this.containerOnDrop}>
             {this.state.items.map(p => {
               if (p.type === 'draggable') {
                 return (
@@ -58,7 +62,7 @@ class Nested extends Component {
                 return (
                   <Draggable key={p.id}>
                     <div style={{padding: '20px 20px', backgroundColor: '#888'}}>
-                      <Container>
+                      <Container onDrop={(e) => this.containerOnDrop2(p.id, e)}>
                         {p.items.map(q => {
                           return (
                             <Draggable key={q.id}>
@@ -78,6 +82,20 @@ class Nested extends Component {
         </div>
       </div>
     );
+  }
+
+  containerOnDrop(e) {
+    this.setState({
+      items: applyDrag(this.state.items, e)
+    });
+  }
+
+  containerOnDrop2(id, e) {
+    const newItems = [...this.state.items];
+    newItems[id].items = applyDrag(newItems[id].items, e);
+    this.setState({
+      items: newItems
+    });
   }
 }
 

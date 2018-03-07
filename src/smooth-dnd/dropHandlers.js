@@ -7,7 +7,7 @@ import {
 
 
 export function domDropHandler({ element, draggables, layout, options }) {
-  return (dropResult, onDropEnd) => {
+  return (dropResult, onDrop) => {
     const { removedIndex, addedIndex, droppedElement } = dropResult;
     if (removedIndex !== null) {
       removeChildAt(element, removedIndex);
@@ -27,17 +27,17 @@ export function domDropHandler({ element, draggables, layout, options }) {
       }
     }
 
-    if (onDropEnd) {
-      onDropEnd(dropResult);
+    if (onDrop) {
+      onDrop(dropResult);
     }
   }
 }
 
 export function reactDropHandler() {
   const handler = ({ element, draggables, layout, options }) => {
-    return (dropResult, onDropEnd) => {
-      if (onDropEnd) {
-        onDropEnd(dropResult);
+    return (dropResult, onDrop) => {
+      if (onDrop) {
+        onDrop(dropResult);
       }
 
       setTimeout(() => {
