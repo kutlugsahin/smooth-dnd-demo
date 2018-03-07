@@ -332,7 +332,7 @@ function getNextAddedIndex(params) {
 	}
 }
 
-function handleInsertionSizeChange({ element, draggables, layout }) {
+function handleInsertionSizeChange({ element, draggables, layout, options }) {
 	let strectherElement = null;
 	let stretcherElementAdded = false;
 
@@ -346,7 +346,7 @@ function handleInsertionSizeChange({ element, draggables, layout }) {
 					const lastDraggableEnd = layout.getBeginEnd(draggables[draggables.length - 1]).end - draggables[draggables.length - 1][translationValue];
 					if (lastDraggableEnd + elementSize > containerEnd) {
 						strectherElement = document.createElement('div');
-						strectherElement.className = stretcherElementClass;
+						strectherElement.className = stretcherElementClass + ' ' + options.orientation;
 						const stretcherSize = (elementSize + lastDraggableEnd) - containerEnd;
 						layout.setSize(strectherElement.style, `${stretcherSize}px`);
 						element.appendChild(strectherElement);

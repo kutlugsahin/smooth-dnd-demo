@@ -62,7 +62,14 @@
 }
 
 .smooth-dnd-stretcher-element{
-  height: 2px;
   background-color: transparent;
-  /* transition: transform 0.18s ease; */
+}
+
+.smooth-dnd-stretcher-element.vertical{
+  height: 1px;
+}
+
+.smooth-dnd-stretcher-element.horizontal{
+  height: 100%;
+  display: inline-block;
 }
