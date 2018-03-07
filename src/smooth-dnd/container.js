@@ -508,6 +508,7 @@ function getDragHandler(params) {
 		handleTargetContainer,
 		invalidateShadowBeginEndIfNeeded,
 		getNextAddedIndex,
+		resetShadowAdjustment,
 		handleInsertionSizeChange,
 		calculateTranslations,
 		getShadowBeginEnd,

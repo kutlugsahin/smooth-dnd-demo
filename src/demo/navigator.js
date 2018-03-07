@@ -7,7 +7,7 @@ class Navigator extends Component {
   render() {
     return (
       <ul className="demo-navigator">
-        {pages.map(p => <li><button onClick={() => this.props.onPage(p.type)}>{p.title}</button></li>)}
+        {pages.map((p,i) => <li key={i}><button onClick={() => this.props.onPage(p.type)}>{p.title}</button></li>)}
       </ul>
     );
   }

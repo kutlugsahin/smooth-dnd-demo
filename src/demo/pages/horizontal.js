@@ -18,16 +18,16 @@ class Horizontal extends Component {
     super();
 
     this.state = {
-      items1: generateItems(5, (_, i) => ({ id: i, data: `Source Draggable - ${i}` })),
-      items2: generateItems(25, (_, i) => ({ id: i, data: `Draggable 2 - ${i}` })),
-      items3: generateItems(25, (_, i) => ({ id: i, data: `Draggable 3 - ${i}` })),
-      items4: generateItems(25, (_, i) => ({ id: i, data: `Draggable 4 - ${i}` })),
+      items1: generateItems(5, (_, i) => ({ id: '1' + i, data: `Draggable 1 - ${i}` })),
+      items2: generateItems(15, (_, i) => ({ id: '2' + i, data: `Draggable 2 - ${i}` })),
+      items3: generateItems(15, (_, i) => ({ id: '3' + i, data: `Draggable 3 - ${i}` })),
+      items4: generateItems(15, (_, i) => ({ id: '4' + i, data: `Draggable 4 - ${i}` })),
     }
   }
   render() {
     return (
       <div>        
-        <Container groupName="1" orientation="horizontal" style={groupStyle}>
+        <Container groupName="1" orientation="horizontal" style={groupStyle} getChildPayload={i => this.state.items1[i]} onDrop={e => this.setState({ items1: applyDrag(this.state.items1, e) })}>
             {
               this.state.items1.map(p => {
                 return (
@@ -41,7 +41,7 @@ class Horizontal extends Component {
             }
           </Container>
         <div style={groupStyle}>
-          <Container groupName="1" orientation="horizontal">
+          <Container groupName="1" orientation="horizontal" getChildPayload={i => this.state.items2[i]} onDrop={e => this.setState({ items2: applyDrag(this.state.items2, e) })}>>
             {
               this.state.items2.map(p => {
                 return (
@@ -56,7 +56,7 @@ class Horizontal extends Component {
           </Container>
         </div>
         <div style={groupStyle}>
-          <Container groupName="1" orientation="horizontal">
+          <Container groupName="1" orientation="horizontal" getChildPayload={i => this.state.items3[i]} onDrop={e => this.setState({ items3: applyDrag(this.state.items3, e) })}>
             {
               this.state.items3.map(p => {
                 return (
