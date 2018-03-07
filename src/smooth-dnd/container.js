@@ -381,15 +381,17 @@ function calculateTranslations({ element, draggables, layout }) {
 	return function({ dragResult: { addedIndex, removedIndex, elementSize } }) {
 		if (addedIndex !== prevAddedIndex || removedIndex !== prevRemovedIndex) {
 			for (let index = 0; index < draggables.length; index++) {
-				const draggable = draggables[index];
-				let translate = 0;
-				if (removedIndex !== null && removedIndex < index) {
-					translate -= layout.getSize(draggables[removedIndex]);
+				if (index !== removedIndex) {
+					const draggable = draggables[index];
+					let translate = 0;
+					if (removedIndex !== null && removedIndex < index) {
+						translate -= layout.getSize(draggables[removedIndex]);
+					}
+					if (addedIndex !== null && addedIndex <= index) {
+						translate += elementSize;
+					}
+					layout.setTranslation(draggable, translate);
 				}
-				if (addedIndex !== null && addedIndex <= index) {
-					translate += elementSize;
-				}
-				layout.setTranslation(draggable, translate);
 			}
 
 			prevAddedIndex = addedIndex;
@@ -598,7 +600,9 @@ function Container(element) {
 				dropHandler(draggableInfo, dragResult);
 				handleScrollOnDrag({ reset: true });
 				handleScrollOnDrag = dragscroller(props);
-				props.layout.invalidate();
+				setTimeout(() => {
+					props.layout.invalidate();
+				}, 100);
 			},
 			getDragResult: function() {
 				return dragResult;

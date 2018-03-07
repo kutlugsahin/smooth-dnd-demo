@@ -25,9 +25,8 @@ class Horizontal extends Component {
   }
   render() {
     return (
-      <div>
-        <div style={groupStyle}>
-          <Container groupName="1" orientation="horizontal">
+      <div>        
+        <Container groupName="1" orientation="horizontal" style={groupStyle}>
             {
               this.state.items1.map(p => {
                 return (
@@ -40,7 +39,6 @@ class Horizontal extends Component {
               })
             }
           </Container>
-        </div>
         <div style={groupStyle}>
           <Container groupName="1" orientation="horizontal">
             {
