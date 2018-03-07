@@ -471,9 +471,10 @@ function getShadowBeginEnd({ draggables, layout }) {
 
 function handleFirstInsertShadowAdjustment() {
 	let lastAddedIndex = null;
-	return ({ dragResult: { pos, addedIndex, shadowBeginEnd, invalidateShadow } }) => {
+	return ({ dragResult: { pos, addedIndex, shadowBeginEnd }, draggableInfo: { invalidateShadow } }) => {
 		if (pos !== null) {
 			if (addedIndex != null && (lastAddedIndex === null || invalidateShadow)) {
+				console.log(invalidateShadow);
 				lastAddedIndex = addedIndex;
 				if (pos < shadowBeginEnd.begin) shadowBeginEnd.begin = pos - 5;
 				if (pos > shadowBeginEnd.end) shadowBeginEnd.end = pos + 5;
@@ -591,6 +592,7 @@ function Container(element) {
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
 				dragResult = dragHandler(draggableInfo);
+				// console.log(dragResult);
 				handleScrollOnDrag({ draggableInfo, dragResult });
 			},
 			handleDrop: function(draggableInfo) {
@@ -617,9 +619,6 @@ function Container(element) {
 			getBehaviour: function() {
 				return props.options.behaviour;
 			},
-			getDragHandleSelector: function() {
-				return props.options.dragHandleSelector;
-			},
 			getDragDelay: () => props.options.dragBeginDelay,
 			setParentContainer: (e) => { parentContainer = e; },
 			getParentContainer: () => parentContainer,
@@ -640,10 +639,10 @@ const options = {
 	acceptGroups: [],
 	orientation: 'vertical',
 	dragHandleSelector: null,
+	nonDragAreaSelector: 'some selector',
 	dragBeginDelay: 0,
 	animationDuration: 180,
 	getChildPayload: (index) => null,
-	dragClass: 'some class',
 }
 
 // exported part of container

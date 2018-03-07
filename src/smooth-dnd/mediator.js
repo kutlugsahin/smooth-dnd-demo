@@ -209,10 +209,15 @@ function onMouseDown(event) {
 		grabbedElement = Utils.getParent(e.target, '.' + constants.wrapperClass);
 		if (grabbedElement) {
 			const container = Utils.getParent(grabbedElement, '.' + constants.containerClass)[constants.containerInstance];
-			const dragHandleSelector = container.getDragHandleSelector();
+			const dragHandleSelector = container.getOptions().dragHandleSelector;
+			const nonDragAreaSelector = container.getOptions().nonDragAreaSelector;
 
 			let startDrag = true;
 			if (dragHandleSelector && !Utils.getParent(e.target, dragHandleSelector)) {
+				startDrag = false;
+			}
+
+			if (nonDragAreaSelector && Utils.getParent(e.target, nonDragAreaSelector)) {
 				startDrag = false;
 			}
 
