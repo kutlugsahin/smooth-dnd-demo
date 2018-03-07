@@ -49,10 +49,10 @@ class Nested extends Component {
       <div>
         <div className="simple-page" style={{border: '1px solid #ddd'}}>
           <Container onDrop={this.containerOnDrop}>
-            {this.state.items.map(p => {
+            {this.state.items.map((p,i) => {
               if (p.type === 'draggable') {
                 return (
-                  <Draggable key={p.id}>
+                  <Draggable key={i}>
                     <div className="draggable-item">
                       {p.data}
                     </div>
@@ -60,12 +60,12 @@ class Nested extends Component {
                 );
               } else {
                 return (
-                  <Draggable key={p.id}>
+                  <Draggable key={i}>
                     <div style={{padding: '20px 20px', backgroundColor: '#888'}}>
-                      <Container onDrop={(e) => this.containerOnDrop2(p.id, e)}>
-                        {p.items.map(q => {
+                      <Container onDrop={(e) => this.containerOnDrop2(i, e)}>
+                        {p.items.map((q,j) => {
                           return (
-                            <Draggable key={q.id}>
+                            <Draggable key={j}>
                               <div className="draggable-item">
                                 {q.data}
                               </div>

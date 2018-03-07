@@ -335,7 +335,7 @@ function getNextAddedIndex(params) {
 function resetShadowAdjustment() {
 	let lastAddedIndex = null;
 	return ({ dragResult: { addedIndex, shadowBeginEnd } }) => {
-		if (addedIndex !== lastAddedIndex && lastAddedIndex !== null) {
+		if (addedIndex !== lastAddedIndex && lastAddedIndex !== null && shadowBeginEnd) {
 			shadowBeginEnd.beginAdjustment = 0;
 		}
 		lastAddedIndex = addedIndex;
