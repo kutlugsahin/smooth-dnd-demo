@@ -36,7 +36,7 @@ body{
   left: 0px;
   padding: 0px;
   margin: 0;
-  background-color: rgb(131, 134, 144);
+  background-color: rgb(185, 190, 207);
   z-index: 1;  
 }
 
@@ -51,18 +51,18 @@ body{
   height: 100%;
   width : 100%;
   display: block;
-  background-color: #348;
+  background-color: rgb(64, 105, 182);
   cursor: pointer;
   outline: 0;
   color: white;
-  border-top: 1px solid rgb(73, 96, 189);
-  border-bottom: 1px solid rgb(10, 13, 26);
+  border-top: 1px solid rgb(116, 137, 223);
+  border-bottom: 1px solid rgb(43, 76, 185);
   transition: all .2s ease;
   font-size: 16px;
 }
 
 .demo-navigator button:hover {
-  background-color: rgb(65, 83, 158);
+  background-color: rgb(47, 94, 182);
 }
 
 
