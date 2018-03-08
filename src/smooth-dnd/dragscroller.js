@@ -62,9 +62,9 @@ function requestFrame(element, layout) {
 }
 
 
-function getAutoScrollInfo(layout, pos, elementSize) {
-  const { begin, end } = layout.getBeginEndOfContainerVisibleRect();
-  const moveDistance = elementSize * 1.5;
+function getAutoScrollInfo(pos, elementSize, scrollableBeginEnd) {
+  const { begin, end } = scrollableBeginEnd;
+  const moveDistance = 100;
   if (end - pos < moveDistance) {
     return {
       direction: 'end',
@@ -84,30 +84,33 @@ export default ({ element, layout, options }) => {
   let lastPos = null;
   const axis = options.orientation === 'vertical' ? 'Y' : 'X';
   let scrollableParent = getScrollableParent(element, axis);
+  const scrollParentBeginEnd = layout.getBeginEndOfDOMRect(scrollableParent.getBoundingClientRect())
   let animator = requestFrame(element, layout);
   return ({ draggableInfo, dragResult, reset }) => {
-    if (reset) {
-      animator.stop();
-      return null;
-    }
-    if (dragResult.pos !== null) {
-      if (lastPos === null) {
-        scrollableParent = getScrollableParent(element, axis);
+    if (scrollableParent) {
+      if (reset) {
         animator.stop();
-        animator = requestFrame(scrollableParent, layout);
+        return null;
       }
-      const autoScrollInfo = getAutoScrollInfo(layout, dragResult.pos, dragResult.elementSize);
-      if (autoScrollInfo) {
-        animator.animate(autoScrollInfo.direction, autoScrollInfo.speedFactor * maxSpeed);
+      if (dragResult.pos !== null) {
+        if (lastPos === null) {
+          scrollableParent = getScrollableParent(element, axis);
+          animator.stop();
+          animator = requestFrame(scrollableParent, layout);
+        }
+        const autoScrollInfo = getAutoScrollInfo(dragResult.pos, dragResult.elementSize, scrollParentBeginEnd);
+        if (autoScrollInfo) {
+          animator.animate(autoScrollInfo.direction, autoScrollInfo.speedFactor * maxSpeed);
+        } else {
+          animator.stop();
+        }
+        lastPos = dragResult.pos;
       } else {
         animator.stop();
       }
-      lastPos = dragResult.pos;
-    } else {
-      animator.stop();
-    }
 
-    lastPos = dragResult.pos;
+      lastPos = dragResult.pos;
+    }
     return null;
   }
 }

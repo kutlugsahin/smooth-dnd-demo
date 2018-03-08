@@ -85,7 +85,7 @@ function getGhostElement(element, { x, y }, container) {
 }
 
 function getDraggableInfo(draggableElement) {
-	const container = containers.filter(p => Utils.hasParent(draggableElement, p.element))[0];
+	const container = containers.filter(p => draggableElement.parentElement === p.element)[0];
 	const draggableIndex = container.draggables.indexOf(draggableElement);
 	return {
 		container,
@@ -222,6 +222,7 @@ function onMouseDown(event) {
 			}
 
 			if (startDrag) {
+				event.preventDefault();
 				handleDragStartConditions(e, container.getDragDelay(), () => {	
 					setTimeout(() => {
 						window.getSelection().empty();

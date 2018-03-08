@@ -173,7 +173,7 @@ function handleDrop({ element, draggables, layout, options }) {
 				payload: draggableInfo.payload,
 				droppedElement: draggableInfo.element.firstChild
 			}
-			dropHandler(dropHandlerParams, options.onDropEnd);
+			dropHandler(dropHandlerParams, options.onDrop);
 			console.log(removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
 		}
 	};
@@ -329,6 +329,16 @@ function getNextAddedIndex(params) {
 		return {
 			addedIndex: index
 		}
+	}
+}
+
+function resetShadowAdjustment() {
+	let lastAddedIndex = null;
+	return ({ dragResult: { addedIndex, shadowBeginEnd } }) => {
+		if (addedIndex !== lastAddedIndex && lastAddedIndex !== null && shadowBeginEnd) {
+			shadowBeginEnd.beginAdjustment = 0;
+		}
+		lastAddedIndex = addedIndex;
 	}
 }
 
@@ -488,16 +498,6 @@ function handleFirstInsertShadowAdjustment() {
 	}
 }
 
-function resetShadowAdjustment() {
-	let lastAddedIndex = null;
-	return ({ dragResult: { addedIndex, shadowBeginEnd } }) => {
-		if (addedIndex !== lastAddedIndex && lastAddedIndex !== null) {
-			shadowBeginEnd.beginAdjustment = 0;
-		}
-		lastAddedIndex = addedIndex;
-	}
-}
-
 function getDragHandler(params) {
 	return compose(params)(
 		getRemovedItem,
@@ -508,6 +508,7 @@ function getDragHandler(params) {
 		handleTargetContainer,
 		invalidateShadowBeginEndIfNeeded,
 		getNextAddedIndex,
+		resetShadowAdjustment,
 		handleInsertionSizeChange,
 		calculateTranslations,
 		getShadowBeginEnd,
@@ -677,6 +678,3 @@ export default function(element, options) {
 		}
 	};
 }
-
-
-

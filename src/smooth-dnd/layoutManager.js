@@ -72,11 +72,7 @@ export default function layoutManager(containerElement, orientation, _animationD
   }, 10);
   // invalidate();
 
-  const buildQuery = (url, params) => {
-    return `${url}?${Object.keys(params).map(p => `${p}=${params[p]}`).join('&')}`;
-  }
-
-  const scrollListener = Utils.listenScrollParent(containerElement, map.scrollSize, map.offsetSize, function() {
+  const scrollListener = Utils.listenScrollParent(containerElement, function() {
     invalidateContainerRectangles(containerElement);
     registeredScrollListener && registeredScrollListener();
   });
@@ -114,6 +110,13 @@ export default function layoutManager(containerElement, orientation, _animationD
     return {
       rect: values.rect,
       visibleRect: values.visibleRect
+    }
+  }
+
+  function getBeginEndOfDOMRect(rect) {
+    return {
+      begin: propMapper.get(rect, 'begin'),
+      end: propMapper.get(rect, 'end')
     }
   }
 
@@ -260,6 +263,7 @@ export default function layoutManager(containerElement, orientation, _animationD
     getSize,
     //getDistanceToContainerBegining,
     getContainerRectangles,
+    getBeginEndOfDOMRect,
     getBeginEndOfContainer,
     getBeginEndOfContainerVisibleRect,
     getBeginEnd,
