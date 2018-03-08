@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import Container from '../../react-smooth-dnd/Container';
-import Draggable from '../../react-smooth-dnd/Draggable';
+import { Container, Draggable } from 'react-smooth-dnd';
 import { applyDrag } from './utils';
 
 function generateItems(count, creator) {

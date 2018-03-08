@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import container from '../smooth-dnd/container';
-import { reactDropHandler } from '../smooth-dnd/dropHandlers';
+import container from 'smooth-dnd';
+import { dropHandlers } from 'smooth-dnd';
 import Draggable from './Draggable';
 
 class Container extends Component {
   constructor(props) {
     super(props);
     this.getContainerOptions = this.getContainerOptions.bind(this);
-    this.dropHandler = reactDropHandler();
+    this.dropHandler = dropHandlers.reactDropHandler();
   }
 
   componentDidMount() {

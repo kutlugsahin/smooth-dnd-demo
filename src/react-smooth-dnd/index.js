@@ -1,5 +1,5 @@
-import Container from './Container.js';
-import Draggable from './Draggable.js';
+import Container from './src/Container';
+import Draggable from './src/Draggable';
 
 export {
   Container,

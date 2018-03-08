@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
-import {
+import { constants } from 'smooth-dnd';
+const {
   wrapperClass,
   animationClass
-} from '../smooth-dnd/constants';
+} = constants;
 
 class Draggable extends Component {  
   render() {
