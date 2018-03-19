@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 import { applyDrag } from './utils';
-
+import container from '../../smooth-dnd';
 function generateItems(count, creator) {
   return Array(count).fill().map(creator);
 }
@@ -16,8 +16,10 @@ class Nested extends Component {
   constructor() {
     super();
 
-    this.containerOnDrop = this.containerOnDrop.bind(this);
-    this.containerOnDrop2 = this.containerOnDrop2.bind(this);
+    this.childContainers = [];
+
+    // this.containerOnDrop = this.containerOnDrop.bind(this);
+    // this.containerOnDrop2 = this.containerOnDrop2.bind(this);
 
     const items = generateItems(30, (_, i) => ({
       id: i, type: 'draggable', data: `Container 1 Draggable - ${i}`
@@ -43,60 +45,51 @@ class Nested extends Component {
       items
     }
   }
+
+  componentDidMount() {
+    container(this.parentContainer);
+    this.childContainers.forEach(container);
+  }
+  
+
   render() {
     return (
       <div>
-        <div className="simple-page" style={{border: '1px solid #ddd'}}>
-          <Container onDrop={this.containerOnDrop}>
-            {this.state.items.map((p,i) => {
+        <div className="simple-page" style={{ border: '1px solid #ddd' }}>
+          <div ref={e => this.parentContainer = e}>
+            {this.state.items.map((p, i) => {
               if (p.type === 'draggable') {
                 return (
-                  <Draggable key={i}>
+                  <div key={i}>
                     <div className="draggable-item">
                       {p.data}
                     </div>
-                  </Draggable>
+                  </div>
                 );
               } else {
                 return (
-                  <Draggable key={i}>
-                    <div style={{padding: '20px 20px', backgroundColor: '#888'}}>
-                      <Container onDrop={(e) => this.containerOnDrop2(i, e)}>
-                        {p.items.map((q,j) => {
+                  <div key={i}>
+                    <div style={{ padding: '20px 20px', backgroundColor: '#888' }}>
+                      <div ref={e => this.childContainers[i] = e}>
+                        {p.items.map((q, j) => {
                           return (
-                            <Draggable key={j}>
+                            <div key={j}>
                               <div className="draggable-item">
                                 {q.data}
                               </div>
-                            </Draggable>
+                            </div>
                           );
                         })}
-                      </Container>
+                      </div>
                     </div>
-                  </Draggable>
+                  </div>
                 )
               }
-            })}
-          </Container>
+            })}  
+          </div>
         </div>
       </div>
     );
-  }
-
-  
-
-  containerOnDrop(e) {
-    this.setState({
-      items: applyDrag(this.state.items, e)
-    });
-  }
-
-  containerOnDrop2(id, e) {
-    const newItems = [...this.state.items];
-    newItems[id].items = applyDrag(newItems[id].items, e);
-    this.setState({
-      items: newItems
-    });
   }
 }
 
