@@ -208,7 +208,8 @@ function onMouseDown(event) {
 	if (!isDragging) {
 		grabbedElement = Utils.getParent(e.target, '.' + constants.wrapperClass);
 		if (grabbedElement) {
-			const container = Utils.getParent(grabbedElement, '.' + constants.containerClass)[constants.containerInstance];
+			const containerElement = Utils.getParent(grabbedElement, '.' + constants.containerClass);
+			const container = containers.filter(p => p.element === containerElement)[0];
 			const dragHandleSelector = container.getOptions().dragHandleSelector;
 			const nonDragAreaSelector = container.getOptions().nonDragAreaSelector;
 
@@ -276,6 +277,7 @@ function onMouseMove(event) {
 
 		dragListeningContainers = containers.filter(p => p.isDragRelevant(draggableInfo));
 		dragListeningContainers.forEach(p => Utils.addClass(p.element, constants.noUserSelectClass));
+		dragListeningContainers.forEach(p => p.prepareDrag(p, dragListeningContainers));
 	} else {
 		// just update ghost position && draggableInfo position
 		ghostInfo.ghost.style.left = `${e.clientX + ghostInfo.positionDelta.left}px`;

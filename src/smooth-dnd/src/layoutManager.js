@@ -164,8 +164,8 @@ export default function layoutManager(containerElement, orientation, _animationD
   function updateDescendantContainerRects(container) {
     container.layout.invalidateRects();
     container.onTranslated();
-    if (container.childContainers) {
-      container.childContainers.forEach(p => updateDescendantContainerRects(p));
+    if (container.getChildContainers()) {
+      container.getChildContainers().forEach(p => updateDescendantContainerRects(p));
     }
   }
 

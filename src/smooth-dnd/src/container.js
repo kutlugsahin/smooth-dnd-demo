@@ -134,6 +134,7 @@ function resetDraggables({ element, draggables, layout, options }) {
 			setAnimation(p, false);
 			layout.setTranslation(p, 0);
 			layout.setVisibility(p, true);
+			p[containersInDraggable] = [];
 		});
 
 		if (element[stretcherElementInstance]) {
@@ -193,16 +194,13 @@ function getContainerProps(element, initialOptions) {
 	};
 }
 
-function hasSameGroup(c1, c2) {
-	return c1.groupName === c2.groupName && c1 !== null;
-}
-
-function getRelaventParentContainer(container) {
+function getRelaventParentContainer(container, relevantContainers) {
 	let current = container.element;
 	while (current) {
-		if (current.parentElement && getContainer(current.parentElement) && hasSameGroup(container, getContainer(current.parentElement))) {
+		const containerOfParentElement = getContainer(current.parentElement);
+		if (containerOfParentElement && relevantContainers.indexOf(containerOfParentElement) > -1) {
 			return {
-				container: getContainer(current.parentElement),
+				container: containerOfParentElement,
 				draggable: current
 			}
 		}
@@ -212,19 +210,14 @@ function getRelaventParentContainer(container) {
 	return null;
 }
 
-function registerToParentContainer(container) {
-	setTimeout(() => {
-		const parentInfo = getRelaventParentContainer(container);
-
-		if (parentInfo) {
-			container.hasParentContainer = true;
-			parentInfo.container.childContainers.push(container);
-			container.setParentContainer(parentInfo.container);
-			//current should be draggable
-			parentInfo.draggable[containersInDraggable].push(container);
-		}
-
-	}, 100);
+function registerToParentContainer(container, relevantContainers) {
+	const parentInfo = getRelaventParentContainer(container, relevantContainers);
+	if (parentInfo) {
+		parentInfo.container.getChildContainers().push(container);
+		container.setParentContainer(parentInfo.container);
+		//current should be draggable
+		parentInfo.draggable[containersInDraggable].push(container);
+	}
 }
 
 function getRemovedItem({ draggables, element, options }) {
@@ -570,24 +563,38 @@ function Container(element) {
 			}
 		}
 
+		function prepareDrag(container, relevantContainers) {
+			registerToParentContainer(container, relevantContainers);
+			
+			const element = container.element;
+			const draggables = props.draggables;
+			for (let i = 0; i < element.children.length; i++) {
+				draggables[i] = element.children[i];
+			}
+
+			for (let i = 0; i < draggables.length - element.children.length; i++) {
+				draggables.pop();
+			}
+		}
+
 		props.layout.setScrollListener(function() {
 			processLastDraggableInfo();
 		});
 
 		function dispose(container) {
-			const parentInfo = getRelaventParentContainer(container);
+			// const parentInfo = getRelaventParentContainer(container);
 
-			if (parentInfo) {
-				const indexInParentContainer = parentInfo.container.childContainers.indexOf(container);
-				if (indexInParentContainer > -1) {
-					parentInfo.container.childContainers.splice(indexInParentContainer, 1);
-				}
+			// if (parentInfo) {
+			// 	const indexInParentContainer = parentInfo.container.getChildContainers().indexOf(container);
+			// 	if (indexInParentContainer > -1) {
+			// 		parentInfo.container.getChildContainers().splice(indexInParentContainer, 1);
+			// 	}
 
-				const indexInDraggable = parentInfo.draggable[containersInDraggable].indexOf(container);
-				if (indexInDraggable > -1) {
-					parentInfo.draggable[containersInDraggable].splice(indexInDraggable, 1);
-				}
-			}
+			// 	const indexInDraggable = parentInfo.draggable[containersInDraggable].indexOf(container);
+			// 	if (indexInDraggable > -1) {
+			// 		parentInfo.draggable[containersInDraggable].splice(indexInDraggable, 1);
+			// 	}
+			// }
 		}
 
 		return {
@@ -598,10 +605,10 @@ function Container(element) {
 			getChildPayload: props.options.getChildPayload,
 			groupName: props.options.groupName,
 			layout: props.layout,
-			childContainers,
-			hasParentContainer: false,
+			getChildContainers: () => childContainers,
 			onChildPositionCaptured,
 			dispose,
+			prepareDrag,
 			isPosInChildContainer: () => posIsInChildContainer,
 			handleDrag: function(draggableInfo) {
 				lastDraggableInfo = draggableInfo;
@@ -616,6 +623,8 @@ function Container(element) {
 				dropHandler(draggableInfo, dragResult);
 				handleScrollOnDrag({ reset: true });
 				handleScrollOnDrag = dragscroller(props);
+				parentContainer = null;
+				childContainers = [];
 				setTimeout(() => {
 					props.layout.invalidate();
 				}, 100);
@@ -665,7 +674,6 @@ export default function(element, options) {
 	const container = containerIniter(options);
 	element[containerInstance] = container;
 	Mediator.register(container);
-	registerToParentContainer(container);
 	return {
 		setOptions: containerIniter,
 		invalidateRect: function() {
