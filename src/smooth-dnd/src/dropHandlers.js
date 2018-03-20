@@ -39,17 +39,6 @@ export function reactDropHandler() {
       if (onDrop) {
         onDrop(dropResult);
       }
-
-      setTimeout(() => {
-        for (let i = 0; i < element.children.length; i++) {
-          draggables[i] = element.children[i];
-        }
-
-        for (let i = 0; i < draggables.length - element.children.length; i++) {
-          draggables.pop();
-        }
-        
-      }, 10);
     }
   }
 
