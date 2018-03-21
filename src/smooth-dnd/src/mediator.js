@@ -122,7 +122,7 @@ function handleDropAnimation(callback) {
 		animateGhostToPosition(dragResult.shadowBeginEnd.rect, Math.max(150, container.getOptions().animationDuration / 2));
 	} else {
 		const container = containers.filter(p => p === draggableInfo.container)[0];
-		if (container.getBehaviour() === 'move') {
+		if (container.getOptions().behaviour === 'move') {
 			const { removedIndex, elementSize } = container.getDragResult();
 			const layout = container.layout;
 			// drag ghost to back
@@ -224,7 +224,7 @@ function onMouseDown(event) {
 
 			if (startDrag) {
 				event.preventDefault();
-				handleDragStartConditions(e, container.getDragDelay(), () => {	
+				handleDragStartConditions(e, container.getOptions().dragBeginDelay, () => {	
 					setTimeout(() => {
 						window.getSelection().empty();
 					}, 0);
@@ -265,6 +265,11 @@ function onMouseMove(event) {
 	const e = getPointerEvent(event);
 	if (!draggableInfo) {
 		isDragging = true;
+		const container = containers.filter(p => grabbedElement.parentElement === p.element)[0];
+		dragListeningContainers = containers.filter(p => p.isDragRelevant(container));
+		dragListeningContainers.forEach(p => Utils.addClass(p.element, constants.noUserSelectClass));
+		dragListeningContainers.forEach(p => p.prepareDrag(p, dragListeningContainers));
+
 		// first move after grabbing  draggable
 		draggableInfo = getDraggableInfo(grabbedElement);
 		ghostInfo = getGhostElement(grabbedElement, { x: e.clientX, y: e.clientY }, draggableInfo.container);
@@ -274,10 +279,6 @@ function onMouseMove(event) {
 		};
 
 		document.body.appendChild(ghostInfo.ghost);
-
-		dragListeningContainers = containers.filter(p => p.isDragRelevant(draggableInfo));
-		dragListeningContainers.forEach(p => Utils.addClass(p.element, constants.noUserSelectClass));
-		dragListeningContainers.forEach(p => p.prepareDrag(p, dragListeningContainers));
 	} else {
 		// just update ghost position && draggableInfo position
 		ghostInfo.ghost.style.left = `${e.clientX + ghostInfo.positionDelta.left}px`;

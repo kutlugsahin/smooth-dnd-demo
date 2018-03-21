@@ -48,17 +48,18 @@ function initOptions(props = defaultOptions) {
 }
 
 function isDragRelevant({ element, options }) {
-	return function(draggableInfo) {
+	return function(sourceContainer) {
+		const sourceOptions = sourceContainer.getOptions();
 		if (options.behaviour === 'copy') return false;
 
 		const parentWrapper = getParent(element, '.' + wrapperClass);
-		if (parentWrapper === draggableInfo.element) {
+		if (parentWrapper === sourceContainer.element) {
 			return false;
 		}
 
-		if (draggableInfo.container.element === element) return true;
-		if (draggableInfo.groupName && draggableInfo.groupName === options.groupName) return true;
-		if (options.acceptGroups.indexOf(draggableInfo.groupName) > -1) return true;
+		if (sourceContainer.element === element) return true;
+		if (sourceOptions.groupName && sourceOptions.groupName === options.groupName) return true;
+		if (options.acceptGroups.indexOf(sourceOptions.groupName) > -1) return true;
 
 		return false;
 	};
@@ -565,6 +566,7 @@ function Container(element) {
 
 		function prepareDrag(container, relevantContainers) {
 			registerToParentContainer(container, relevantContainers);
+			container.layout.invalidateRects();
 			
 			const element = container.element;
 			const draggables = props.draggables;
@@ -582,19 +584,7 @@ function Container(element) {
 		});
 
 		function dispose(container) {
-			// const parentInfo = getRelaventParentContainer(container);
-
-			// if (parentInfo) {
-			// 	const indexInParentContainer = parentInfo.container.getChildContainers().indexOf(container);
-			// 	if (indexInParentContainer > -1) {
-			// 		parentInfo.container.getChildContainers().splice(indexInParentContainer, 1);
-			// 	}
-
-			// 	const indexInDraggable = parentInfo.draggable[containersInDraggable].indexOf(container);
-			// 	if (indexInDraggable > -1) {
-			// 		parentInfo.draggable[containersInDraggable].splice(indexInDraggable, 1);
-			// 	}
-			// }
+			// additional dispose actions
 		}
 
 		return {
@@ -625,9 +615,6 @@ function Container(element) {
 				handleScrollOnDrag = dragscroller(props);
 				parentContainer = null;
 				childContainers = [];
-				setTimeout(() => {
-					props.layout.invalidate();
-				}, 100);
 			},
 			getDragResult: function() {
 				return dragResult;
@@ -635,14 +622,6 @@ function Container(element) {
 			getTranslateCalculator: function(...params) {
 				return calculateTranslations(props)(...params);
 			},
-			invalidateRect: function() {
-				props.layout.invalidate();
-				processLastDraggableInfo();
-			},
-			getBehaviour: function() {
-				return props.options.behaviour;
-			},
-			getDragDelay: () => props.options.dragBeginDelay,
 			setParentContainer: (e) => { parentContainer = e; },
 			getParentContainer: () => parentContainer,
 			onTranslated: () => {
@@ -676,9 +655,6 @@ export default function(element, options) {
 	Mediator.register(container);
 	return {
 		setOptions: containerIniter,
-		invalidateRect: function() {
-			container.invalidateRect();
-		},
 		dispose: function() {
 			Mediator.unregister(container)
 			container.layout.dispose();

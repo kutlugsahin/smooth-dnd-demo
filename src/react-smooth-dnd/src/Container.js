@@ -9,15 +9,28 @@ class Container extends Component {
     super(props);
     this.getContainerOptions = this.getContainerOptions.bind(this);
     this.dropHandler = dropHandlers.reactDropHandler();
+    this.prevContainer = null;
   }
 
   componentDidMount() {
+    this.prevContainer = this.containerDiv;
     this.container = container(this.containerDiv, this.getContainerOptions(this.props));
   }
 
   componentWillUnmount() {
     this.container.dispose();
     this.container = null;
+  }
+
+  componentDidUpdate() {
+    if (this.containerDiv) {
+      if (this.prevContainer && this.prevContainer !== this.containerDiv) {
+        this.container.dispose();
+        this.container = container(this.containerDiv, this.getContainerOptions(this.props));
+        this.prevContainer = this.containerDiv;
+        console.log('container did update');
+      }
+    }
   }
 
   getChildContext() {
