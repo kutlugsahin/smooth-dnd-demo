@@ -565,18 +565,20 @@ function Container(element) {
 		}
 
 		function prepareDrag(container, relevantContainers) {
-			registerToParentContainer(container, relevantContainers);
-			container.layout.invalidateRects();
-			
 			const element = container.element;
 			const draggables = props.draggables;
-			for (let i = 0; i < element.children.length; i++) {
-				draggables[i] = element.children[i];
+			const options = container.getOptions();
+			const newDraggables = wrapChildren(element, options.orientation, options.animationDuration);
+			for (let i = 0; i < newDraggables.length; i++) {
+				draggables[i] = newDraggables[i];
 			}
-
-			for (let i = 0; i < draggables.length - element.children.length; i++) {
+			
+			for (let i = 0; i < draggables.length - newDraggables.length; i++) {
 				draggables.pop();
 			}
+
+			container.layout.invalidateRects();
+			registerToParentContainer(container, relevantContainers);
 		}
 
 		props.layout.setScrollListener(function() {
