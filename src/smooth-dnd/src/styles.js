@@ -8,7 +8,7 @@ const css = {
 		'box-sizing': 'border-box',
 	},
 	[`.${constants.containerClass}.horizontal`]: {
-		'white-space': 'no-wrap',
+		'white-space': 'nowrap',
 	},
 	[`.${constants.containerClass}.horizontal .${constants.wrapperClass}`]: {
 		'height': '100%',
