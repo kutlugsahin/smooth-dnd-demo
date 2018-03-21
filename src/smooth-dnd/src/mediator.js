@@ -166,9 +166,9 @@ const handleDragStartConditions = (function handleDragStartConditions() {
 				deregisterEvent();
 			}
 		}
-	};
+	}
 
-	function onUp() { deregisterEvent(); };
+	function onUp() { deregisterEvent(); }
 	function onHTMLDrag() { deregisterEvent(); }
 
 	function registerEvents() {
@@ -178,14 +178,14 @@ const handleDragStartConditions = (function handleDragStartConditions() {
 
 		moveEvents.forEach(e => window.document.addEventListener(e, onMove), { passive: false });
 		releaseEvents.forEach(e => window.document.addEventListener(e, onUp), { passive: false });
-		document.addEventListener("drag", onHTMLDrag, { passive: false });
+		document.addEventListener('drag', onHTMLDrag, { passive: false });
 	}
 
 	function deregisterEvent() {
 		clearTimeout(timer);
 		moveEvents.forEach(e => window.document.removeEventListener(e, onMove), { passive: false });
 		releaseEvents.forEach(e => window.document.removeEventListener(e, onUp), { passive: false });
-		document.removeEventListener("drag", onHTMLDrag, { passive: false });
+		document.removeEventListener('drag', onHTMLDrag, { passive: false });
 	}
 
 	function callCallback() {
@@ -200,7 +200,7 @@ const handleDragStartConditions = (function handleDragStartConditions() {
 		clb = _clb;
 
 		registerEvents();
-	}
+	};
 })();
 
 function onMouseDown(event) {
@@ -244,7 +244,7 @@ function onMouseUp() {
 			document.body.style.touchAction = null;
 			(dragListeningContainers || []).forEach(p => {
 				Utils.removeClass(p.element, constants.noUserSelectClass);
-					p.handleDrop(draggableInfo);
+				p.handleDrop(draggableInfo);
 			});
 
 			dragListeningContainers = null;

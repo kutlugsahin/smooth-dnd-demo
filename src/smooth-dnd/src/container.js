@@ -174,7 +174,7 @@ function handleDrop({ element, draggables, layout, options }) {
 				addedIndex: actualAddIndex,
 				payload: draggableInfo.payload,
 				droppedElement: draggableInfo.element.firstChild
-			}
+			};
 			dropHandler(dropHandlerParams, options.onDrop);
 			console.log(removedIndex, actualAddIndex, draggableInfo.payload, draggableInfo.element.firstChild);
 		}
@@ -203,7 +203,7 @@ function getRelaventParentContainer(container, relevantContainers) {
 			return {
 				container: containerOfParentElement,
 				draggable: current
-			}
+			};
 		}
 		current = current.parentElement;
 	}
@@ -230,7 +230,7 @@ function getRemovedItem({ draggables, element, options }) {
 		}
 
 		return { removedIndex };
-	}
+	};
 }
 
 function setRemovedItemVisibilty({ draggables, layout }) {
@@ -238,15 +238,15 @@ function setRemovedItemVisibilty({ draggables, layout }) {
 		if (dragResult.removedIndex !== null) {
 			layout.setVisibility(draggables[dragResult.removedIndex], false);
 		}
-	}
+	};
 }
 
 function getPosition({ element, layout }) {
 	return ({ draggableInfo }) => {
 		return {
 			pos: !getContainer(element).isPosInChildContainer() ? layout.getPosition(draggableInfo.position) : null
-		}
-	}
+		};
+	};
 }
 
 function notifyParentOnPositionCapture({ element }) {
@@ -256,7 +256,7 @@ function notifyParentOnPositionCapture({ element }) {
 			isCaptured = dragResult.pos !== null;
 			getContainer(element).getParentContainer().onChildPositionCaptured(isCaptured);
 		}
-	}
+	};
 }
 
 function getElementSize({ layout }) {
@@ -265,16 +265,16 @@ function getElementSize({ layout }) {
 		if (dragResult.pos === null) {
 			return elementSize = null;
 		} else {
-			elementSize = elementSize || layout.getSize(draggableInfo.element)
+			elementSize = elementSize || layout.getSize(draggableInfo.element);
 		}
 		return { elementSize };
-	}
+	};
 }
 
 function handleTargetContainer({ element }) {
 	return ({ draggableInfo, dragResult }) => {
 		setTargetContainer(draggableInfo, element, !!dragResult.pos);
-	}
+	};
 }
 
 function getDragInsertionIndex({ draggables, layout }) {
@@ -304,10 +304,10 @@ function invalidateShadowBeginEndIfNeeded(params) {
 	const shadowBoundsGetter = getShadowBeginEnd(params);
 	return ({ draggableInfo, dragResult }) => {
 		if (draggableInfo.invalidateShadow) {
-			return shadowBoundsGetter({ draggableInfo, dragResult })
+			return shadowBoundsGetter({ draggableInfo, dragResult });
 		}
 		return null;
-	}
+	};
 }
 
 function getNextAddedIndex(params) {
@@ -322,8 +322,8 @@ function getNextAddedIndex(params) {
 		}
 		return {
 			addedIndex: index
-		}
-	}
+		};
+	};
 }
 
 function resetShadowAdjustment() {
@@ -333,7 +333,7 @@ function resetShadowAdjustment() {
 			shadowBeginEnd.beginAdjustment = 0;
 		}
 		lastAddedIndex = addedIndex;
-	}
+	};
 }
 
 function handleInsertionSizeChange({ element, draggables, layout, options }) {
@@ -376,7 +376,7 @@ function handleInsertionSizeChange({ element, draggables, layout, options }) {
 
 			}
 		}
-	}
+	};
 }
 
 function calculateTranslations({ element, draggables, layout }) {
@@ -489,7 +489,7 @@ function handleFirstInsertShadowAdjustment() {
 		} else {
 			lastAddedIndex = null;
 		}
-	}
+	};
 }
 
 function getDragHandler(params) {
@@ -517,7 +517,7 @@ function getDefaultDragResult() {
 		elementSize: null,
 		pos: null,
 		shadowBeginEnd: null
-	}
+	};
 }
 
 function compose(params) {
@@ -529,8 +529,8 @@ function compose(params) {
 				return Object.assign(dragResult, fn({ draggableInfo, dragResult }));
 			}, result || getDefaultDragResult());
 			return result;
-		}
-	}
+		};
+	};
 }
 
 // Container definition begin
@@ -645,7 +645,7 @@ const options = {
 	dragBeginDelay: 0,
 	animationDuration: 180,
 	getChildPayload: (index) => null,
-}
+};
 
 // exported part of container
 export default function(element, options) {
@@ -656,7 +656,7 @@ export default function(element, options) {
 	return {
 		setOptions: containerIniter,
 		dispose: function() {
-			Mediator.unregister(container)
+			Mediator.unregister(container);
 			container.layout.dispose();
 			container.dispose(container);
 		}

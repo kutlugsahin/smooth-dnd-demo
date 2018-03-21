@@ -16,8 +16,8 @@
     "deploy": "gh-pages -d build"
   },
   "devDependencies": {
-    "eslint": "^4.17.0",
-    "eslint-plugin-react": "^7.6.1",
+    "eslint": "^4.19.0",
+    "eslint-plugin-react": "^7.7.0",
     "gh-pages": "^1.1.0"
   },
   "homepage": "http://kutlugsahin.github.io/react-smooth-dnd"
