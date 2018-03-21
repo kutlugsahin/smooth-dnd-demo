@@ -13,7 +13,7 @@ export const containerClass = 'smooth-dnd-container';
 
 export const extraSizeForInsertion = 'smooth-dnd-extra-size-for-insertion';
 export const stretcherElementClass = 'smooth-dnd-stretcher-element';
-export const stretcherElementInstance = 'smooth-dnd-stretcher-instance'
+export const stretcherElementInstance = 'smooth-dnd-stretcher-instance';
 
 export const isDraggableDetached = 'smoth-dnd-is-draggable-detached';
 

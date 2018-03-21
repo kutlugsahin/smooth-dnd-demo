@@ -14,15 +14,10 @@
 }
 
 .smooth-dnd-container.horizontal{
-  /* display: inline-flex;
-  flex-direction: row;
-  justify-content: flex-start; */
   white-space: nowrap;
 }
 
 .smooth-dnd-container.horizontal .smooth-dnd-draggable-wrapper{
-  /* flex: 0 0 auto;
-  float: left; */
   height: 100%;
   display: inline-block;
 }
@@ -48,16 +43,7 @@
   transition: all ease-out;
 }
 
-.clearfix:after {
-    content: ".";
-    display: block;
-    clear: both;
-    visibility: hidden;
-    line-height: 0;
-    height: 0;
-}
-
-.smooth-dnd-no-user-select{
+/* .smooth-dnd-no-user-select{
   user-select: none;
 }
 
@@ -72,4 +58,4 @@
 .smooth-dnd-stretcher-element.horizontal{
   height: 100%;
   display: inline-block;
-}
+} */

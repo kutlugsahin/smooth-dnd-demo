@@ -14,7 +14,7 @@ import {
 } from './constants';
 import layoutManager from './layoutManager';
 import Mediator from './mediator';
-import './container.css';
+// import './container.css';
 
 const defaultOptions = {
 	groupName: null,

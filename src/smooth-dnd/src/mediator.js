@@ -1,5 +1,6 @@
 import * as Utils from './utils';
 import * as constants from './constants';
+import { addStyleToHead } from './styles';
 
 const grabEvents = ['mousedown', 'touchstart'];
 const moveEvents = ['mousemove', 'touchmove'];
@@ -303,6 +304,8 @@ function Mediator() {
 		}
 	};
 }
+
+addStyleToHead();
 
 export default Mediator();
 
