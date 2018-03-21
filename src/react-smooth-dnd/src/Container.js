@@ -28,7 +28,6 @@ class Container extends Component {
 				this.container.dispose();
 				this.container = container(this.containerDiv, this.getContainerOptions(this.props));
 				this.prevContainer = this.containerDiv;
-				console.log('container did update');
 			}
 		}
 	}
