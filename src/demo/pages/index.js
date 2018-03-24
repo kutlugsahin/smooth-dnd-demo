@@ -5,6 +5,7 @@ import Horizontal from './horizontal';
 import Nested from './nested';
 import VanillaNested from './vanilla-nested';
 import Height from './height';
+import Form from './form';
 
 
 
@@ -18,4 +19,5 @@ export default [
 	{ title: 'Nested', type: Nested },
 	{ title: 'Vanilla Nested', type: VanillaNested },
 	{ title: 'Different Heights', type: Height },
+	{ title: 'Form', type: Form },
 ];

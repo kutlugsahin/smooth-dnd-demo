@@ -108,3 +108,38 @@ body{
     border-left: 1px solid #eee;
     border-right: 1px solid #aaa;
 }
+
+.form{
+  width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 50px;
+  background-color: #f3f3f3;
+}
+
+
+.form-line {
+  padding: 20px 30px;
+  background-color: #f3f3f3;
+  border: 1px solid transparent;
+  transition: all .3s ease;
+  transition-property: border-color, background-color;
+}
+
+.form-line.selected {
+  border: 1px solid #ddd;
+  background-color: #eee;
+  /* box-shadow: 0px 0px 10px 10px #ccc; */
+}
+
+.label {
+  margin-bottom: 5px; 
+}
+
+.field > input, textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  outline: none;
+}
