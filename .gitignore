@@ -2,6 +2,10 @@
 
 # dependencies
 /node_modules
+/src/smooth-dnd/node_modules
+/src/smooth-dnd/dist
+/src/react-smooth-dnd/node_modules
+/src/react-smooth-dnd/dist
 
 # testing
 /coverage
