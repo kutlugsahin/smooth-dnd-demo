@@ -4,6 +4,7 @@ import Copy from './copy';
 import Horizontal from './horizontal';
 import Nested from './nested';
 import VanillaNested from './vanilla-nested';
+import Height from './height';
 
 
 
@@ -16,4 +17,5 @@ export default [
 	{ title: 'Horizontal', type: Horizontal },
 	{ title: 'Nested', type: Nested },
 	{ title: 'Vanilla Nested', type: VanillaNested },
+	{ title: 'Different Heights', type: Height },
 ];
