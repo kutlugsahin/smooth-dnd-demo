@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Draggable } from './react-smooth-dnd';
+import { Container, Draggable } from 'react-smooth-dnd';
 
 const itemCls = {
 	height: '50px',
