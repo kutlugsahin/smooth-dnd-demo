@@ -89,7 +89,8 @@ module.exports = {
 		// for React Native Web.
 		extensions: ['.web.js', '.mjs', '.js', '.json', '.web.jsx', '.jsx'],
 		alias: {
-      
+			'smooth-dnd': path.resolve(__dirname, '../../smooth-dnd/index.js'),
+			'react-smooth-dnd': path.resolve(__dirname, '../../react-smooth-dnd/index.js'),
 			// Support React Native Web
 			// https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
 			'react-native': 'react-native-web',
