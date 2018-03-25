@@ -179,3 +179,23 @@ body{
 .dragging {
   background-color: yellow;
 }
+
+.card-scene{
+  padding: 50px;
+}
+
+.card-container{
+  width: 320px;
+  padding: 10px;
+  margin-right: 50px;
+  background-color: #f3f3f3;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.24);
+}
+
+.card{
+  margin: 5px;
+  /* border: 1px solid #ccc; */
+  background-color: white;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.24);
+  padding: 10px;
+}

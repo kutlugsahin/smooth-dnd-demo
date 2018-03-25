@@ -6,6 +6,7 @@ import Nested from './nested';
 import VanillaNested from './vanilla-nested';
 import Height from './height';
 import Form from './form';
+import Cards from './cards';
 
 
 
@@ -20,4 +21,5 @@ export default [
 	{ title: 'Vanilla Nested', type: VanillaNested },
 	{ title: 'Different Heights', type: Height },
 	{ title: 'Form', type: Form },
+	{ title: 'Cards', type: Cards },
 ];
