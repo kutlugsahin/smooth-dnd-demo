@@ -22,7 +22,7 @@ class Simple extends Component {
 		return (
 			<div>
 				<div className="simple-page">
-					<Container autoScrollEnabled={false} onDrop={e => this.setState({items: applyDrag(this.state.items, e)})}>
+					<Container dragClass="dragging" autoScrollEnabled={true} onDrop={e => this.setState({items: applyDrag(this.state.items, e)})}>
 						{this.state.items.map(p => {
 							return (
 								<Draggable key={p.id}>
