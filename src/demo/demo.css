@@ -109,14 +109,35 @@ body{
     border-right: 1px solid #aaa;
 }
 
-.form{
-  width: 550px;
+.form-demo{
+  width: 950px;
   margin-left: auto;
   margin-right: auto;
   margin-top: 50px;
+  display: flex
+}
+
+.form{
+  flex: 3;
   background-color: #f3f3f3;
 }
 
+.form-fields-panel{
+  flex: 1;
+  margin-right: 50px;
+}
+
+.form-field{
+  height: 50px;
+  width: 250px;
+  line-height: 30px;
+  vertical-align: middle;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  cursor: move;
+  margin-top: -1px;
+}
 
 .form-line {
   padding: 20px 30px;
@@ -124,6 +145,7 @@ body{
   border: 1px solid transparent;
   transition: all .3s ease;
   transition-property: border-color, background-color;
+  cursor: move;
 }
 
 .form-line.selected {
@@ -136,7 +158,11 @@ body{
   margin-bottom: 5px; 
 }
 
-.field > input, textarea {
+.field {
+  cursor: auto;
+}
+
+.field > input, textarea, select {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;

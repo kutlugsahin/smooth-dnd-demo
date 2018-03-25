@@ -7,7 +7,7 @@ const form = [
 	{
 		id: 0,
 		element: <h2>Form Header</h2>
-	},{
+	}, {
 		id: 1,
 		label: 'Full Name',
 		element: <input type="text" />
@@ -22,11 +22,27 @@ const form = [
 	}
 ];
 
+const fields = [
+	{ name: 'Full Name', type: 'full-name', render: () => <input type="text" /> },
+	{ name: 'Email', type: 'email', render: () => <input type="text" /> },
+	{ name: 'Text Area', type: 'text-area', render: () => <textarea /> },
+	{
+		name: 'Options', type: 'options', render: () => (
+			<select>
+				<option value="1">Option 1</option>	
+				<option value="2" selected>Option 2</option>	
+				<option value="3">Option 3</option>	
+				<option value="4">Option 4</option>	
+			</select>
+		)},
+];
+
 class Form extends Component {
 	constructor() {
 		super();
 		this.generateForm = this.generateForm.bind(this);
 		this.onFieldSelected = this.onFieldSelected.bind(this);
+		this.onDrop = this.onDrop.bind(this);
 
 		this.state = {
 			form,
@@ -36,14 +52,47 @@ class Form extends Component {
 
 	render() {
 		return (
-			<div className="form">
-				<Container style={{paddingBottom: '200px'}}
-					onDrop={e => this.setState({form: applyDrag(this.state.form, e)})}	
-					nonDragAreaSelector=".field">
-					{this.generateForm(this.state.form)}
-				</Container>
+			<div className="form-demo">
+				<div className="form-fields-panel">
+					<Container behaviour="copy" groupName="form" getChildPayload={(index) => fields[index]}>
+						{fields.map(p => {
+							return (
+								<Draggable>
+									<div className="form-field">
+										{p.name}
+									</div>
+								</Draggable>
+							);
+						})}
+					</Container>
+				</div>
+				<div className="form">
+					<Container style={{ paddingBottom: '200px' }} groupName="form" shouldAnimateDrop={({ payload }) => !payload}
+						onDrop={this.onDrop}
+						nonDragAreaSelector=".field">
+						{this.generateForm(this.state.form)}
+					</Container>
+				</div>
 			</div>
 		);
+	}
+
+	onDrop(dropResult) {
+		if (dropResult.removedIndex !== null) {
+			return this.setState({ form: applyDrag(this.state.form, dropResult) });
+		} else {
+			const newForm = [...this.state.form];
+			newForm.splice(dropResult.addedIndex, 0, {
+				id: newForm.length,
+				label: dropResult.payload.name,
+				element: dropResult.payload.render()
+			});
+
+			this.setState({
+				form: newForm,
+				selectedId: newForm.length -1
+			});
+		}
 	}
 
 	generateForm(form) {
