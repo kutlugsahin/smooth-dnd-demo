@@ -5,6 +5,9 @@ import { applyDrag } from './utils';
 
 const form = [
 	{
+		id: 0,
+		element: <h2>Form Header</h2>
+	},{
 		id: 1,
 		label: 'Full Name',
 		element: <input type="text" />

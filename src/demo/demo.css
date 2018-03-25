@@ -142,4 +142,10 @@ body{
   border: 1px solid #ddd;
   border-radius: 3px;
   outline: none;
+  transition: border-color .3s ease;
+}
+
+.field > input:focus, textarea:focus {
+  border: 1px solid rgb(211, 168, 112);
+  box-shadow: 0 0 3px 0px rgb(136, 121, 37);
 }
