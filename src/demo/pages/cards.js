@@ -38,7 +38,8 @@ class Cards extends Component {
 						id: `${i}${j}`,
 						props: {
 							className: 'card'
-						}
+						},
+						data: lorem.slice(0, Math.floor(Math.random() * 150) + 30)
 					}))
 				}))
 			}
@@ -61,7 +62,7 @@ class Cards extends Component {
 												<Draggable key={card.id}>
 													<div {...card.props}>
 														<p>
-															{lorem.slice(0, Math.floor(Math.random() * 150) + 30)}
+															{card.data}
 														</p>	
 													</div>
 												</Draggable>

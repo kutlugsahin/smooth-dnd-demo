@@ -3,7 +3,6 @@
 }
 
 body{
-  background-color: #eee;
   height: 100%;
   width: 100%;
 }
@@ -111,7 +110,7 @@ body{
 
 .form-demo{
   width: 950px;
-  margin-left: auto;
+  margin-left: 50px;
   margin-right: auto;
   margin-top: 50px;
   display: flex
@@ -120,6 +119,7 @@ body{
 .form{
   flex: 3;
   background-color: #f3f3f3;
+  box-shadow: 3px 3px 3px rgba(0,0,0,0.12), 0px 3px 3px rgba(0,0,0,0.24);
 }
 
 .form-fields-panel{
@@ -134,9 +134,12 @@ body{
   vertical-align: middle;
   padding: 10px;
   background-color: #fff;
-  border: 1px solid #ddd;
+  border: 1px solid #eee;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #ddd;
+  background-color: #eee;
   cursor: move;
-  margin-top: -1px;
+  
 }
 
 .form-line {
@@ -149,8 +152,8 @@ body{
 }
 
 .form-line.selected {
-  border: 1px solid #ddd;
-  background-color: #eee;
+  /* border: 1px solid #ddd; */
+  background-color: #e2e2e2;
   /* box-shadow: 0px 0px 10px 10px #ccc; */
 }
 
@@ -182,6 +185,7 @@ body{
 
 .card-scene{
   padding: 50px;
+  background-color: #fff;
 }
 
 .card-container{
