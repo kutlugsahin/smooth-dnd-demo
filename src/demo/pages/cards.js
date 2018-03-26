@@ -17,11 +17,6 @@ class Cards extends Component {
 		this.onColumnDrop = this.onColumnDrop.bind(this);
 		this.onCardDrop = this.onCardDrop.bind(this);
 		this.state = {
-			items1: generateItems(5, (_, i) => ({ id: '1' + i, data: `Draggable 1 - ${i}` })),
-			items2: generateItems(5, (_, i) => ({ id: '2' + i, data: `Draggable 2 - ${i}` })),
-			items3: generateItems(5, (_, i) => ({ id: '3' + i, data: `Draggable 3 - ${i}` })),
-			items4: generateItems(5, (_, i) => ({ id: '4' + i, data: `Draggable 4 - ${i}` })),
-
 			scene: {
 				type: 'container',
 				props: {
