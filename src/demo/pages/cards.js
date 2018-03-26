@@ -54,9 +54,7 @@ class Cards extends Component {
 									<div>ToDo</div>	
 									<Container {...column.props} groupName="col"
 										onDrop={e => this.onCardDrop(column.id, e)}
-										getChildPayload={index => {
-											return this.state.scene.children[columnIndex].children[index];
-										}}>
+										getChildPayload={index => this.state.scene.children[columnIndex].children[index]}>
 										{column.children.map(card => {
 											return (
 												<Draggable key={card.id}>
