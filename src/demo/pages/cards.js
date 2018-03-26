@@ -12,7 +12,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 const columnNames = ['Lorem', 'Ipsum', 'Consectetur', 'Eiusmod'];
 
-const cardColors = ['azure', 'beige', 'bisque', 'blanchedalmond', 'burlywood', 'cornsilk', 'gainsboro', 'ghostwhite', 'ivory', 'khaki']
+const cardColors = ['azure', 'beige', 'bisque', 'blanchedalmond', 'burlywood', 'cornsilk', 'gainsboro', 'ghostwhite', 'ivory', 'khaki'];
 const pickColor = () => {
 	let rand = Math.floor((Math.random() * 10));
 	return cardColors[rand];

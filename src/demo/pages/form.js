@@ -19,6 +19,41 @@ const form = [
 		id: 3,
 		label: 'Address',
 		element: <textarea name="address" id="" cols="30" rows="10" />
+	},
+	{
+		id: 5,
+		label: 'Radio',
+		element: (
+			<div>
+				<div><label><input type="radio" name="r" />option 1</label></div>
+				<div><label><input type="radio" name="r" />option 2</label></div>
+				<div><label><input type="radio" name="r" />option 3</label></div>
+				<div><label><input type="radio" name="r" />option 4</label></div>
+				<div><label><input type="radio" name="r" />option 5</label></div>
+			</div>
+		)
+	},{
+		id: 4,
+		label: 'Options',
+		element: (<select>
+			<option value="1">Option 1</option>
+			<option value="2" selected>Option 2</option>
+			<option value="3">Option 3</option>
+			<option value="4">Option 4</option>
+		</select>)
+	}
+	, {
+		id: 6,
+		label: 'Checkbox',
+		element: (
+			<div>
+				<div><label><input type="checkbox" name="r" />option 1</label></div>
+				<div><label><input type="checkbox" name="r" />option 2</label></div>
+				<div><label><input type="checkbox" name="r" />option 3</label></div>
+				<div><label><input type="checkbox" name="r" />option 4</label></div>
+				<div><label><input type="checkbox" name="r" />option 5</label></div>
+			</div>
+		)
 	}
 ];
 
@@ -57,7 +92,7 @@ class Form extends Component {
 					<Container behaviour="copy" groupName="form" getChildPayload={(index) => fields[index]}>
 						{fields.map(p => {
 							return (
-								<Draggable>
+								<Draggable key={p.id}>
 									<div className="form-field">
 										{p.name}
 									</div>
@@ -96,7 +131,7 @@ class Form extends Component {
 	}
 
 	generateForm(form) {
-		return form.map((item, index) => {
+		return form.map((item) => {
 			return (
 				<Draggable key={item.id}>
 					<div
