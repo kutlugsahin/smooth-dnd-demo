@@ -47,14 +47,16 @@ class Cards extends Component {
 		return (
 			<div className="card-scene">
 				<Container orientation="horizontal" onDrop={this.onColumnDrop}>
-					{this.state.scene.children.map((column) => {
+					{this.state.scene.children.map((column, columnIndex) => {
 						return (
 							<Draggable key={column.id}>
 								<div className={column.props.className}>
 									<div>ToDo</div>	
 									<Container {...column.props} groupName="col"
 										onDrop={e => this.onCardDrop(column.id, e)}
-										getChildPayload={index => column.children[index]}>
+										getChildPayload={index => {
+											return this.state.scene.children[columnIndex].children[index];
+										}}>
 										{column.children.map(card => {
 											return (
 												<Draggable key={card.id}>
@@ -86,17 +88,19 @@ class Cards extends Component {
 	}	
 
 	onCardDrop(columnId, dropResult) {
-		const scene = Object.assign({}, this.state.scene);
-		const column = scene.children.find(p => p.id === columnId);
-		const columnIndex = scene.children.indexOf(column);
+		if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
+			const scene = Object.assign({}, this.state.scene);
+			const column = scene.children.find(p => p.id === columnId);
+			const columnIndex = scene.children.indexOf(column);
 
-		const newColumn = Object.assign({}, column);
-		newColumn.children = applyDrag(newColumn.children, dropResult);
-		scene.children.splice(columnIndex, 1, newColumn);
+			const newColumn = Object.assign({}, column);
+			newColumn.children = applyDrag(newColumn.children, dropResult);
+			scene.children.splice(columnIndex, 1, newColumn);
 
-		this.setState({
-			scene
-		});
+			this.setState({
+				scene
+			});
+		}	
 	}
 }
 
