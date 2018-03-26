@@ -191,7 +191,8 @@ body{
 .card-container{
   width: 320px;
   padding: 10px;
-  margin-right: 50px;
+  margin: 5px;
+  margin-right: 45px;
   background-color: #f3f3f3;
   box-shadow: 0 1px 1px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.24);
 }
@@ -202,4 +203,23 @@ body{
   background-color: white;
   box-shadow: 0 1px 1px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.24);
   padding: 10px;
+}
+
+.card-column-header{
+  font-size: 18px;
+}
+
+.column-drag-handle{
+  cursor: move;
+  padding: 5px; 
+}
+
+.card-ghost {
+  transition: transform 0.18s ease;
+  transform: rotateZ(5deg)
+}
+
+.card-ghost-drop{
+  transition: transform 0.18s ease-in-out;
+  transform: rotateZ(0deg)
 }
