@@ -71,6 +71,8 @@ class Cards extends Component {
 										getChildPayload={index => this.getCardPayload(column.id, index)}
 										dragClass="card-ghost"
 										dropClass="card-ghost-drop"
+										onDragEnter={() => { console.log('drag enter:', column.id); }}
+										onDragLeave={() => { console.log('drag leave:', column.id); }}
 									>
 										{column.children.map(card => {
 											return (
