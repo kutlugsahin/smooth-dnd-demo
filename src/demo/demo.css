@@ -93,7 +93,7 @@ body{
 
 
 .simple-page{
-  width: 500px;
+  max-width: 500px;
   margin-left: auto;
   margin-right: auto;
   margin-top: 50px;
@@ -101,7 +101,7 @@ body{
 }
 
 .simple-page-scroller{
-  width: 500px;
+  max-width: 500px;
   margin-left: auto;
   margin-right: auto;
   margin-top: 50px;
