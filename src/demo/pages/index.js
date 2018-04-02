@@ -1,4 +1,5 @@
 import * as simples from './simple';
+import SimpleHorizontal from './simple-horizontal';
 import Groups from './groups';
 import Copy from './copy';
 import Horizontal from './horizontal';
@@ -7,19 +8,79 @@ import VanillaNested from './vanilla-nested';
 import Height from './height';
 import Form from './form';
 import Cards from './cards';
+import LockAxis from './lock-axis';
+import DragDelay from './drag-delay';
+import DragHandle from './drag-handle';
+import DragClass from './drag-class';
+import TransitionDuration from './transition-duration';
 
 
+const getUrl = (pagename) => {
+  return `https://github.com/kutlugsahin/smooth-dnd-demo/blob/master/src/demo/pages/${pagename}`;
+};
 
 
 export default [
-	{ title: 'Simple with window scroller', type: simples.Simple },
-	{ title: 'Inside Sroll View', type: simples.SimpleScroller },
-	{ title: 'DnD between Containers', type: Groups },
-	{ title: 'Copy form source', type: Copy },
-	{ title: 'Horizontal', type: Horizontal },
-	{ title: 'Nested', type: Nested },
-	{ title: 'Vanilla Nested', type: VanillaNested },
-	{ title: 'Different Heights', type: Height },
-	{ title: 'Form', type: Form },
-	{ title: 'Cards', type: Cards },
+  {
+    title: 'Showcase',
+    pages: [
+      {
+        title: 'Card board', page: Cards, url:getUrl('cards.js')
+      },
+      {
+        title: 'Form elements', page: Form, url: getUrl('form.js')
+      }
+    ]
+  },{
+    title: 'Basic Sortables',
+    pages: [
+      {
+        title: 'Sortable with default options', page: simples.Simple, url: getUrl('simple.js')
+      },
+      {
+        title: 'Sortable inside scroller', page: simples.SimpleScroller, url: getUrl('simple.js')	
+      }, {
+        title: 'Horizontal sortable', page: SimpleHorizontal, url: getUrl('horizontal.js')
+      }
+    ]
+  },
+  {
+    title: 'Groups',
+    pages: [
+      {
+        title: 'DnD between groups', page: Groups, url: getUrl('groups.js')
+      },
+      {
+        title: 'Copy draggable', page: Copy, url: getUrl('copy.js')
+      }
+    ]
+  },
+  {
+    title: 'Nested Groups',
+    pages: [
+      {
+        title: 'Nested vertical sortable', page: Nested, url: getUrl('nested.js')
+      }
+    ]
+  },
+  {
+    title: 'Advanced options',
+    pages: [
+      {
+        title: 'Lock axis', page: LockAxis, url: getUrl('lock-axis.js')
+      },
+      {
+        title: 'Drag begin delay of 500ms', page: DragDelay, url: getUrl('drag-delay.js')
+      },
+      {
+        title: 'Drag handle', page: DragHandle, url: getUrl('drag-handle.js')
+      },
+      {
+        title: 'Drag and Drop classses', page: DragClass, url: getUrl('drag-class.js')
+      },
+      {
+        title: 'Animation duration 500ms', page: TransitionDuration, url: getUrl('transition-duration.js')
+      }
+    ]
+  }
 ];

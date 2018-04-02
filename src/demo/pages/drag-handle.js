@@ -1,18 +1,15 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Container, Draggable } from 'react-smooth-dnd';
 import { applyDrag, generateItems } from './utils';
 
-
-class Height extends Component {
+class DragHandle extends Component {
   constructor() {
     super();
     this.state = {
       items: generateItems(50, (index) => {
         return {
           id: index,
-          data: 'Draggable' + index,
-          height: `${(40 + Math.random() * 200).toFixed()}px`
+          data: 'Draggable' + index
         };
       })
     };
@@ -21,11 +18,12 @@ class Height extends Component {
     return (
       <div>
         <div className="simple-page">
-          <Container onDrop={e => this.setState({ items: applyDrag(this.state.items, e) })}>
+          <Container dragHandleSelector=".column-drag-handle" onDrop={e => this.setState({ items: applyDrag(this.state.items, e) })}>
             {this.state.items.map(p => {
               return (
                 <Draggable key={p.id}>
-                  <div className="draggable-item" style={{height: p.height}}>
+                  <div className="draggable-item">
+                    <span className="column-drag-handle" style={{float:'left', padding:'0 10px'}}>&#x2630;</span>
                     {p.data}
                   </div>
                 </Draggable>
@@ -38,8 +36,4 @@ class Height extends Component {
   }
 }
 
-Height.propTypes = {
-
-};
-
-export default Height;
+export default DragHandle;

@@ -1,18 +1,22 @@
 
 export const applyDrag = (arr, dragResult) => {
-	const { removedIndex, addedIndex, payload } = dragResult;
-	if (removedIndex === null && addedIndex === null) arr;
+  const { removedIndex, addedIndex, payload } = dragResult;
+  if (removedIndex === null && addedIndex === null) arr;
 
-	const result = [...arr];
-	let itemToAdd = payload;
+  const result = [...arr];
+  let itemToAdd = payload;
 
-	if (removedIndex !== null) {
-		itemToAdd = result.splice(removedIndex, 1)[0];
-	}
+  if (removedIndex !== null) {
+    itemToAdd = result.splice(removedIndex, 1)[0];
+  }
 
-	if (addedIndex !== null) {
-		result.splice(addedIndex, 0, itemToAdd);
-	}
+  if (addedIndex !== null) {
+    result.splice(addedIndex, 0, itemToAdd);
+  }
 
-	return result;
+  return result;
+};
+
+export const generateItems = (count, creator) => {
+  return Array(count).fill().map((_, i) => creator(i));
 };
