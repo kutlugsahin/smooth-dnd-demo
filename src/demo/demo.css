@@ -197,6 +197,16 @@ body{
   box-shadow: 0 0 2px 5px rgba(0,0,0,0.0);
 }
 
+.form-submit-button{
+  border: 0;
+  width: 100%;
+  vertical-align: middle;
+  height: 40px;
+  color: #eee;
+  background-color: cornflowerblue;
+  cursor: pointer;
+}
+
 .label {
   margin-bottom: 5px; 
 }

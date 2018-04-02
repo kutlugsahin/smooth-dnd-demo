@@ -54,6 +54,13 @@ const form = [
         <div><label><input type="checkbox" name="r" /> option 5</label></div>
       </div>
     )
+  }, {
+    id: 7,
+    element: (
+      <div>
+        <button className="form-submit-button">Submit</button>
+      </div>
+    )
   }
 ];
 
