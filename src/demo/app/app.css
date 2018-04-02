@@ -154,12 +154,13 @@
   flex-direction: column;
 	flex: 1 1 auto;
 	background-color: #f8f9fa;
+  min-width: 0;
 }
 
 .demo {
   flex: 1;
-  align-content: stretch;
-  overflow: auto
+  overflow: auto;
+  min-width: 0;
 }
 
 .header{
