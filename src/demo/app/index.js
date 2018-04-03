@@ -31,7 +31,9 @@ class App extends Component {
 							<h3>react-smooth-dnd</h3>
 							<div className="divider"></div>
 						</div>
-						{this.renderMenu()}
+						<div>
+							{this.renderMenu()}
+						</div>
 					</div>
 				</div>
 				<div className="content">

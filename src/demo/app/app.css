@@ -108,6 +108,8 @@
 .navigator-content{
   padding-top: 0px;
   width: 350px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .navigator-header h3{
