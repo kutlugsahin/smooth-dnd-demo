@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
-import { applyDrag } from './utils';
+import { applyDrag, generateItems } from './utils';
 import container from 'smooth-dnd';
-function generateItems(count, creator) {
-  return Array(count).fill().map(creator);
-}
 
 const groupStyle = {
   margin: '50px',
@@ -21,15 +18,15 @@ class Nested extends Component {
     // this.containerOnDrop = this.containerOnDrop.bind(this);
     // this.containerOnDrop2 = this.containerOnDrop2.bind(this);
 
-    const items = generateItems(30, (_, i) => ({
+    const items = generateItems(30, (i) => ({
       id: i, type: 'draggable', data: `Container 1 Draggable - ${i}`
     }));
 
-    const items2 = generateItems(5, (_, i) => ({
+    const items2 = generateItems(5, (i) => ({
       id: i, type: 'draggable', data: `Container 2 Draggable - ${i}`
     }));
 
-    const items3 = generateItems(4, (_, i) => ({
+    const items3 = generateItems(4, (i) => ({
       id: i, type: 'draggable', data: `Container 3 Draggable - ${i}`
     }));
 
