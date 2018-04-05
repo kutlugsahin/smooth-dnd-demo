@@ -92,7 +92,7 @@ class Cards extends Component {
   }
 
   getCardPayload(columnId, index) {
-    return this.state.scene.children.find(p => p.id === columnId).children[index];
+    return this.state.scene.children.filter(p => p.id === columnId)[0].children[index];
   }
 
   onColumnDrop(dropResult) {
@@ -106,7 +106,7 @@ class Cards extends Component {
   onCardDrop(columnId, dropResult) {
     if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
       const scene = Object.assign({}, this.state.scene);
-      const column = scene.children.find(p => p.id === columnId);
+      const column = scene.children.filter(p => p.id === columnId)[0];
       const columnIndex = scene.children.indexOf(column);
 
       const newColumn = Object.assign({}, column);
