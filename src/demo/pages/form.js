@@ -32,7 +32,7 @@ const form = [
         <div><label><input type="radio" name="r" /> option 5</label></div>
       </div>
     )
-  },{
+  }, {
     id: 4,
     label: 'Options',
     element: (<select>
@@ -64,52 +64,25 @@ const form = [
   }
 ];
 
-const fields = [
-  { name: 'Full Name', type: 'full-name', render: () => <input type="text" /> },
-  { name: 'Email', type: 'email', render: () => <input type="text" /> },
-  { name: 'Text Area', type: 'text-area', render: () => <textarea /> },
-  {
-    name: 'Options', type: 'options', render: () => (
-      <select>
-        <option value="1">Option 1</option>	
-        <option value="2" selected>Option 2</option>	
-        <option value="3">Option 3</option>	
-        <option value="4">Option 4</option>	
-      </select>
-    )},
-];
-
 class Form extends Component {
   constructor() {
     super();
     this.generateForm = this.generateForm.bind(this);
-    this.onFieldSelected = this.onFieldSelected.bind(this);
     this.onDrop = this.onDrop.bind(this);
 
     this.state = {
-      form,
-      selectedId: null
+      form
     };
   }
 
   render() {
     return (
       <div className="form-demo">
-        {/* <div className="form-fields-panel">
-          <Container behaviour="copy" groupName="form" getChildPayload={(index) => fields[index]}>
-            {fields.map(p => {
-              return (
-                <Draggable key={p.id}>
-                  <div className="form-field">
-                    {p.name}
-                  </div>
-                </Draggable>
-              );
-            })}
-          </Container>
-        </div> */}
         <div className="form">
-          <Container style={{ paddingBottom: '200px' }} dragClass="form-ghost" dropClass="form-ghost-drop" groupName="form" shouldAnimateDrop={({ payload }) => !payload}
+          <Container
+            style={{ paddingBottom: '200px' }}
+            dragClass="form-ghost"
+            dropClass="form-ghost-drop"
             onDrop={this.onDrop}
             nonDragAreaSelector=".field">
             {this.generateForm(this.state.form)}
@@ -120,21 +93,7 @@ class Form extends Component {
   }
 
   onDrop(dropResult) {
-    if (dropResult.removedIndex !== null) {
-      return this.setState({ form: applyDrag(this.state.form, dropResult) });
-    } else {
-      const newForm = [...this.state.form];
-      newForm.splice(dropResult.addedIndex, 0, {
-        id: newForm.length,
-        label: dropResult.payload.name,
-        element: dropResult.payload.render()
-      });
-
-      this.setState({
-        form: newForm,
-        selectedId: newForm.length -1
-      });
-    }
+    return this.setState({ form: applyDrag(this.state.form, dropResult) });
   }
 
   generateForm(form) {
@@ -142,8 +101,7 @@ class Form extends Component {
       return (
         <Draggable key={item.id}>
           <div
-            className={`form-line${this.state.selectedId === item.id ? ' selected' : ''}`}
-            onMouseDown={e => this.onFieldSelected(item.id)}>
+            className={`form-line`}>
             <div className="label">
               <span>{item.label}</span>
             </div>
@@ -151,22 +109,10 @@ class Form extends Component {
               {item.element}
             </div>
           </div>
-        </Draggable>
+        </Draggable >
       );
     });
   }
-
-  onFieldSelected(id) {
-    this.setState({
-      selectedId: id
-    });
-  }
 }
-
-
-Form.propTypes = {
-
-};
-
 
 export default Form;
