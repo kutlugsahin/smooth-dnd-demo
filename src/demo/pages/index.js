@@ -13,6 +13,8 @@ import DragDelay from './drag-delay';
 import DragHandle from './drag-handle';
 import DragClass from './drag-class';
 import TransitionDuration from './transition-duration';
+import DropZone from './drop-zone';
+import Chess from './chess';
 
 
 const getUrl = (pagename) => {
@@ -24,6 +26,9 @@ export default [
   {
     title: 'Showcase',
     pages: [
+      // {
+      //   title: 'Chess', page: Chess, url: getUrl('form.js')
+      // },
       {
         title: 'Card board', page: Cards, url:getUrl('cards.js')
       },
@@ -52,6 +57,9 @@ export default [
       },
       {
         title: 'Copy draggable', page: Copy, url: getUrl('copy.js')
+      },
+      {
+        title: 'Drop Zones', page: DropZone, url: getUrl('drop-zone.js')
       }
     ]
   },
