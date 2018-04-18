@@ -58,9 +58,9 @@ export default [
       {
         title: 'Copy draggable', page: Copy, url: getUrl('copy.js')
       },
-      {
-        title: 'Drop Zones', page: DropZone, url: getUrl('drop-zone.js')
-      }
+      // {
+      //   title: 'Drop Zones', page: DropZone, url: getUrl('drop-zone.js')
+      // }
     ]
   },
   {
