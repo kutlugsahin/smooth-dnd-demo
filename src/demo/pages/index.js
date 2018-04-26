@@ -15,6 +15,7 @@ import DragClass from './drag-class';
 import TransitionDuration from './transition-duration';
 import DropZone from './drop-zone';
 import Chess from './chess';
+import ScrollBoth from './scroll-both';
 
 
 const getUrl = (pagename) => {
@@ -58,6 +59,9 @@ export default [
       {
         title: 'Copy draggable', page: Copy, url: getUrl('copy.js')
       },
+      // {
+      //   title: 'auto scroll', page: ScrollBoth, url: getUrl('copy.js')
+      // },
       // {
       //   title: 'Drop Zones', page: DropZone, url: getUrl('drop-zone.js')
       // }
