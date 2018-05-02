@@ -14,6 +14,7 @@ class Nested extends Component {
 
     this.containerOnDrop = this.containerOnDrop.bind(this);
     this.containerOnDrop2 = this.containerOnDrop2.bind(this);
+    this.containerOnDrop3 = this.containerOnDrop3.bind(this);
 
     const items = generateItems(30, i => ({
       id: i,
@@ -84,55 +85,68 @@ class Nested extends Component {
                         cursor: "move"
                       }}
                     >
-                      <h4>Sortable List</h4>
+                      <h4 style={{ textAlign: "center" }}>
+                        Nested Sortable List - {p.id}
+                      </h4>
                       <div style={{ cursor: "default" }}>
                         <Container onDrop={e => this.containerOnDrop2(i, e)}>
                           {p.items.map((q, j) => {
                             if (q.type === "draggable") {
-                              return <Draggable key={j}>
-                                  <div className="draggable-item" style={{ backgroundColor: "cornsilk" }}>
+                              return (
+                                <Draggable key={j}>
+                                  <div
+                                    className="draggable-item"
+                                    style={{ backgroundColor: "cornsilk" }}
+                                  >
                                     {q.data}
                                   </div>
-                                </Draggable>;
+                                </Draggable>
+                              );
                             } else {
-                              return <Draggable key={j}>
-                                  <div style={{ padding: "20px 20px", marginTop: "2px", marginBottom: "2px", border: "1px solid rgba(0,0,0,.125)", backgroundColor: "cornsilk", cursor: "move" }}>
-                                    <h4>
-                                      Sortable
-                                      List
+                              return (
+                                <Draggable key={j}>
+                                  <div
+                                    style={{
+                                      padding: "20px 20px",
+                                      marginTop: "2px",
+                                      marginBottom: "2px",
+                                      border: "1px solid rgba(0,0,0,.125)",
+                                      backgroundColor: "cornsilk",
+                                      cursor: "move"
+                                    }}
+                                  >
+                                    <h4
+                                      style={{
+                                        textAlign: "center"
+                                      }}
+                                    >
+                                      Nested Sortable List - {q.id}
                                     </h4>
                                     <div style={{ cursor: "default" }}>
-                                      <Container onDrop={e => this.containerOnDrop3(i, j, e)}>
-                                        {q.items.map(
-                                          (
-                                            t,
-                                            y
-                                          ) => {
-                                            return (
-                                              <Draggable
-                                                key={
-                                                  y
-                                                }
+                                      <Container
+                                        onDrop={e =>
+                                          this.containerOnDrop3(i, j, e)
+                                        }
+                                      >
+                                        {q.items.map((t, y) => {
+                                          return (
+                                            <Draggable key={y}>
+                                              <div
+                                                className="draggable-item"
+                                                style={{
+                                                  backgroundColor: "ghostwhite"
+                                                }}
                                               >
-                                                <div
-                                                  className="draggable-item"
-                                                  style={{
-                                                    backgroundColor:
-                                                      "ghostwhite"
-                                                  }}
-                                                >
-                                                  {
-                                                    t.data
-                                                  }
-                                                </div>
-                                              </Draggable>
-                                            );
-                                          }
-                                        )}
+                                                {t.data}
+                                              </div>
+                                            </Draggable>
+                                          );
+                                        })}
                                       </Container>
                                     </div>
                                   </div>
-                                </Draggable>;
+                                </Draggable>
+                              );
                             }
                           })}
                         </Container>
