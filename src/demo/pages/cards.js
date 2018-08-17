@@ -93,6 +93,7 @@ class Cards extends Component {
                     onDragLeave={() => {
                       console.log("drag leave:", column.id);
                     }}
+                    onDropReady={p => console.log('Drop ready: ', p)}
                   >
                     {column.children.map(card => {
                       return (
