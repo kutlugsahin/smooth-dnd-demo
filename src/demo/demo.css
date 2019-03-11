@@ -373,3 +373,13 @@ input:last-child{
   height: 100px;
   vertical-align: middle;
 }
+
+.popup-container {
+  position: absolute;
+  overflow-y: auto;
+}
+
+.popup-container-button {
+  width: 150px;
+  padding: 15px;
+}

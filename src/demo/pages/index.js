@@ -16,6 +16,7 @@ import TransitionDuration from './transition-duration';
 import DropZone from './drop-zone';
 import Chess from './chess';
 import ScrollBoth from './scroll-both';
+import DynamicContainers from './dynamic-containers';
 
 
 const getUrl = (pagename) => {
@@ -92,6 +93,9 @@ export default [
       },
       {
         title: 'Animation duration 500ms', page: TransitionDuration, url: getUrl('transition-duration.js')
+      },
+      {
+        title: 'Dynamic add/remove Containers', page: DynamicContainers, url: getUrl('dynamic-containers.js')
       }
     ]
   }
