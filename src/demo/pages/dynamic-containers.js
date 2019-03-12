@@ -1,74 +1,75 @@
 import React, { Component } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 import { applyDrag, generateItems } from './utils';
-const groupStyle = {
-	marginLeft: '50px',
-	flex: 1
-};
 
 class DynamicContainers extends Component {
 	constructor() {
 		super();
+		this.renderContainer = this.renderContainer.bind(this);
 
 		this.state = {
-			items1: generateItems(15, (i) => ({ id: '1' + i, data: `Draggable 1 - ${i}` })),
-			items2: generateItems(15, (i) => ({ id: '2' + i, data: `Draggable 2 - ${i}` })),
-			popupOpen: false,
+			items1: generateItems(45, (i) => ({ id: '1' + i, data: `Draggable 1 - ${i}` })),
+			items2: generateItems(25, (i) => ({ id: '2' + i, data: `Draggable 2 - ${i}` })),
+			items3: generateItems(25, (i) => ({ id: '3' + i, data: `Draggable 3 - ${i}` })),
+			items4: generateItems(25, (i) => ({ id: '4' + i, data: `Draggable 4 - ${i}` })),
+			popup1Open: false,
+			popup2Open: false,
 		};
 	}
+
+	renderContainer(listName, getList, autoScroll = true) {
+		return (
+			<div className="dynamic-container-holder">
+				<Container autoScrollEnabled={autoScroll} getGhostParent={() => document.body} groupName="1" getChildPayload={i => getList()[i]} onDrop={e => this.setState({ [listName]: applyDrag(getList(), e) })}>
+					{
+						getList().map(p => {
+							return (
+								<Draggable key={p.id}>
+									<div className="draggable-item">
+										{p.data}
+									</div>
+								</Draggable>
+							);
+						})
+					}
+				</Container>
+			</div>
+		)
+	}
+
 	render() {
 		return (
-			<div style={{ display: 'flex', justifyContent: 'stretch', marginTop: '50px', marginRight: '50px' }}>
-				<div style={groupStyle}>
-					<Container getGhostParent={() => document.body} groupName="1" getChildPayload={i => this.state.items1[i]} onDrop={e => this.setState({ items1: applyDrag(this.state.items1, e) })}>
-						{
-							this.state.items1.map(p => {
-								return (
-									<Draggable key={p.id}>
-										<div className="draggable-item">
-											{p.data}
-										</div>
-									</Draggable>
-								);
-							})
-						}
-					</Container>
+			<div style={{ display: 'flex', justifyContent: 'stretch', height: '100%' }}>
+				<div className="dynamic-left-pane">
+					{this.renderContainer('items1', () => this.state.items1)}
 				</div>
-				<div style={groupStyle}>
-					<div className="popup-container-button"
-						onMouseEnter={() => this.setState({ popupOpen: true })}
-						onMouseLeave={() => this.setState({ popupOpen: false })}
-					>
-						'HoverMe'
-						{this.renderPopupContainer()}
+				<div className="dynamic-right-pane">
+					<div className="dynamic-menu-container">
+						<div className="popup-container-button"
+							onMouseEnter={() => this.setState({ popup1Open: true })}
+							onMouseLeave={() => this.setState({ popup1Open: false })}
+						>
+							Make Container Visible
+							<div className={`popup-container ${this.state.popup1Open ? 'open' : ''}`}>
+								{this.renderContainer('items2', () => this.state.items2)}
+							</div>
+						</div>
+						<div className="popup-container-button"
+							onMouseEnter={() => this.setState({ popup2Open: true })}
+							onMouseLeave={() => this.setState({ popup2Open: false })}
+						>
+							Mount New Container
+							{this.state.popup2Open ? <div className={`popup-container ${this.state.popup2Open ? 'open' : ''}`}>
+								{this.renderContainer('items3', () => this.state.items3)}
+							</div> : null}
+						</div>
+					</div>
+					<div className="dynamic-right-content">
+						{this.renderContainer('items4', () => this.state.items4)}
 					</div>
 				</div>
 			</div>
 		);
-	}
-
-	renderPopupContainer() {
-		if (this.state.popupOpen) {
-			return (
-				<div className={`popup-container ${this.state.popupOpen ? 'open': ''}`}>
-					<Container getGhostParent={() => document.body} groupName="1" getChildPayload={i => this.state.items2[i]} onDrop={e => this.setState({ items2: applyDrag(this.state.items2, e) })}>
-						{
-							this.state.items2.map(p => {
-								return (
-									<Draggable key={p.id}>
-										<div className="draggable-item">
-											{p.data}
-										</div>
-									</Draggable>
-								);
-							})
-						}
-					</Container>
-				</div>
-			);
-		}
-
-		return null;
 	}
 }
 
