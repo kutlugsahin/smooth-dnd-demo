@@ -377,6 +377,14 @@ input:last-child{
 .popup-container {
   position: absolute;
   overflow-y: auto;
+  height: 500px;
+  display: none;
+}
+
+.popup-container.open {
+  position: absolute;
+  overflow-y: auto;
+  display: block;
 }
 
 .popup-container-button {

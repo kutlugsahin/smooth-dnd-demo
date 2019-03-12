@@ -18,15 +18,15 @@ class DynamicContainers extends Component {
 	}
 	render() {
 		return (
-			<div style={ { display: 'flex', justifyContent: 'stretch', marginTop: '50px', marginRight: '50px' } }>
-				<div style={ groupStyle }>
-					<Container getGhostParent={ () => document.body } groupName="1" getChildPayload={ i => this.state.items1[i] } onDrop={ e => this.setState({ items1: applyDrag(this.state.items1, e) }) }>
+			<div style={{ display: 'flex', justifyContent: 'stretch', marginTop: '50px', marginRight: '50px' }}>
+				<div style={groupStyle}>
+					<Container getGhostParent={() => document.body} groupName="1" getChildPayload={i => this.state.items1[i]} onDrop={e => this.setState({ items1: applyDrag(this.state.items1, e) })}>
 						{
 							this.state.items1.map(p => {
 								return (
-									<Draggable key={ p.id }>
+									<Draggable key={p.id}>
 										<div className="draggable-item">
-											{ p.data }
+											{p.data}
 										</div>
 									</Draggable>
 								);
@@ -34,15 +34,15 @@ class DynamicContainers extends Component {
 						}
 					</Container>
 				</div>
-				<div style={ groupStyle }>
+				<div style={groupStyle}>
 					<div className="popup-container-button"
-						onMouseEnter={ () => this.setState({ popupOpen: true }) }
-						onMouseLeave={ () => this.setState({ popupOpen: false }) }
+						onMouseEnter={() => this.setState({ popupOpen: true })}
+						onMouseLeave={() => this.setState({ popupOpen: false })}
 					>
 						'HoverMe'
 						{this.renderPopupContainer()}
 					</div>
-				</div>				
+				</div>
 			</div>
 		);
 	}
@@ -50,14 +50,14 @@ class DynamicContainers extends Component {
 	renderPopupContainer() {
 		if (this.state.popupOpen) {
 			return (
-				<div className="popup-container">
-					<Container getGhostParent={() => document.body} groupName="1" getChildPayload={ i => this.state.items2[i] } onDrop={ e => this.setState({ items2: applyDrag(this.state.items2, e) }) }>
+				<div className={`popup-container ${this.state.popupOpen ? 'open': ''}`}>
+					<Container getGhostParent={() => document.body} groupName="1" getChildPayload={i => this.state.items2[i]} onDrop={e => this.setState({ items2: applyDrag(this.state.items2, e) })}>
 						{
 							this.state.items2.map(p => {
 								return (
-									<Draggable key={ p.id }>
+									<Draggable key={p.id}>
 										<div className="draggable-item">
-											{ p.data }
+											{p.data}
 										</div>
 									</Draggable>
 								);
