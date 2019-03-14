@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Draggable } from 'react-smooth-dnd';
+import { Container, Draggable, constants } from 'react-smooth-dnd';
 import { applyDrag, generateItems } from './utils';
 
 class DynamicContainers extends Component {
@@ -19,7 +19,7 @@ class DynamicContainers extends Component {
 
 	renderContainer(listName, getList, autoScroll = true) {
 		return (
-			<div className="dynamic-container-holder">
+			<div className={`dynamic-container-holder`}>
 				<Container autoScrollEnabled={autoScroll} getGhostParent={() => document.body} groupName="1" getChildPayload={i => getList()[i]} onDrop={e => this.setState({ [listName]: applyDrag(getList(), e) })}>
 					{
 						getList().map(p => {
@@ -50,7 +50,7 @@ class DynamicContainers extends Component {
 							onMouseLeave={() => this.setState({ popup1Open: false })}
 						>
 							Make Container Visible
-							<div className={`popup-container ${this.state.popup1Open ? 'open' : ''}`}>
+							<div className={`popup-container ${this.state.popup1Open ? 'open' : ''}  ${constants.preventSmoothDnDAutoScroll}`}>
 								{this.renderContainer('items2', () => this.state.items2)}
 							</div>
 						</div>
