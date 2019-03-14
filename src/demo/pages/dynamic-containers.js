@@ -50,7 +50,7 @@ class DynamicContainers extends Component {
 							onMouseLeave={() => this.setState({ popup1Open: false })}
 						>
 							Make Container Visible
-							<div className={`popup-container ${this.state.popup1Open ? 'open' : ''}  ${constants.preventSmoothDnDAutoScroll}`}>
+							<div className={`popup-container ${this.state.popup1Open ? 'open' : ''}  ${constants.preventAutoScrollClass}`}>
 								{this.renderContainer('items2', () => this.state.items2)}
 							</div>
 						</div>
