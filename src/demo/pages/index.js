@@ -4,6 +4,7 @@ import Groups from './groups';
 import Copy from './copy';
 import Horizontal from './horizontal';
 import Nested from './nested';
+import NestedGroup from './nested-group';
 import VanillaNested from './vanilla-nested';
 import Height from './height';
 import Form from './form';
@@ -73,7 +74,10 @@ export default [
     pages: [
       {
         title: 'Nested vertical sortable', page: Nested, url: getUrl('nested.js')
-      }
+      },
+      // {
+      //   title: 'Drag-drop between parent/child', page: NestedGroup, url: getUrl('nested-group.js')
+      // }
     ]
   },
   {

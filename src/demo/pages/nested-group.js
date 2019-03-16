@@ -11,41 +11,41 @@ class Nested extends Component {
     this.containerOnDrop3 = this.containerOnDrop3.bind(this);
 
     const items = generateItems(30, i => ({
-      id: i,
+      id: 'item1 '+i,
       type: "draggable",
       data: `Container 1 Draggable - ${i}`
     }));
 
     const items2 = generateItems(10, i => ({
-      id: i,
+      id: 'item2 ' +i,
       type: "draggable",
       data: `Container 2 Draggable - ${i}`
     }));
 
     items2[3] = {
-      id: 3,
+      ...items2[3],
       type: "container",
       items: generateItems(4, i => ({
-        id: i,
+        id: 'item2 sub' + i,
         type: "draggable",
         data: `Container 4 Draggable - ${i}`
       }))
     };
 
     const items3 = generateItems(4, i => ({
-      id: i,
+      id: 'item3 '+i,
       type: "draggable",
       data: `Container 3 Draggable - ${i}`
     }));
 
     items[5] = {
-      id: 5,
+      ...items[5],
       type: "container",
       items: items2
     };
 
     items[9] = {
-      id: 9,
+      ...items[9],
       type: "container",
       items: items3
     };
@@ -58,7 +58,7 @@ class Nested extends Component {
     return (
       <div>
         <div className="simple-page">
-          <Container onDrop={this.containerOnDrop}>
+          <Container groupName="1" onDrop={this.containerOnDrop} getChildPayload={(i) => this.state.items[1]}>
             {this.state.items.map((p, i) => {
               if (p.type === "draggable") {
                 return (
@@ -83,7 +83,7 @@ class Nested extends Component {
                         Nested Sortable List - {p.id}
                       </h4>
                       <div style={{ cursor: "default" }}>
-                        <Container onDrop={e => this.containerOnDrop2(i, e)}>
+                        <Container groupName="1" getChildPayload={(index) => this.state.items[i].items[index]} onDrop={e => this.containerOnDrop2(i, e)}>
                           {p.items.map((q, j) => {
                             if (q.type === "draggable") {
                               return (
@@ -118,6 +118,8 @@ class Nested extends Component {
                                     </h4>
                                     <div style={{ cursor: "default" }}>
                                       <Container
+                                        getChildPayload={(index) => this.state.items[i].items[j].items[index]}
+                                        groupName="1"
                                         onDrop={e =>
                                           this.containerOnDrop3(i, j, e)
                                         }
