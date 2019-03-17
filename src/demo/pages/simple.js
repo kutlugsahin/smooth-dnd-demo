@@ -18,7 +18,7 @@ class Simple extends Component {
     return (
       <div>
         <div className="simple-page">
-          <Container onDrop={e => this.setState({ items: applyDrag(this.state.items, e) })}>
+          <Container behaviour="contain" onDrop={e => this.setState({ items: applyDrag(this.state.items, e) })}>
             {this.state.items.map(p => {
               return (
                 <Draggable key={p.id}>
@@ -51,7 +51,7 @@ class SimpleScroller extends Component {
     return (
       <div>
         <div className="simple-page-scroller">
-          <Container onDrop={e => this.setState({ items: applyDrag(this.state.items, e) })}>
+          <Container behaviour="contain" onDrop={e => this.setState({ items: applyDrag(this.state.items, e) })}>
             {this.state.items.map(p => {
               return (
                 <Draggable key={p.id}>

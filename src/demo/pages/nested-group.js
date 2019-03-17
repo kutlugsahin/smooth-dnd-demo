@@ -58,7 +58,7 @@ class Nested extends Component {
     return (
       <div>
         <div className="simple-page">
-          <Container groupName="1" onDrop={this.containerOnDrop} getChildPayload={(i) => this.state.items[1]}>
+          <Container groupName="1" onDrop={this.containerOnDrop} getChildPayload={(i) => this.state.items[i]}>
             {this.state.items.map((p, i) => {
               if (p.type === "draggable") {
                 return (
@@ -159,12 +159,14 @@ class Nested extends Component {
   }
 
   containerOnDrop(e) {
+    console.log('level 1: Drop');
     this.setState({
       items: applyDrag(this.state.items, e)
     });
   }
 
   containerOnDrop2(id, e) {
+    console.log('level 2: Drop');
     const newItems = [...this.state.items];
     newItems[id].items = applyDrag(newItems[id].items, e);
     this.setState({
@@ -173,6 +175,7 @@ class Nested extends Component {
   }
 
   containerOnDrop3(id1, id2, e) {
+    console.log('level 3: Drop');
     const newItems = [...this.state.items];
     newItems[id1].items[id2].items = applyDrag(
       newItems[id1].items[id2].items,

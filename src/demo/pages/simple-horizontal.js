@@ -19,7 +19,7 @@ class SimpleHorizontal extends Component {
     return (
       <div>
         <div style={groupStyle}>
-          <Container orientation="horizontal" onDrop={e => this.setState({ items: applyDrag(this.state.items, e) })}>
+          <Container behaviour="contain" orientation="horizontal" onDrop={e => this.setState({ items: applyDrag(this.state.items, e) })}>
             {
               this.state.items.map(p => {
                 return (

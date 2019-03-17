@@ -75,9 +75,9 @@ export default [
       {
         title: 'Nested vertical sortable', page: Nested, url: getUrl('nested.js')
       },
-      // {
-      //   title: 'Drag-drop between parent/child', page: NestedGroup, url: getUrl('nested-group.js')
-      // }
+      {
+        title: 'Drag-drop between parent/child', page: NestedGroup, url: getUrl('nested-group.js')
+      }
     ]
   },
   {
