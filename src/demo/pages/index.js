@@ -75,9 +75,9 @@ export default [
       {
         title: 'Nested vertical sortable', page: Nested, url: getUrl('nested.js')
       },
-      {
-        title: 'Drag-drop between parent/child', page: NestedGroup, url: getUrl('nested-group.js')
-      }
+      // {
+      //   title: 'Drag-drop between parent/child', page: NestedGroup, url: getUrl('nested-group.js')
+      // }
     ]
   },
   {
@@ -98,9 +98,9 @@ export default [
       {
         title: 'Animation duration 500ms', page: TransitionDuration, url: getUrl('transition-duration.js')
       },
-      {
-        title: 'Dynamic add/remove Containers', page: DynamicContainers, url: getUrl('dynamic-containers.js')
-      }
+      // {
+      //   title: 'Dynamic add/remove Containers', page: DynamicContainers, url: getUrl('dynamic-containers.js')
+      // }
     ]
   }
 ];
