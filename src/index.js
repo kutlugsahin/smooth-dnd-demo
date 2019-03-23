@@ -4,6 +4,6 @@ import './index.css';
 import Vanilla from './Vanilla';
 import Nested from './Nested';
 import Tryout from './Tryout';
-import Demo from '../src/demo/app';
+import Demo from './demo/app';
 
 ReactDOM.render(<Demo />, document.getElementById('root'));

@@ -4,6 +4,7 @@ import Groups from './groups';
 import Copy from './copy';
 import Horizontal from './horizontal';
 import Nested from './nested';
+import NestedGroup from './nested-group';
 import VanillaNested from './vanilla-nested';
 import Height from './height';
 import Form from './form';
@@ -16,6 +17,7 @@ import TransitionDuration from './transition-duration';
 import DropZone from './drop-zone';
 import Chess from './chess';
 import ScrollBoth from './scroll-both';
+import DynamicContainers from './dynamic-containers';
 
 
 const getUrl = (pagename) => {
@@ -72,7 +74,10 @@ export default [
     pages: [
       {
         title: 'Nested vertical sortable', page: Nested, url: getUrl('nested.js')
-      }
+      },
+      // {
+      //   title: 'Drag-drop between parent/child', page: NestedGroup, url: getUrl('nested-group.js')
+      // }
     ]
   },
   {
@@ -92,7 +97,10 @@ export default [
       },
       {
         title: 'Animation duration 500ms', page: TransitionDuration, url: getUrl('transition-duration.js')
-      }
+      },
+      // {
+      //   title: 'Dynamic add/remove Containers', page: DynamicContainers, url: getUrl('dynamic-containers.js')
+      // }
     ]
   }
 ];

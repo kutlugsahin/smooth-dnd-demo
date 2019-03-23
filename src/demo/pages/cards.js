@@ -67,6 +67,11 @@ class Cards extends Component {
           orientation="horizontal"
           onDrop={this.onColumnDrop}
           dragHandleSelector=".column-drag-handle"
+          dropPlaceholder={{
+            animationDuration: 150,
+            showOnTop: true,
+            className: 'cards-drop-preview'
+          }}
         >
           {this.state.scene.children.map(column => {
             return (
@@ -94,6 +99,12 @@ class Cards extends Component {
                       console.log("drag leave:", column.id);
                     }}
                     onDropReady={p => console.log('Drop ready: ', p)}
+                    dropPlaceholder={{                      
+                      animationDuration: 150,
+                      showOnTop: true,
+                      className: 'drop-preview' 
+                    }}
+                    dropPlaceholderAnimationDuration={200}
                   >
                     {column.children.map(card => {
                       return (
