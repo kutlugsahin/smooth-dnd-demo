@@ -1,13 +1,13 @@
 {
-  "main.css": "/smooth-dnd-demo/static/css/main.3e21ecae.chunk.css",
-  "main.js": "/smooth-dnd-demo/static/js/main.7fec597a.chunk.js",
-  "main.js.map": "/smooth-dnd-demo/static/js/main.7fec597a.chunk.js.map",
+  "main.css": "/smooth-dnd-demo/static/css/main.cb373c5e.chunk.css",
+  "main.js": "/smooth-dnd-demo/static/js/main.744139cf.chunk.js",
+  "main.js.map": "/smooth-dnd-demo/static/js/main.744139cf.chunk.js.map",
   "runtime~main.js": "/smooth-dnd-demo/static/js/runtime~main.acb7d7ac.js",
   "runtime~main.js.map": "/smooth-dnd-demo/static/js/runtime~main.acb7d7ac.js.map",
-  "static/js/2.097d806a.chunk.js": "/smooth-dnd-demo/static/js/2.097d806a.chunk.js",
-  "static/js/2.097d806a.chunk.js.map": "/smooth-dnd-demo/static/js/2.097d806a.chunk.js.map",
+  "static/js/2.38a60427.chunk.js": "/smooth-dnd-demo/static/js/2.38a60427.chunk.js",
+  "static/js/2.38a60427.chunk.js.map": "/smooth-dnd-demo/static/js/2.38a60427.chunk.js.map",
   "index.html": "/smooth-dnd-demo/index.html",
-  "precache-manifest.1b87f6b7967170fe3a44d9885e03d67d.js": "/smooth-dnd-demo/precache-manifest.1b87f6b7967170fe3a44d9885e03d67d.js",
+  "precache-manifest.411870c6d60c2e21b51709aec9047f50.js": "/smooth-dnd-demo/precache-manifest.411870c6d60c2e21b51709aec9047f50.js",
   "service-worker.js": "/smooth-dnd-demo/service-worker.js",
-  "static/css/main.3e21ecae.chunk.css.map": "/smooth-dnd-demo/static/css/main.3e21ecae.chunk.css.map"
+  "static/css/main.cb373c5e.chunk.css.map": "/smooth-dnd-demo/static/css/main.cb373c5e.chunk.css.map"
 }
